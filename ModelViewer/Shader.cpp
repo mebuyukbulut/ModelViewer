@@ -3,20 +3,6 @@
 #include <glad/glad.h>
 #include <iostream>
 
-std::string vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-
-
-std::string fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\n\0";
 
 // compile shader code
 unsigned int Shader::compileShader(std::string shaderCode, unsigned int shaderType)
@@ -68,7 +54,7 @@ unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmen
     return shaderProgram;
 }
 
-void Shader::init()
+void Shader::init(std::string vertexShaderSource, std::string fragmentShaderSource)
 {
     unsigned int vertexShader = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
     unsigned int fragmentShader = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);

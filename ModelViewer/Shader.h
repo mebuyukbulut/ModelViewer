@@ -9,7 +9,7 @@ class Shader
 	unsigned int linkProgram(unsigned int vertexShader, unsigned int fragmentShader);
 
 public:
-	void init();
+	void init(std::string vertexShaderSource, std::string fragmentShaderSource);
 	void useShader(); // use() ? 
 	void deleteShader(); // destroy() ? 
 };

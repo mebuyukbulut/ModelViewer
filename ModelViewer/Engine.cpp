@@ -1,5 +1,7 @@
 #include "Engine.h"
 #include "Shader.h"
+#include "FileUtils.h"
+
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -46,7 +48,9 @@ void Engine::init()
 	initOpenGL();
 
     Shader shader;
-    shader.init();
+	std::string vertexShaderSource = FileUtils::readFile("shaders/basic.vert");
+	std::string fragmentShaderSource = FileUtils::readFile("shaders/basic.frag");
+    shader.init(vertexShaderSource, fragmentShaderSource);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
