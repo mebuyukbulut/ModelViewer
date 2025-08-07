@@ -10,7 +10,7 @@ class Shader
 
 public:
 	void init(std::string vertexShaderSource, std::string fragmentShaderSource);
-	void useShader(); // use() ? 
-	void deleteShader(); // destroy() ? 
+	void use(); 
+	void terminate(); 
 };
 

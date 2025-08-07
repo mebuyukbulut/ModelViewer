@@ -20,15 +20,15 @@ void Engine::initWindow()
 
     // glfw window creation
     // --------------------
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
-    if (window == NULL)
+    _window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    if (_window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         //return -1;
     }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwMakeContextCurrent(_window);
+    glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 }
 
 void Engine::initOpenGL()
@@ -43,49 +43,40 @@ void Engine::initOpenGL()
 
 }
 
-void Engine::init()
-{
+void Engine::init(){
     initWindow();
-	initOpenGL();
-
-    Shader shader;
-	std::string vertexShaderSource = FileUtils::readFile("shaders/basic.vert");
-	std::string fragmentShaderSource = FileUtils::readFile("shaders/basic.frag");
-    shader.init(vertexShaderSource, fragmentShaderSource);
-
-	Model model;
-    model.loadDefault();
-
-
-    Renderer renderer;
-	renderer._shader = shader;
-
+	initOpenGL();    
+    _renderer.init();
+    _model.loadDefault();
+}
+void Engine::mainLoop()
+{
     // render loop
     // -----------
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(_window))
     {
-        // input
-        // -----
-        processInput(window);
-        renderer.beginFrame();
-
-		renderer.drawModel(model);
+        processInput(_window);
+        _renderer.beginFrame();
+        _renderer.drawModel(_model);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(_window);
         glfwPollEvents();
     }
-
-    model.terminate();
-    shader.deleteShader();
-
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
+}
+void Engine::terminate() {
+    _model.terminate();
+    _renderer.terminate();
     glfwTerminate();
-
 }
 
+void Engine::run()
+{
+    init();
+    mainLoop();
+	terminate();
+}
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------

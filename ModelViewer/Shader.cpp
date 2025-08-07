@@ -61,10 +61,10 @@ void Shader::init(std::string vertexShaderSource, std::string fragmentShaderSour
     _shaderProgram = linkProgram(vertexShader, fragmentShader);
 }
 
-void Shader::useShader(){
+void Shader::use(){
     glUseProgram(_shaderProgram);
 }
 
-void Shader::deleteShader(){
+void Shader::terminate(){
     glDeleteProgram(_shaderProgram);
 }

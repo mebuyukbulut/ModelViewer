@@ -4,8 +4,8 @@
 
 class Renderer
 {
-public:
 	Shader _shader;
+public:
 
 	void init();
 	void terminate();
