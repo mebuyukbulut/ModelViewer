@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "FileUtils.h"
 #include "Model.h"
+#include "Renderer.h"
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -56,8 +57,8 @@ void Engine::init()
     model.loadDefault();
 
 
-    // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    Renderer renderer;
+	renderer._shader = shader;
 
     // render loop
     // -----------
@@ -66,18 +67,9 @@ void Engine::init()
         // input
         // -----
         processInput(window);
+        renderer.beginFrame();
 
-        // render
-        // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // draw our first triangle
-        shader.useShader();
-        model.use();
-        
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // glBindVertexArray(0); // no need to unbind it every time 
+		renderer.drawModel(model);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -93,8 +85,6 @@ void Engine::init()
     glfwTerminate();
 
 }
-
-
 
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

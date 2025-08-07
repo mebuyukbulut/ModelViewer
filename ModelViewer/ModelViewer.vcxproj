@@ -127,12 +127,14 @@
     <ClCompile Include="FileUtils.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
