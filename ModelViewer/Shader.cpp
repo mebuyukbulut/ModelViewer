@@ -1,7 +1,10 @@
 #include "Shader.h"
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <iostream>
+
+
 
 
 // compile shader code
@@ -67,4 +70,8 @@ void Shader::use(){
 
 void Shader::terminate(){
     glDeleteProgram(_shaderProgram);
+}
+
+void Shader::setMat4(const std::string& name, const glm::mat4& mat){
+    glUniformMatrix4fv(glGetUniformLocation(_shaderProgram, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }

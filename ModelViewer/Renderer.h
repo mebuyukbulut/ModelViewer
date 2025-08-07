@@ -2,9 +2,12 @@
 #include "Model.h"
 #include "Shader.h"
 
+class Camera;
+
 class Renderer
 {
 	Shader _shader;
+	Camera* _camera;
 public:
 
 	void init();
@@ -14,6 +17,8 @@ public:
 	void endFrame();
 
 	void drawModel(Model& model);
+
+	void setCamera(Camera* camera) { _camera = camera; }
 
 	void enableWireframe();
 };

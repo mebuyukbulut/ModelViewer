@@ -3,6 +3,7 @@
 #include "FileUtils.h"
 #include "Model.h"
 #include "Renderer.h"
+#include <functional>
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -28,7 +29,8 @@ void Engine::initWindow()
         //return -1;
     }
     glfwMakeContextCurrent(_window);
-    glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
+    glfwSetWindowUserPointer(_window, this);
+    glfwSetFramebufferSizeCallback(_window, Engine::framebuffer_size_callback);
 }
 
 void Engine::initOpenGL()
@@ -46,7 +48,11 @@ void Engine::initOpenGL()
 void Engine::init(){
     initWindow();
 	initOpenGL();    
+
+	_camera.init();
     _renderer.init();
+	_renderer.setCamera(&_camera);
+
     _model.loadDefault();
 }
 void Engine::mainLoop()
@@ -78,19 +84,25 @@ void Engine::run()
 	terminate();
 }
 
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height){
+    glViewport(0, 0, width, height);
+
+    // Retrieve the instance pointer
+    Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (app) {
+		//std::cout << "Window resized to: " << width << "x" << height << std::endl;
+        app->_camera.setAspectRatio(width,height);
+    }
+}
+
+
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow* window)
+void  Engine::processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
-}
