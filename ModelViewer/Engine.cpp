@@ -62,6 +62,9 @@ void Engine::mainLoop()
     while (!glfwWindowShouldClose(_window))
     {
         processInput(_window);
+		_camera.rotate(0.01f, 0.0f); // Rotate the camera for demonstration
+		_camera.zoom(0.01*std::sin(glfwGetTime())); // Zoom in slightly for demonstration
+
         _renderer.beginFrame();
         _renderer.drawModel(_model);
 

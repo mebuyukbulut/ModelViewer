@@ -12,6 +12,12 @@ void Camera::init()
     _position = glm::vec3(0.0f, 0.0f, 3.0f); // camera position
     _target = glm::vec3(0.0f, 0.0f, 0.0f); // camera target
     _up = glm::vec3(0.0f, 1.0f, 0.0f); // up vector
+
+	// Spherical coordinates for camera position
+    _radius = 5.0f; // distance from the target
+    _theta = glm::radians(45.0f); // angle in the x-z plane
+    _phi = glm::radians(45.0f); // angle from the y-axis
+
 }
 
 glm::mat4 Camera::getProjectionMatrix()
@@ -20,11 +26,24 @@ glm::mat4 Camera::getProjectionMatrix()
 }
 
 glm::mat4 Camera::getViewMatrix()
-{
+{    
+    // Update camera position based on spherical coordinates
+    _position.x = _radius * sin(_phi) * cos(_theta);
+    _position.y = _radius * cos(_phi);
+	_position.z = _radius * sin(_phi) * sin(_theta);
     return glm::lookAt(_position, _target, _up);
 }
 
 void Camera::setAspectRatio(int width, int height)
 {
 	_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+}
+
+void Camera::rotate(float dTheta, float dPhi) {
+    _theta += dTheta;
+    _phi = glm::clamp(_phi + dPhi, 0.1f, glm::pi<float>() - 0.1f); // avoid flipping
+}
+
+void Camera::zoom(float dr) {
+    _radius = glm::max(0.1f, _radius + dr);
 }
