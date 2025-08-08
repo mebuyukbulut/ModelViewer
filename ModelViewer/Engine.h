@@ -17,6 +17,10 @@ class Engine
 	Model _model;
 	Camera _camera;
 
+	float _mouseLastX, _mouseLastY;
+	bool _mouseLeftPress;
+	bool _firstMouse; 
+
 	void initWindow();
 	void initOpenGL();
 	void init();
@@ -24,6 +28,9 @@ class Engine
 	void terminate();
 	void processInput(GLFWwindow* window);
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+	static void mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn);
+	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 public:
 	void run();

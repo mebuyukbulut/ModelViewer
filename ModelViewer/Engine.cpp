@@ -31,6 +31,12 @@ void Engine::initWindow()
     glfwMakeContextCurrent(_window);
     glfwSetWindowUserPointer(_window, this);
     glfwSetFramebufferSizeCallback(_window, Engine::framebuffer_size_callback);
+    glfwSetMouseButtonCallback(_window, Engine::mouse_button_callback);
+    glfwSetCursorPosCallback(_window, Engine::mouse_cursor_callback);
+    glfwSetScrollCallback(_window, Engine::scroll_callback);
+
+
+
 }
 
 void Engine::initOpenGL()
@@ -54,6 +60,11 @@ void Engine::init(){
 	_renderer.setCamera(&_camera);
 
     _model.loadDefault();
+
+    _mouseLastX = 0; 
+    _mouseLastY = 0; 
+    _mouseLeftPress = false;
+    _firstMouse = true;
 }
 void Engine::mainLoop()
 {
@@ -62,9 +73,6 @@ void Engine::mainLoop()
     while (!glfwWindowShouldClose(_window))
     {
         processInput(_window);
-		_camera.rotate(0.01f, 0.0f); // Rotate the camera for demonstration
-		_camera.zoom(0.01*std::sin(glfwGetTime())); // Zoom in slightly for demonstration
-
         _renderer.beginFrame();
         _renderer.drawModel(_model);
 
@@ -100,6 +108,53 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     }
 }
 
+void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (!app) return;
+
+    //if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        app->_mouseLeftPress = true;
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        app->_mouseLeftPress = false;
+        app->_firstMouse = true;
+    }
+
+}
+
+void Engine::mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (app && app->_mouseLeftPress) {        
+        if (app->_firstMouse) {
+            app->_mouseLastX = xposIn;
+            app->_mouseLastY = yposIn;
+            app->_firstMouse = false; 
+            return;
+        }
+
+        float xoffset = xposIn - app->_mouseLastX;
+        float yoffset = app->_mouseLastY - yposIn; // reversed since y-coordinates go from bottom to top
+        
+        app->_mouseLastX = xposIn;
+        app->_mouseLastY = yposIn;
+
+        xoffset = glm::radians(.4f) * xoffset;
+        yoffset = glm::radians(.4f) * yoffset;
+        std::cout << xoffset << "\t" << yoffset << std::endl;
+        app->_camera.rotate(xoffset,yoffset);
+    }
+}
+
+void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (app) {
+        app->_camera.zoom(static_cast<float>(yoffset));
+    }
+}
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
@@ -107,5 +162,6 @@ void  Engine::processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
 }
 
