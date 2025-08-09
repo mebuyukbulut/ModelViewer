@@ -13,6 +13,8 @@ void Renderer::init() {
     _shader.init(vertexShaderSource, fragmentShaderSource);
     _shader.use();
 
+	glEnable(GL_DEPTH_TEST);
+
 }
 void Renderer::terminate() {
 	_shader.terminate();
@@ -21,7 +23,7 @@ void Renderer::terminate() {
 void Renderer::beginFrame() {
 	// clear the color buffer
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set view and projection matrices
     _shader.setMat4("view", _camera->getViewMatrix());

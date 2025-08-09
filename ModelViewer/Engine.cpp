@@ -61,7 +61,7 @@ void Engine::init(){
 	_camera.init();
     _renderer.init();
 	_renderer.setCamera(&_camera);
-    _renderer.enableWireframe();
+    //_renderer.enableWireframe();
     //_model.loadDefault();
 	_model.loadFromFile("models/monkey.obj");
 
