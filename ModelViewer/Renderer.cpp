@@ -36,8 +36,8 @@ void Renderer::drawModel(Model& model) {
     // draw our first triangle
     //_shader.use();
 	_shader.setMat4("model", glm::mat4(1.0f)); // identity matrix for model transformation
-    model.use();
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    model.draw();
 }
 
 

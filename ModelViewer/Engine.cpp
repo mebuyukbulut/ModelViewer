@@ -5,6 +5,9 @@
 #include "Renderer.h"
 #include <functional>
 
+
+
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -58,8 +61,9 @@ void Engine::init(){
 	_camera.init();
     _renderer.init();
 	_renderer.setCamera(&_camera);
-
-    _model.loadDefault();
+    _renderer.enableWireframe();
+    //_model.loadDefault();
+	_model.loadFromFile("models/monkey.obj");
 
     _mouseLastX = 0; 
     _mouseLastY = 0; 
@@ -143,7 +147,7 @@ void Engine::mouse_cursor_callback(GLFWwindow* window, double xposIn, double ypo
 
         xoffset = glm::radians(.4f) * xoffset;
         yoffset = glm::radians(.4f) * yoffset;
-        std::cout << xoffset << "\t" << yoffset << std::endl;
+        //std::cout << xoffset << "\t" << yoffset << std::endl;
         app->_camera.rotate(xoffset,yoffset);
     }
 }
