@@ -13,6 +13,15 @@ void Renderer::init() {
     _shader.init(vertexShaderSource, fragmentShaderSource);
     _shader.use();
 
+	_shader.setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
+    _shader.setFloat("lightIntensity", 10.0f);
+    _shader.setFloat("albedo", 0.18f);
+
+    // uniform vec3 lightPos;
+    // uniform vec3 lightColor;
+    // uniform float lightIntensity;
+    // uniform float albedo;
+
 	glEnable(GL_DEPTH_TEST);
 
 }

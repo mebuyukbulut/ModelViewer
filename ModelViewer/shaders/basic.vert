@@ -7,18 +7,33 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform vec3 lightPos;
+//uniform vec3 lightColor;
+uniform float lightIntensity;
+uniform float albedo;
+
 out vec3 ourColor;
+
+#define _PI 3.1415926535897932384626433832795
 
 void main()
 {
-	// view-space normal transformation 
-	mat3 normalMatrix = transpose(inverse(mat3(view)));
-	vec3 normalView = normalize(normalMatrix * aNormal);
-	vec3 rgb_normal = normalView * 0.5 + 0.5;
-
-	// Alternatively, if you want to use the original normal directly:
-	//vec3 rgb_normal = aNormal * 0.5 + 0.5;
-	ourColor = vec3(rgb_normal); // Pass normal to fragment shader
+	vec3 surfaceNormal = normalize(aNormal);
+	vec3 lightDirection = normalize(lightPos - aPos);
+	float incidentLight = max(dot(surfaceNormal, lightDirection), 0.0) * lightIntensity;
+	float reflectedLight =  albedo / _PI * incidentLight;
+	ourColor = vec3(reflectedLight, reflectedLight, reflectedLight); 
 
 	gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }
+
+
+
+//	// view-space normal transformation 
+//	mat3 normalMatrix = transpose(inverse(mat3(view)));
+//	vec3 normalView = normalize(normalMatrix * aNormal);
+//	vec3 rgb_normal = normalView * 0.5 + 0.5;
+//
+//	// Alternatively, if you want to use the original normal directly:
+//	//vec3 rgb_normal = aNormal * 0.5 + 0.5;
+//	ourColor = vec3(rgb_normal); // Pass normal to fragment shader

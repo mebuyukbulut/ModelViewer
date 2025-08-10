@@ -15,5 +15,7 @@ public:
 	void terminate(); 
 
 	void setMat4(const std::string& name, const glm::mat4& mat);
+	void setVec3(const std::string& name, const glm::vec3& vec);
+	void setFloat(const std::string& name, float value);
 };
 

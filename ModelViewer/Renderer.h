@@ -21,5 +21,7 @@ public:
 	void setCamera(Camera* camera) { _camera = camera; }
 
 	void enableWireframe();
+
+	Shader& getShader() { return _shader; }
 };
 

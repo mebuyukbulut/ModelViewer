@@ -80,6 +80,9 @@ void Engine::mainLoop()
         _renderer.beginFrame();
         _renderer.drawModel(_model);
 
+		float x = sin(glfwGetTime()) * 3;
+		float y = cos(glfwGetTime()) * 3;
+		_renderer.getShader().setVec3("lightPos", glm::vec3(x, 2,y));
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);
