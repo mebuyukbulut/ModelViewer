@@ -7,7 +7,7 @@
 #include "Renderer.h"
 #include "Model.h"
 #include "Camera.h"
-
+#include "UIManager.h"
 void processInput(GLFWwindow* window);
 
 class Engine
@@ -16,6 +16,8 @@ class Engine
 	Renderer _renderer;
 	Model _model;
 	Camera _camera;
+	UIManager _UI;
+
 
 	float _mouseLastX, _mouseLastY;
 	bool _mouseLeftPress;

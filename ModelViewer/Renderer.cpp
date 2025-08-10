@@ -52,6 +52,12 @@ void Renderer::drawModel(Model& model) {
 }
 
 
+void Renderer::setCamera(Camera* camera) { _camera = camera; }
+void Renderer::setShader(const std::string name) {
+    _shader = &_shaderManager.getShader(name);
+    _shader->use();
+}
+
 void Renderer::enableWireframe() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }

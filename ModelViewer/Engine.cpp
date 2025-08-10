@@ -69,6 +69,11 @@ void Engine::init(){
     _mouseLastY = 0; 
     _mouseLeftPress = false;
     _firstMouse = true;
+
+    _UI.init(_window);
+    _UI.onShaderSelected = ([&](std::string shaderName) {
+		_renderer.setShader(shaderName);
+	});
 }
 void Engine::mainLoop()
 {
@@ -83,6 +88,10 @@ void Engine::mainLoop()
 		float x = sin(glfwGetTime()) * 3;
 		float y = cos(glfwGetTime()) * 3;
 		_renderer.getShader().setVec3("lightPos", glm::vec3(x, 2,y));
+
+
+		_UI.draw();
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);
@@ -92,6 +101,7 @@ void Engine::mainLoop()
 void Engine::terminate() {
     _model.terminate();
     _renderer.terminate();
+    _UI.terminate();
     glfwTerminate();
 }
 

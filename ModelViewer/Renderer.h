@@ -20,11 +20,12 @@ public:
 
 	void drawModel(Model& model);
 
-	void setCamera(Camera* camera) { _camera = camera; }
-
+	void setCamera(Camera* camera);
+	void setShader(const std::string name);
 	void enableWireframe();
 
 	Shader& getShader() { return *_shader; }
+
 	//void setShader(const std::string& name) { _shader = shader; }
 };
 
