@@ -1,12 +1,14 @@
 #pragma once
 #include "Model.h"
-#include "Shader.h"
+#include "ShaderManager.h"
 
 class Camera;
+class Shader;
 
 class Renderer
 {
-	Shader _shader;
+	ShaderManager _shaderManager;
+	Shader* _shader{};
 	Camera* _camera;
 public:
 
@@ -22,6 +24,7 @@ public:
 
 	void enableWireframe();
 
-	Shader& getShader() { return _shader; }
+	Shader& getShader() { return *_shader; }
+	//void setShader(const std::string& name) { _shader = shader; }
 };
 
