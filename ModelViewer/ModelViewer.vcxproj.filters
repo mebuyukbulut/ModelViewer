@@ -80,5 +80,7 @@
     <None Include="shaders\lambertian.vert" />
     <None Include="shaders\normal.frag" />
     <None Include="shaders\normal.vert" />
+    <None Include="shaders\blinn-phong.frag" />
+    <None Include="shaders\blinn-phong.vert" />
   </ItemGroup>
 </Project>

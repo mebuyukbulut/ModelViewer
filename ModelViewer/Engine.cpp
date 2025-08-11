@@ -88,6 +88,8 @@ void Engine::mainLoop()
 		float x = sin(glfwGetTime()) * 3;
 		float y = cos(glfwGetTime()) * 3;
 		_renderer.getShader().setVec3("lightPos", glm::vec3(x, 2,y));
+        
+		_renderer.getShader().setVec3("viewPos",_camera.getPosition());
 
 
 		_UI.draw();

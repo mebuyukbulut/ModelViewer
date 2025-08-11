@@ -40,7 +40,7 @@ void UIManager::draw() {
     }
 
 
-    const char* items[] = { "normal", "lambertian" };
+    const char* items[] = { "normal", "lambertian", "blinn-phong"};
     static int currentItem = 0;
 
     if (ImGui::Begin("Shader Controls")) {

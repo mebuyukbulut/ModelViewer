@@ -19,7 +19,7 @@ class ShaderManager
 		{"lambertian", "shaders/lambertian.vert", "shaders/lambertian.frag"},
 		{"normal", "shaders/normal.vert", "shaders/normal.frag"},
 		//{"phong", "shaders/phong.vert", "shaders/phong.frag"},
-		//{"blinn-phong", "shaders/blinn-phong.vert", "shaders/blinn-phong.frag"},
+		{"blinn-phong", "shaders/blinn-phong.vert", "shaders/blinn-phong.frag"},
 		//{"gouraud", "shaders/gouraud.vert", "shaders/gouraud.frag"},
 		//{"flat", "shaders/flat.vert", "shaders/flat.frag"},
 	};

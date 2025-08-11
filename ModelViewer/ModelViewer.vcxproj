@@ -146,6 +146,8 @@
     <ClInclude Include="UIManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\blinn-phong.frag" />
+    <None Include="shaders\blinn-phong.vert" />
     <None Include="shaders\lambertian.frag" />
     <None Include="shaders\lambertian.vert" />
     <None Include="shaders\normal.frag" />

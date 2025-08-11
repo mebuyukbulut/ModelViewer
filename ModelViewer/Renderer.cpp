@@ -8,19 +8,7 @@
 
 void Renderer::init() {
 	_shaderManager.init(); // load all shaders
-	_shader = &_shaderManager.getShader("lambertian"); // get active shader
-
-    _shader->use();
-
-	_shader->setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
-    _shader->setFloat("lightIntensity", 10.0f);
-    _shader->setFloat("albedo", 0.18f);
-
-    // uniform vec3 lightPos;
-    // uniform vec3 lightColor;
-    // uniform float lightIntensity;
-    // uniform float albedo;
-
+	setShader("lambertian"); // set default shader
 	glEnable(GL_DEPTH_TEST);
 
 }
@@ -56,6 +44,11 @@ void Renderer::setCamera(Camera* camera) { _camera = camera; }
 void Renderer::setShader(const std::string name) {
     _shader = &_shaderManager.getShader(name);
     _shader->use();
+
+
+    _shader->setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
+    _shader->setFloat("lightIntensity", 10.0f);
+    _shader->setFloat("albedo", 0.18f);
 }
 
 void Renderer::enableWireframe() {
