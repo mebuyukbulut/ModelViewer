@@ -74,6 +74,10 @@ void Engine::init(){
     _UI.onShaderSelected = ([&](std::string shaderName) {
 		_renderer.setShader(shaderName);
 	});
+    _UI.onEngineExit = [&]() {
+        glfwSetWindowShouldClose(_window, true);
+	};
+
 }
 void Engine::mainLoop()
 {
@@ -88,7 +92,6 @@ void Engine::mainLoop()
 		float x = sin(glfwGetTime()) * 3;
 		float y = cos(glfwGetTime()) * 3;
 		_renderer.getShader().setVec3("lightPos", glm::vec3(x, 2,y));
-        
 		_renderer.getShader().setVec3("viewPos",_camera.getPosition());
 
 
@@ -133,8 +136,10 @@ void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, i
     if (!app) return;
 
     //if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
+    
+	//std::cout << app->_UI.isHoverOnUI() << std::endl;
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !app->_UI.isHoverOnUI())
         app->_mouseLeftPress = true;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
         app->_mouseLeftPress = false;
