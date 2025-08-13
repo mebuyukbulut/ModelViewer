@@ -63,7 +63,10 @@ void Engine::init(){
 	_renderer.setCamera(&_camera);
     //_renderer.enableWireframe();
     //_model.loadDefault();
-	_model.loadFromFile("models/monkey.obj");
+    Model model;
+	model.loadFromFile("models/monkey.obj");
+	_models.push_back(model);
+
 
     _mouseLastX = 0; 
     _mouseLastY = 0; 
@@ -77,6 +80,23 @@ void Engine::init(){
     _UI.onEngineExit = [&]() {
         glfwSetWindowShouldClose(_window, true);
 	};
+    _UI.onOpenModel = [&](std::string modelPath) {         
+        if (modelPath.empty())
+            return;
+
+        for (Model& i : _models)
+            i.terminate();
+        _models.clear();
+
+        Model model;    
+        if (model.loadFromFile(modelPath)) {
+            _models.push_back(model);
+            //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
+            std::cout << "Success to load model: " << modelPath << std::endl;
+        } else {
+            std::cout << "Failed to load model: " << modelPath << std::endl;
+        }
+	};
 
 }
 void Engine::mainLoop()
@@ -87,7 +107,10 @@ void Engine::mainLoop()
     {
         processInput(_window);
         _renderer.beginFrame();
-        _renderer.drawModel(_model);
+        for(Model& model : _models) {
+            _renderer.drawModel(model);
+		}
+        //_renderer.drawModel(_model);
 
 		float x = sin(glfwGetTime()) * 3;
 		float y = cos(glfwGetTime()) * 3;
@@ -104,7 +127,9 @@ void Engine::mainLoop()
     }
 }
 void Engine::terminate() {
-    _model.terminate();
+    for (Model& model : _models) 
+        model.terminate();
+    //_model.terminate();
     _renderer.terminate();
     _UI.terminate();
     glfwTerminate();

@@ -57,8 +57,7 @@ void UIManager::mainMenu(){
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Exit")) { onEngineExit(); }
-            if (ImGui::MenuItem("Open", "Ctrl+O")) { FileUtils::openFileDialog(); }
-            if (ImGui::MenuItem("Credits")) {}
+            if (ImGui::MenuItem("Open", "Ctrl+O")) { onOpenModel(FileUtils::openFileDialog()); }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("View")) {

@@ -27,6 +27,7 @@ private:
 
 public:
 	std::function<void(std::string)> onShaderSelected;
+	std::function<void(std::string)> onOpenModel;
 	std::function<void()> onEngineExit;
 };
 
