@@ -231,6 +231,9 @@ void  Engine::processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+        _camera.resetFrame();
 
 }
 

@@ -27,5 +27,7 @@ public:
 	void move(float dX, float dY);
 	void rotate(float dTheta, float dPhi);
 	void zoom(float dr);
+
+	void resetFrame();
 };
 

@@ -61,3 +61,8 @@ void Camera::rotate(float dTheta, float dPhi) {
 void Camera::zoom(float dr) {
     _radius = glm::max(0.1f, _radius + dr);
 }
+
+void Camera::resetFrame()
+{
+    init();
+}
