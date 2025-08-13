@@ -12,6 +12,7 @@ void Camera::init()
     _position = glm::vec3(0.0f, 0.0f, 3.0f); // camera position
     _target = glm::vec3(0.0f, 0.0f, 0.0f); // camera target
     _up = glm::vec3(0.0f, 1.0f, 0.0f); // up vector
+	_centerPoint = glm::vec3(0.0f, 0.0f, 0.0f); // center point of the camera orbit
 
 	// Spherical coordinates for camera position
     _radius = 5.0f; // distance from the target
@@ -31,12 +32,25 @@ glm::mat4 Camera::getViewMatrix()
     _position.x = _radius * sin(_phi) * cos(_theta);
     _position.y = _radius * cos(_phi);
 	_position.z = _radius * sin(_phi) * sin(_theta);
-    return glm::lookAt(_position, _target, _up);
+    return glm::lookAt(_position + _centerPoint, _target + _centerPoint, _up);
 }
 
 void Camera::setAspectRatio(int width, int height)
 {
 	_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+}
+
+void Camera::move(float dX, float dY)
+{
+	glm::vec3 front = glm::normalize(_target - _position); // direction from camera to target
+	glm::vec3 right = glm::normalize(glm::cross(front, _up)); // right vector
+	glm::vec3 up = glm::normalize(glm::cross(right, front)); // up vector
+
+ //   glm::vec3 myvec(dX, dY, 0);
+ //   auto myMat = glm::lookAt(_position, _target, up);
+	//auto a = glm::transpose(glm::inverse(glm::mat3(myMat))) * myvec; // transform the vector to world space
+ //   
+    _centerPoint += -right * dX - up * dY;
 }
 
 void Camera::rotate(float dTheta, float dPhi) {

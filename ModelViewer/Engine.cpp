@@ -54,6 +54,36 @@ void Engine::initOpenGL()
 
 }
 
+void Engine::initUI()
+{
+    _UI.init(_window);
+
+    _UI.onShaderSelected = ([&](std::string shaderName) {
+        _renderer.setShader(shaderName);
+        });
+    _UI.onEngineExit = [&]() {
+        glfwSetWindowShouldClose(_window, true);
+        };
+    _UI.onOpenModel = [&](std::string modelPath) {
+        if (modelPath.empty())
+            return;
+
+        for (Model& i : _models)
+            i.terminate();
+        _models.clear();
+
+        Model model;
+        if (model.loadFromFile(modelPath)) {
+            _models.push_back(model);
+            //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
+            std::cout << "Success to load model: " << modelPath << std::endl;
+        }
+        else {
+            std::cout << "Failed to load model: " << modelPath << std::endl;
+        }
+        };
+}
+
 void Engine::init(){
     initWindow();
 	initOpenGL();    
@@ -71,33 +101,10 @@ void Engine::init(){
     _mouseLastX = 0; 
     _mouseLastY = 0; 
     _mouseLeftPress = false;
+    _mouseRightPress = false;
     _firstMouse = true;
 
-    _UI.init(_window);
-    _UI.onShaderSelected = ([&](std::string shaderName) {
-		_renderer.setShader(shaderName);
-	});
-    _UI.onEngineExit = [&]() {
-        glfwSetWindowShouldClose(_window, true);
-	};
-    _UI.onOpenModel = [&](std::string modelPath) {         
-        if (modelPath.empty())
-            return;
-
-        for (Model& i : _models)
-            i.terminate();
-        _models.clear();
-
-        Model model;    
-        if (model.loadFromFile(modelPath)) {
-            _models.push_back(model);
-            //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
-            std::cout << "Success to load model: " << modelPath << std::endl;
-        } else {
-            std::cout << "Failed to load model: " << modelPath << std::endl;
-        }
-	};
-
+	initUI();
 }
 void Engine::mainLoop()
 {
@@ -171,29 +178,42 @@ void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, i
         app->_firstMouse = true;
     }
 
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && !app->_UI.isHoverOnUI())
+        app->_mouseRightPress = true;
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+        app->_mouseRightPress = false;
+        app->_firstMouse = true;
+    }
+
 }
 
 void Engine::mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (app && app->_mouseLeftPress) {        
-        if (app->_firstMouse) {
-            app->_mouseLastX = xposIn;
-            app->_mouseLastY = yposIn;
-            app->_firstMouse = false; 
-            return;
-        }
+	if (!app) return;
+    if (!(app->_mouseLeftPress || app->_mouseRightPress)) return;
 
-        float xoffset = xposIn - app->_mouseLastX;
-        float yoffset = app->_mouseLastY - yposIn; // reversed since y-coordinates go from bottom to top
-        
+    if (app->_firstMouse) {
         app->_mouseLastX = xposIn;
         app->_mouseLastY = yposIn;
+        app->_firstMouse = false;
+        return;
+    }
 
+    float xoffset = xposIn - app->_mouseLastX;
+    float yoffset = app->_mouseLastY - yposIn; // reversed since y-coordinates go from bottom to top
+
+    app->_mouseLastX = xposIn;
+    app->_mouseLastY = yposIn;
+
+    if (app->_mouseLeftPress) {        
         xoffset = glm::radians(.4f) * xoffset;
         yoffset = glm::radians(.4f) * yoffset;
         //std::cout << xoffset << "\t" << yoffset << std::endl;
-        app->_camera.rotate(xoffset,yoffset);
+        app->_camera.rotate(xoffset, yoffset);
+    }
+    else { //_mouseRightPress
+		app->_camera.move(static_cast<float>(xoffset) * 0.01f, static_cast<float>(yoffset) * 0.01f);
     }
 }
 

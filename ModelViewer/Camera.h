@@ -10,6 +10,7 @@ class Camera
 	glm::vec3 _position; // camera position
 	glm::vec3 _target; // camera target
 	glm::vec3 _up; // up vector
+	glm::vec3 _centerPoint;
 
 	float _radius, _theta, _phi; // spherical coordinates for camera position
 
@@ -23,6 +24,7 @@ public:
 
 	void setAspectRatio(int width, int height);
 
+	void move(float dX, float dY);
 	void rotate(float dTheta, float dPhi);
 	void zoom(float dr);
 };

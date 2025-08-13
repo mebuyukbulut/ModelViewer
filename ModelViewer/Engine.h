@@ -22,10 +22,12 @@ class Engine
 
 	float _mouseLastX, _mouseLastY;
 	bool _mouseLeftPress;
+	bool _mouseRightPress;
 	bool _firstMouse; 
 
 	void initWindow();
 	void initOpenGL();
+	void initUI();
 	void init();
 
 	void mainLoop();
