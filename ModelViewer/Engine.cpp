@@ -94,7 +94,7 @@ void Engine::init(){
     //_renderer.enableWireframe();
     //_model.loadDefault();
     Model model;
-	model.loadFromFile("models/monkey.obj");
+	model.loadFromFile("models\\bellapais_abbey\\Bellapais Abbey.obj");
 	_models.push_back(model);
 
 

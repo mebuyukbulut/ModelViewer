@@ -1,7 +1,7 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec3 aTexCoords;
+layout (location = 2) in vec2 aTexCoords;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -13,11 +13,15 @@ uniform float lightIntensity;
 uniform float albedo;
 
 out vec3 ourColor;
+out vec2 texCoords;
 
 #define _PI 3.1415926535897932384626433832795
 
 void main()
 {
+	texCoords = aTexCoords;
+
+	// Calculate the Lambertian reflectance
 	vec3 surfaceNormal = normalize(aNormal);
 	vec3 lightDirection = normalize(lightPos - aPos);
 	float incidentLight = max(dot(surfaceNormal, lightDirection), 0.0) * lightIntensity;

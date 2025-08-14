@@ -36,7 +36,7 @@ void Renderer::drawModel(Model& model) {
     //_shader.use();
 	_shader->setMat4("model", glm::mat4(1.0f)); // identity matrix for model transformation
 
-    model.draw();
+    model.draw(*_shader);
 }
 
 

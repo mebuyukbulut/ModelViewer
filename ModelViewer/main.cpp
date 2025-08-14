@@ -1,5 +1,5 @@
-﻿#include "Engine.h"
-
+﻿#define STB_IMAGE_IMPLEMENTATION
+#include "Engine.h"
 #include <windows.h>
 extern "C"
 {
