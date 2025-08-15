@@ -47,7 +47,7 @@ void Renderer::setShader(const std::string name) {
 
 
     _shader->setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
-    _shader->setFloat("lightIntensity", 10.0f);
+    _shader->setFloat("lightIntensity", 30.0f);
     _shader->setFloat("albedo", 0.18f);
 }
 
