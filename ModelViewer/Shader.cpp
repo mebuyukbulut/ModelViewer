@@ -57,6 +57,15 @@ unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmen
     return shaderProgram;
 }
 
+unsigned int Shader::getUniformLocation(const std::string& name){
+    if (_uniforms.contains(name))
+        return _uniforms[name];
+    
+	unsigned int location = glGetUniformLocation(_shaderProgram, name.c_str());
+    _uniforms[name] = location;
+    return location;
+}
+
 void Shader::init(std::string vertexShaderSource, std::string fragmentShaderSource)
 {
     unsigned int vertexShader = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
@@ -73,20 +82,17 @@ void Shader::terminate(){
 }
 
 void Shader::setMat4(const std::string& name, const glm::mat4& mat){
-    glUniformMatrix4fv(glGetUniformLocation(_shaderProgram, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }
 
-void Shader::setVec3(const std::string& name, const glm::vec3& vec)
-{
-	glUniform3fv(glGetUniformLocation(_shaderProgram, name.c_str()), 1, &vec[0]);
+void Shader::setVec3(const std::string& name, const glm::vec3& vec){
+	glUniform3fv(getUniformLocation(name), 1, &vec[0]);
 }
 
-void Shader::setFloat(const std::string& name, float value)
-{
-	glUniform1f(glGetUniformLocation(_shaderProgram, name.c_str()), value);
+void Shader::setFloat(const std::string& name, float value){
+	glUniform1f(getUniformLocation(name), value);
 }
 
-void Shader::setInt(const std::string& name, float value)
-{
-    glUniform1i(glGetUniformLocation(_shaderProgram, name.c_str()), value);
+void Shader::setInt(const std::string& name, float value){
+    glUniform1i(getUniformLocation(name), value);
 }
