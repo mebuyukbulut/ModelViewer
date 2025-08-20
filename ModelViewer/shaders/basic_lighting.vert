@@ -13,12 +13,9 @@ uniform mat4 projection;
 
 void main()
 {
-	fPos = vPos;
+	fPos = vec3(model * vec4(vPos, 1.0));;
 	fNormal = vNormal;
 	fTexCoords = vTexCoords;
 
-	gl_Position = projection * view * model * vec4(vPos.x, vPos.y, vPos.z, 1.0);
+	gl_Position = projection * view * model * vec4(vPos, 1.0);
 }
-
-
-

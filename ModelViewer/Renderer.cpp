@@ -8,8 +8,10 @@
 
 void Renderer::init() {
 	_shaderManager.init(); // load all shaders
-	setShader("lambertian"); // set default shader
+	setShader("basic"); // set default shader
 	glEnable(GL_DEPTH_TEST);
+   
+
 
 }
 void Renderer::terminate() {

@@ -20,6 +20,7 @@ class ShaderManager
 		{"normal", "shaders/normal.vert", "shaders/normal.frag"},
 		//{"phong", "shaders/phong.vert", "shaders/phong.frag"},
 		{"blinn-phong", "shaders/blinn-phong.vert", "shaders/blinn-phong.frag"},
+		{"basic", "shaders/basic_lighting.vert", "shaders/basic_lighting.frag"},
 		//{"gouraud", "shaders/gouraud.vert", "shaders/gouraud.frag"},
 		//{"flat", "shaders/flat.vert", "shaders/flat.frag"},
 	};

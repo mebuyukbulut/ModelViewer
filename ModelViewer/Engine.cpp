@@ -94,7 +94,8 @@ void Engine::init(){
     //_renderer.enableWireframe();
     //_model.loadDefault();
     Model model;
-	model.loadFromFile("models\\bellapais_abbey\\Bellapais Abbey.obj");
+	model.loadFromFile("models\\monkey.obj");
+	//model.loadFromFile("models\\bellapais_abbey\\Bellapais Abbey.obj");
 	_models.push_back(model);
 
 
@@ -119,11 +120,28 @@ void Engine::mainLoop()
 		}
         //_renderer.drawModel(_model);
 
-		float x = sin(glfwGetTime()) * 30;
-		float y = cos(glfwGetTime()) * 30;
-		_renderer.getShader().setVec3("lightPos", glm::vec3(x, 10 ,y));
-		_renderer.getShader().setVec3("viewPos",_camera.getPosition());
+		float x = sin(glfwGetTime()) * 3;
+		float y = cos(glfwGetTime()) * 3;
+		_renderer.getShader().setVec3("lightPos", glm::vec3(x, 5 ,y));
+        _renderer.getShader().setVec3("viewPos", _camera.getPosition());
 
+        _renderer.getShader().setVec3("lightColor", glm::vec3(1,1,1));
+        _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
+        _renderer.getShader().setVec3("objectColor", glm::vec3(1, 0, 0));
+        _renderer.getShader().setFloat("lightIntensity", 1);
+        _renderer.getShader().setFloat("ambientIntensity", 0.1);
+        _renderer.getShader().setFloat("specularIntensity", 0.5);
+
+        // vec3 viewPos;
+        // vec3 lightPos;
+        // vec3 lightColor;
+        // 
+        // float lightIntensity;
+        // float ambientIntensity;
+        // float specularIntensity = 0.5;
+        // 
+        // vec3 ambientColor;
+        // vec3 objectColor = vec3(1, 1, 1);
 
 		_UI.draw();
 
