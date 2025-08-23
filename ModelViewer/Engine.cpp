@@ -56,7 +56,8 @@ void Engine::initOpenGL()
 
 void Engine::initUI()
 {
-    _UI.init(_window, &_lightManager);
+    _UI.init(_window, &_lightManager, &_camera);
+	_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
 
     _UI.onShaderSelected = ([&](std::string shaderName) {
         _renderer.setShader(shaderName);
@@ -166,6 +167,7 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     if (app) {
 		//std::cout << "Window resized to: " << width << "x" << height << std::endl;
         app->_camera.setAspectRatio(width,height);
+		app->_UI.setWindowSize(width, height);
     }
 }
 
@@ -227,7 +229,7 @@ void Engine::mouse_cursor_callback(GLFWwindow* window, double xposIn, double ypo
 void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (app) {
+    if (app && !app->_UI.isHoverOnUI()) {
         app->_camera.zoom(static_cast<float>(yoffset));
     }
 }

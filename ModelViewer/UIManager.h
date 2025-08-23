@@ -1,15 +1,21 @@
 #pragma once
 #include <string>
 #include <functional>
+#include <glm/glm.hpp>
+
 struct GLFWwindow;
 class LightManager;
+class Camera;
 
 class UIManager
 {
 	GLFWwindow* _window;
+	Camera* _camera;
 	LightManager* _lightManager;
+	glm::vec2 _windowSize;
 public:
-	void init(GLFWwindow* window, LightManager* lightManager);
+	void init(GLFWwindow* window, LightManager* lightManager, Camera* camera);
+	void setWindowSize(int width, int height) { _windowSize = glm::vec2(width, height); }
 	void terminate(); 
 
 	void draw();
