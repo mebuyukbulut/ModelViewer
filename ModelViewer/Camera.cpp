@@ -35,10 +35,12 @@ glm::mat4 Camera::getViewMatrix()
     return glm::lookAt(_position + _centerPoint, _target + _centerPoint, _up);
 }
 
-void Camera::setAspectRatio(int width, int height)
-{
+void Camera::setWindowSize(int width, int height){
+	_windowSize.x = width; _windowSize.y = height;
 	_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
+glm::vec2  Camera::getWindowSize(){ return _windowSize; }
+
 
 void Camera::move(float dX, float dY)
 {

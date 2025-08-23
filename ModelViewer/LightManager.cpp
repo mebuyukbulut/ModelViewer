@@ -3,8 +3,14 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <iostream>
+#include <ImGuizmo.h>
 
+#include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
+#include "Camera.h"
 
 void LightManager::drawUI() {
     // Shader selection combo box
@@ -19,7 +25,6 @@ void LightManager::drawUI() {
         addLight(currentItem);
 
 
-    static int selectedLight = -1;
     ImGui::SeparatorText("Light List");
 	
     if (ImGui::BeginListBox("listbox 1"))
@@ -51,19 +56,53 @@ void LightManager::drawUI() {
 	    ImGui::DragFloat3("Direction", &_lights[selectedLight].direction[0], 0.1f);
 	if (_lights[selectedLight].type == 2) // Spot light
 		ImGui::DragFloat("Cutoff", &_lights[selectedLight].cutoff, 1.0f, 0.0f, 90.0f);
-    // std::string name;
-    // glm::vec3 position;
-    // glm::vec3 color;
-    // float intensity;
-    // int type; // 0=Point, 1=Directional, 2=Spot
-    // glm::vec3 direction;
-    // float cutoff; // spot için
-
 
 
     ImGui::End();
 
+
+
+
+
+
     //ImGui::ShowDemoWindow();
+}
+
+void LightManager::drawGizmo()
+{
+	if (selectedLight == -1) return; // No light selected
+
+
+    // Make sure to call inside ImGui frame:
+    ImGuizmo::BeginFrame();
+
+    // Get viewport size
+    ImVec2 windowPos(0, 0);// = ImGui::GetWindowPos();
+   
+	auto windowSize = _camera->getWindowSize();
+
+    // Setup ImGuizmo rect
+    ImGuizmo::SetRect(windowPos.x, windowPos.y, windowSize.x, windowSize.y);
+
+    // Choose operation: translate / rotate / scale
+    static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+
+    glm::mat4 modelMatrix(1);
+	modelMatrix = glm::translate(glm::mat4(1.0f), _lights[selectedLight].position);
+
+    ImGuizmo::Manipulate(
+        glm::value_ptr(_camera->getViewMatrix()),
+        glm::value_ptr(_camera->getProjectionMatrix()),
+        mCurrentGizmoOperation,
+        ImGuizmo::LOCAL,
+        glm::value_ptr(modelMatrix)
+    );
+
+
+    // If modified, write back into your glm::mat4
+    if (ImGuizmo::IsUsing()) {
+		_lights[selectedLight].position = glm::vec3(modelMatrix[3]); 
+    }
 }
 
 void LightManager::configShader(Shader& shader)

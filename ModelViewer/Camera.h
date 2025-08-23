@@ -3,6 +3,8 @@
 
 class Camera
 {
+	glm::vec2 _windowSize;
+
 	float _fov; // field of view
 	float _aspectRatio; // width / height
 	float _nearPlane; // near clipping plane
@@ -22,7 +24,8 @@ public:
 	
 	glm::vec3 getPosition() const { return _position; }
 
-	void setAspectRatio(int width, int height);
+	void setWindowSize(int width, int height);
+	glm::vec2 getWindowSize();
 
 	void move(float dX, float dY);
 	void rotate(float dTheta, float dPhi);

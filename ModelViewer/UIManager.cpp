@@ -3,14 +3,12 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <ImGuizmo.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "FileUtils.h"
 #include "LightManager.h"
 #include "Camera.h"
+#include <iostream>
 
 void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* camera) {
 	_window = window;
@@ -34,61 +32,11 @@ void UIManager::terminate() {
 
 void UIManager::draw() {
 	beginFrame();
-
-
-
-
-
-    // Make sure to call inside ImGui frame:
-    ImGuizmo::BeginFrame();
-
-    // Get viewport size
-    ImVec2 windowPos(0, 0);// = ImGui::GetWindowPos();
-    //ImVec2 windowSize(600, 600);// = ImGui::GetWindowSize();
-
-    // Setup ImGuizmo rect
-    ImGuizmo::SetRect(windowPos.x, windowPos.y, _windowSize.x, _windowSize.y);
-
-    //// Example: use your camera/view/projection matrices
-    //float view[16];       // from your camera
-    //float projection[16]; // from your camera
-    //float objectMatrix[16]; // model matrix of the object you want to manipulate
-
-    //// Convert glm::mat4 to float[16] if you’re using glm
-    //memcpy(view, glm::value_ptr(viewMat), sizeof(float) * 16);
-    //memcpy(projection, glm::value_ptr(projMat), sizeof(float) * 16);
-    //memcpy(objectMatrix, glm::value_ptr(modelMat), sizeof(float) * 16);
-
-    // Choose operation: translate / rotate / scale
-    static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-
-    glm::mat4 modelMatrix(1); 
-    ImGuizmo::Manipulate(
-        glm::value_ptr(_camera->getViewMatrix()),
-        glm::value_ptr(_camera->getProjectionMatrix()),
-        mCurrentGizmoOperation,
-        ImGuizmo::LOCAL,
-        glm::value_ptr(modelMatrix)
-    );
-
-
-    //// Manipulate the matrix in place
-    //ImGuizmo::Manipulate(glm::value_ptr(vM), projection, mCurrentGizmoOperation,
-    //    ImGuizmo::LOCAL, objectMatrix);
-
-    //// If modified, write back into your glm::mat4
-    //if (ImGuizmo::IsUsing()) {
-    //    modelMat = glm::make_mat4(objectMatrix);
-    //}
-
-
-
-
-
 	mainMenu();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
 	_lightManager->drawUI();
+    _lightManager->drawGizmo();
 
 	endFrame();
 

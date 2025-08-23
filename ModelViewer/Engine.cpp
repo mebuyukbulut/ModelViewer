@@ -6,6 +6,10 @@
 #include <functional>
 
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <ImGuizmo.h>
 
 
 // settings
@@ -57,7 +61,7 @@ void Engine::initOpenGL()
 void Engine::initUI()
 {
     _UI.init(_window, &_lightManager, &_camera);
-	_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
+	//_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
 
     _UI.onShaderSelected = ([&](std::string shaderName) {
         _renderer.setShader(shaderName);
@@ -90,8 +94,10 @@ void Engine::init(){
 	initOpenGL();    
 
 	_camera.init();
+	_camera.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
     _renderer.init();
 	_renderer.setCamera(&_camera);
+	_lightManager.init(&_camera);
     //_renderer.enableWireframe();
     //_model.loadDefault();
     Model model;
@@ -166,8 +172,9 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (app) {
 		//std::cout << "Window resized to: " << width << "x" << height << std::endl;
-        app->_camera.setAspectRatio(width,height);
-		app->_UI.setWindowSize(width, height);
+        app->_camera.setWindowSize(width,height);
+		//app->_UI.setWindowSize(width, height);
+		//app->_camera.setAspectRatio(width, height);
     }
 }
 
@@ -175,6 +182,7 @@ void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, i
 {
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (!app) return;
+
 
     //if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
     
@@ -198,9 +206,19 @@ void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, i
 
 void Engine::mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+
+
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
 	if (!app) return;
     if (!(app->_mouseLeftPress || app->_mouseRightPress)) return;
+
+    if (ImGuizmo::IsUsing()) {
+        app->_mouseLeftPress = false;
+		app->_mouseRightPress = false;
+        app->_firstMouse = true;
+        return;
+    }
+
 
     if (app->_firstMouse) {
         app->_mouseLastX = xposIn;

@@ -12,6 +12,7 @@ void ShaderManager::init(){
 	}
 
 }
+
 void ShaderManager::terminate(){
 	for(auto& pair : shaders)
 		pair.second.terminate();
