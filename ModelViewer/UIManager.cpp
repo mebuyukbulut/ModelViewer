@@ -5,9 +5,11 @@
 #include <imgui_impl_opengl3.h>
 
 #include "FileUtils.h"
+#include "LightManager.h"
 
-void UIManager::init(GLFWwindow* window) {
+void UIManager::init(GLFWwindow* window, LightManager* lightManager) {
 	_window = window;
+	_lightManager = lightManager;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -29,7 +31,7 @@ void UIManager::draw() {
 	mainMenu();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
-
+	_lightManager->drawUI();
 
 
 	endFrame();

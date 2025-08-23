@@ -9,6 +9,9 @@
 #include "Model.h"
 #include "Camera.h"
 #include "UIManager.h"
+#include "LightManager.h"
+
+
 void processInput(GLFWwindow* window);
 
 class Engine
@@ -19,6 +22,7 @@ class Engine
 	std::vector<Model> _models;
 	Camera _camera;
 	UIManager _UI;
+	LightManager _lightManager;
 
 	float _mouseLastX, _mouseLastY;
 	bool _mouseLeftPress;

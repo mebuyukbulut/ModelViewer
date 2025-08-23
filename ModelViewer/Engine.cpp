@@ -56,7 +56,7 @@ void Engine::initOpenGL()
 
 void Engine::initUI()
 {
-    _UI.init(_window);
+    _UI.init(_window, &_lightManager);
 
     _UI.onShaderSelected = ([&](std::string shaderName) {
         _renderer.setShader(shaderName);
@@ -118,25 +118,9 @@ void Engine::mainLoop()
         for(Model& model : _models) {
             _renderer.drawModel(model);
 		}
+		_lightManager.configShader(_renderer.getShader());
+
         //_renderer.drawModel(_model);
-
-		float x = sin(glfwGetTime()) * 3;
-		float y = cos(glfwGetTime()) * 3;
-        _renderer.getShader().setVec3("pointLights[0].position", glm::vec3(x, 5, y));
-        _renderer.getShader().setVec3("pointLights[0].color", glm::vec3(1, 0, 0));
-        _renderer.getShader().setFloat("pointLights[0].intensity", 3);
-
-        _renderer.getShader().setVec3 ("pointLights[1].position", glm::vec3(2*x, 2, 2*y));
-        _renderer.getShader().setVec3 ("pointLights[1].color", glm::vec3(0, 1, 0));
-        _renderer.getShader().setFloat("pointLights[1].intensity", 3);
-
-        _renderer.getShader().setVec3 ("pointLights[2].position", glm::vec3(x, y, 0));
-        _renderer.getShader().setVec3 ("pointLights[2].color", glm::vec3(0, 0, 1));
-        _renderer.getShader().setFloat("pointLights[2].intensity", 3);
-
-        //_renderer.getShader().setVec3 ("pointLights[3].position", glm::vec3(x, 5, y));
-        //_renderer.getShader().setVec3 ("pointLights[3].color", glm::vec3(1, 1, 1));
-        //_renderer.getShader().setFloat("pointLights[3].intensity", 3);
 
 
         _renderer.getShader().setVec3("viewPos", _camera.getPosition());
@@ -145,18 +129,8 @@ void Engine::mainLoop()
         _renderer.getShader().setFloat("ambientIntensity", 0.1);
         //_renderer.getShader().setVec3("objectColor", glm::vec3(186/255.f, 184/255.f, 108/255.f));
         _renderer.getShader().setVec3("objectColor", glm::vec3(1,1,1));
-        _renderer.getShader().setFloat("specularIntensity", 0.99);
+        _renderer.getShader().setFloat("specularIntensity", 0.5);
 
-        // vec3 viewPos;
-        // vec3 lightPos;
-        // vec3 lightColor;
-        // 
-        // float lightIntensity;
-        // float ambientIntensity;
-        // float specularIntensity = 0.5;
-        // 
-        // vec3 ambientColor;
-        // vec3 objectColor = vec3(1, 1, 1);
 
 		_UI.draw();
 

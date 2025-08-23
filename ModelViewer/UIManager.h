@@ -2,12 +2,14 @@
 #include <string>
 #include <functional>
 struct GLFWwindow;
+class LightManager;
 
 class UIManager
 {
 	GLFWwindow* _window;
+	LightManager* _lightManager;
 public:
-	void init(GLFWwindow* window);
+	void init(GLFWwindow* window, LightManager* lightManager);
 	void terminate(); 
 
 	void draw();

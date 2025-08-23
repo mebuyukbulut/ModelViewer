@@ -9,10 +9,13 @@ struct PointLight {
     vec3 position;
 	vec3 color;
 	float intensity;
+    int type; // 0: point, 1: dir, 2: spot
+    vec3 direction; // only for dir and spot
+    float cutoff; // only for spot
 };  
-#define NR_POINT_LIGHTS 4  
+#define NR_POINT_LIGHTS 8  
 uniform PointLight pointLights[NR_POINT_LIGHTS];
-
+uniform int numLights;
 
 uniform float ambientIntensity;
 uniform vec3 ambientColor;
@@ -26,6 +29,9 @@ uniform sampler2D texture_diffuse1;
 
 
 #define _PI 3.1415926535897932384626433832795
+
+float near = 0.1; // near plane    
+float far = 100.0; // far plane
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
@@ -54,6 +60,13 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     return (diffuse + specular)*attenuation;
 } 
 
+float LinearizeDepth(float depth) 
+{
+    // Convert depth from NDC to linear depth
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main()
 {
 
@@ -66,15 +79,16 @@ void main()
 	vec3 ambient = ambientIntensity * ambientColor; 
 
     //vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
-    vec3 l1 = CalcPointLight(pointLights[0], surfaceNormal, fPos, viewDir);
-    vec3 l2 = CalcPointLight(pointLights[1], surfaceNormal, fPos, viewDir);
-    vec3 l3 = CalcPointLight(pointLights[2], surfaceNormal, fPos, viewDir);
-    vec3 l4 = CalcPointLight(pointLights[3], surfaceNormal, fPos, viewDir);
-        
-    vec3 pLights = l1 + l2 + l3 + l4;
+    vec3 pLights = vec3(0.0);
+    for(int i = 0; i < numLights; i++){
+        pLights += CalcPointLight(pointLights[i], surfaceNormal, fPos, viewDir);
+    }
+
     vec3 result = (pLights + ambient) * objectColor;
 
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(result, 1.0);    
+    //float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
+    //FragColor = vec4(vec3(depth), 1.0);
 }	
 
 //FragColor = texture(texture_diffuse1, fTexCoords) * vec4(finalColor, 1);
