@@ -7,6 +7,7 @@
 struct GLFWwindow;
 class LightManager;
 class Camera;
+class Material;
 
 class UIManager
 {
@@ -20,7 +21,7 @@ public:
 
 	void terminate(); 
 
-	void draw();
+	void draw(Material* material);
 
 	bool isHoverOnUI();
 

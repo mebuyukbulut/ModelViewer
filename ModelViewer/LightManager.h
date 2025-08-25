@@ -26,20 +26,6 @@ public:
     void configShader(Shader& shader);
 
 private:
-    void addLight(int lightType);
-
- //   void removeLight(int index) {
- //       if (index >= 0 && index < _lights.size()) {
- //           _lights.erase(_lights.begin() + index);
- //       }
- //   }
- //   const std::vector<Light>& getLights() const {
- //       return _lights;
- //   }
- //   void clearLights() {
- //       _lights.clear();
-	//}
-    
-    
+    void addLight(int lightType);    
 };
 

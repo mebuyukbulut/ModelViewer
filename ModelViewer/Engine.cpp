@@ -3,6 +3,7 @@
 #include "FileUtils.h"
 #include "Model.h"
 #include "Renderer.h"
+#include "Material.h"
 #include <functional>
 
 
@@ -116,12 +117,16 @@ void Engine::init(){
 }
 void Engine::mainLoop()
 {
+    Material material;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(_window))
     {
         processInput(_window);
         _renderer.beginFrame();
+        material.use(&_renderer.getShader());
+
         for(Model& model : _models) {
             _renderer.drawModel(model);
 		}
@@ -134,12 +139,10 @@ void Engine::mainLoop()
 
         _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
         _renderer.getShader().setFloat("ambientIntensity", 0.1);
-        //_renderer.getShader().setVec3("objectColor", glm::vec3(186/255.f, 184/255.f, 108/255.f));
-        _renderer.getShader().setVec3("objectColor", glm::vec3(1,1,1));
-        _renderer.getShader().setFloat("specularIntensity", 0.5);
 
 
-		_UI.draw();
+		_UI.draw(&material);
+        
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

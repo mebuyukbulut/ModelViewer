@@ -8,6 +8,7 @@
 #include "FileUtils.h"
 #include "LightManager.h"
 #include "Camera.h"
+#include "Material.h"
 #include <iostream>
 
 void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* camera) {
@@ -30,13 +31,14 @@ void UIManager::terminate() {
 
 }
 
-void UIManager::draw() {
+void UIManager::draw(Material* material) {
 	beginFrame();
 	mainMenu();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
 	_lightManager->drawUI();
     _lightManager->drawGizmo();
+    material->drawUI();
 
 	endFrame();
 

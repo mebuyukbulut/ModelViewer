@@ -21,9 +21,12 @@ uniform float ambientIntensity;
 uniform vec3 ambientColor;
 
 uniform vec3 viewPos;
-uniform vec3 objectColor;
-uniform float specularIntensity;
 
+struct Material{
+    vec3 color;
+    float specularIntensity;
+};
+uniform Material material;
 
 uniform sampler2D texture_diffuse1;
 
@@ -45,12 +48,12 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse  = (1.0f - specularIntensity) * diff * light.intensity * light.color; 
+    vec3 diffuse  = (1.0f -  material.specularIntensity) * diff * light.intensity * light.color; 
 
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = specularIntensity * spec * light.intensity * light.color; 
+    vec3 specular =  material.specularIntensity * spec * light.intensity * light.color; 
 
     // attenuation
     float distance    = length(light.position - fragPos);
@@ -84,7 +87,7 @@ void main()
         pLights += CalcPointLight(pointLights[i], surfaceNormal, fPos, viewDir);
     }
 
-    vec3 result = (pLights + ambient) * objectColor;
+    vec3 result = (pLights + ambient) * material.color;
 
     FragColor = vec4(result, 1.0);    
     //float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
