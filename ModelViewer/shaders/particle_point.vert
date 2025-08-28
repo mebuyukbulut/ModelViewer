@@ -16,6 +16,9 @@ void main()
 
 	//gl_Position = projection * view * model * vec4(vPos, 1.0);
 	gl_Position = projection * view * model *vec4(vPosition, 1.0);
-	gl_PointSize = 2; // gl_Position.z;    
+	//gl_PointSize = 2; // gl_Position.z;    
+
+	float lifeRatio = 1.0 - (vAge / vLifeTime);
+	gl_PointSize = mix(5.0, 0.0, 1.0 - lifeRatio); // küçülerek kaybolsun
 
 }

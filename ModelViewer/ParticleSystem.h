@@ -11,7 +11,7 @@ struct Particle {
     glm::vec3 velocity{ 0.0f, 0.0f, 0.0f };
     float lifetime{ 0.0f };
     float age{ 0.0f };
-    bool isactive{ true };
+    float isactive{ 1.0f };
 
     void update(float deltaTime) {
         age += deltaTime;
@@ -30,13 +30,14 @@ struct Particle {
 class ParticleSystem
 {
     std::vector<Particle> _particles{};
-    //int _maxPCount;
+    int _maxPCount;
     int _PCount{};
     Camera* _camera; 
     unsigned int _vao, _vbo;
 
 public:
-    void init(Camera* camera){ //unsigned int maxParticleCount
+    void init(Camera* camera){ 
+        _maxPCount = 10'000;
         _camera = camera; 
         glEnable(GL_PROGRAM_POINT_SIZE);
 
@@ -50,7 +51,8 @@ public:
         glBindVertexArray(_vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * _particles.size(), _particles.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * _maxPCount, nullptr, GL_STATIC_DRAW);
+        //glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * _particles.size(), _particles.data(), GL_STATIC_DRAW);
 
 
         //glm::vec3 position{ 0.0f, 0.0f, 0.0f };
@@ -87,7 +89,9 @@ public:
     void draw() {
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * _particles.size(), _particles.data(), GL_STATIC_DRAW);
+
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Particle) * _particles.size(), _particles.data());
+        //glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * _particles.size(), _particles.data(), GL_STATIC_DRAW);
         //std::cout << "draw _p.size(): " << _particles.size() << std::endl;
         //std::cout << _particles[0].position.x << std::endl;
         glDrawArrays(GL_POINTS, 0, _particles.size());
@@ -107,16 +111,12 @@ public:
         //}
 
         _PCount = _particles.size();
-        std::remove_if(_particles.begin(), _particles.end(), 
+        auto it = std::remove_if(_particles.begin(), _particles.end(), 
             [&](Particle p) {
-                if (!p.isactive) {
-                    _PCount--;
-                    return true;
-                }
-                return false;
+                return !p.isactive;
             }
         );
-        _particles.resize(_PCount);
+        _particles.erase(it, _particles.end());
 
 
         float spawnRate = 100; // 100 particle per second 
@@ -131,6 +131,8 @@ public:
             newParticleCount -= N;
 
             for (int i{}; i < N; i++) {
+                if (_particles.size() + 1 >= _maxPCount)
+                    break;
                 Particle newParticle;
                 //newParticle.position;
                 float rx = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
