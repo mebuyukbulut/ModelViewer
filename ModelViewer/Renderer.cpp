@@ -22,13 +22,14 @@ void Renderer::terminate() {
 
 void Renderer::beginFrame() {
 	// clear the color buffer
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0,0,0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set view and projection matrices
     _shader->setMat4("view", _camera->getViewMatrix());
     _shader->setMat4("projection", _camera->getProjectionMatrix());
-    
+    _shader->setMat4("model", glm::mat4(1.0f));
 }
 void Renderer::endFrame() {
     
@@ -49,9 +50,9 @@ void Renderer::setShader(const std::string name) {
     _shader->use();
 
 
-    _shader->setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
-    _shader->setFloat("lightIntensity", 30.0f);
-    _shader->setFloat("albedo", 0.18f);
+    //_shader->setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
+    //_shader->setFloat("lightIntensity", 30.0f);
+    //_shader->setFloat("albedo", 0.18f);
 }
 
 void Renderer::enableWireframe() {

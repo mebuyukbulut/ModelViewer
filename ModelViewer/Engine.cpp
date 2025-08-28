@@ -11,6 +11,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <ImGuizmo.h>
+#include "ParticleSystem.h"
 
 
 // settings
@@ -119,26 +120,42 @@ void Engine::mainLoop()
 {
     Material material;
 
+
+    _renderer.setShader("particle0");
+    ParticleSystem ps;
+    ps.init(&_camera);
+    
+    double lastTime = glfwGetTime();
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(_window))
     {
         processInput(_window);
         _renderer.beginFrame();
-        material.use(&_renderer.getShader());
 
-        for(Model& model : _models) {
-            _renderer.drawModel(model);
-		}
-		_lightManager.configShader(_renderer.getShader());
+        double now = glfwGetTime();
+        //if((int)now != (int)lastTime)
+        //    std::cout << (int)now << ","; 
+        double deltaTime = now - lastTime;
+        lastTime = now; 
 
-        //_renderer.drawModel(_model);
+        ps.update(deltaTime);
+        ps.draw();
+        //material.use(&_renderer.getShader());
+
+        //for(Model& model : _models) {
+        //    _renderer.drawModel(model);
+		//}
+		//_lightManager.configShader(_renderer.getShader());
+
+        ////_renderer.drawModel(_model);
 
 
-        _renderer.getShader().setVec3("viewPos", _camera.getPosition());
+        //_renderer.getShader().setVec3("viewPos", _camera.getPosition());
 
-        _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
-        _renderer.getShader().setFloat("ambientIntensity", 0.1);
+        //_renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
+        //_renderer.getShader().setFloat("ambientIntensity", 0.1);
 
 
 		_UI.draw(&material);
