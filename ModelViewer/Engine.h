@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "UIManager.h"
 #include "LightManager.h"
+#include "Time.h"
 
 
 void processInput(GLFWwindow* window);
@@ -23,6 +24,8 @@ class Engine
 	Camera _camera;
 	UIManager _UI;
 	LightManager _lightManager;
+
+	Time time;
 
 	float _mouseLastX, _mouseLastY;
 	bool _mouseLeftPress;
@@ -42,6 +45,7 @@ class Engine
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 	static void mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn);
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
 
 public:
 	void run();
