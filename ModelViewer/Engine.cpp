@@ -14,10 +14,6 @@
 #include "ParticleSystem.h"
 #include "Mouse.h"
 
-// settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
 
 void Engine::initWindow()
 {   // glfw: initialize and configure
@@ -30,7 +26,12 @@ void Engine::initWindow()
 
     // glfw window creation
     // --------------------
-    _window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    _window = glfwCreateWindow(
+        config.window.width, 
+        config.window.height, 
+        config.window.title.c_str(),
+        config.window.fullscreen ? glfwGetPrimaryMonitor() : NULL,
+        NULL);
     if (_window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -45,7 +46,6 @@ void Engine::initWindow()
     _mouse.onMove = [&](float dx, float dy) { _camera.move(dx, dy); };
     _mouse.onRotate = [&](float dx, float dy) { _camera.rotate(dx, dy); };
     _mouse.onZoom = [&](float dy) { _camera.zoom(dy); };
-
 
 
 }
@@ -94,11 +94,13 @@ void Engine::initUI()
 }
 
 void Engine::init(){
+    config.load();
+
     initWindow();
 	initOpenGL();    
 
 	_camera.init();
-	_camera.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
+	_camera.setWindowSize(config.window.width, config.window.height);
     _renderer.init();
 	_renderer.setCamera(&_camera);
 	_lightManager.init(&_camera);

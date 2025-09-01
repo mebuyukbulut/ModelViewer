@@ -12,6 +12,7 @@
 #include "LightManager.h"
 #include "Time.h"
 #include "Mouse.h"
+#include "Config.h"
 
 class Engine
 {
@@ -21,8 +22,9 @@ class Engine
 	Camera _camera;
 	UIManager _UI;
 	LightManager _lightManager;
-	Time time;
 	Mouse _mouse;
+	Time time;
+	Config config;
 
 	void initWindow();
 	void initOpenGL();
