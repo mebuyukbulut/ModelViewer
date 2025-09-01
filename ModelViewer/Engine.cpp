@@ -12,7 +12,7 @@
 #include <imgui_impl_opengl3.h>
 #include <ImGuizmo.h>
 #include "ParticleSystem.h"
-
+#include "Mouse.h"
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -40,9 +40,11 @@ void Engine::initWindow()
     glfwMakeContextCurrent(_window);
     glfwSetWindowUserPointer(_window, this);
     glfwSetFramebufferSizeCallback(_window, Engine::framebuffer_size_callback);
-    glfwSetMouseButtonCallback(_window, Engine::mouse_button_callback);
-    glfwSetCursorPosCallback(_window, Engine::mouse_cursor_callback);
-    glfwSetScrollCallback(_window, Engine::scroll_callback);
+
+    _mouse.init(_window, &_UI);
+    _mouse.onMove = [&](float dx, float dy) { _camera.move(dx, dy); };
+    _mouse.onRotate = [&](float dx, float dy) { _camera.rotate(dx, dy); };
+    _mouse.onZoom = [&](float dy) { _camera.zoom(dy); };
 
 
 
@@ -108,11 +110,6 @@ void Engine::init(){
 	_models.push_back(model);
 
 
-    _mouseLastX = 0; 
-    _mouseLastY = 0; 
-    _mouseLeftPress = false;
-    _mouseRightPress = false;
-    _firstMouse = true;
 
 	initUI();
 }
@@ -186,80 +183,6 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
         app->_camera.setWindowSize(width,height);
 		//app->_UI.setWindowSize(width, height);
 		//app->_camera.setAspectRatio(width, height);
-    }
-}
-
-void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
-    Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (!app) return;
-
-
-    //if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
-    
-	//std::cout << app->_UI.isHoverOnUI() << std::endl;
-
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !app->_UI.isHoverOnUI())
-        app->_mouseLeftPress = true;
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-        app->_mouseLeftPress = false;
-        app->_firstMouse = true;
-    }
-
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && !app->_UI.isHoverOnUI())
-        app->_mouseRightPress = true;
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
-        app->_mouseRightPress = false;
-        app->_firstMouse = true;
-    }
-
-}
-
-void Engine::mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
-
-
-    Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-	if (!app) return;
-    if (!(app->_mouseLeftPress || app->_mouseRightPress)) return;
-
-    if (ImGuizmo::IsUsing()) {
-        app->_mouseLeftPress = false;
-		app->_mouseRightPress = false;
-        app->_firstMouse = true;
-        return;
-    }
-
-
-    if (app->_firstMouse) {
-        app->_mouseLastX = xposIn;
-        app->_mouseLastY = yposIn;
-        app->_firstMouse = false;
-        return;
-    }
-
-    float xoffset = xposIn - app->_mouseLastX;
-    float yoffset = app->_mouseLastY - yposIn; // reversed since y-coordinates go from bottom to top
-
-    app->_mouseLastX = xposIn;
-    app->_mouseLastY = yposIn;
-
-    if (app->_mouseLeftPress) {        
-        xoffset = glm::radians(.4f) * xoffset;
-        yoffset = glm::radians(.4f) * yoffset;
-        //std::cout << xoffset << "\t" << yoffset << std::endl;
-        app->_camera.rotate(xoffset, yoffset);
-    }
-    else { //_mouseRightPress
-		app->_camera.move(static_cast<float>(xoffset) * 0.01f, static_cast<float>(yoffset) * 0.01f);
-    }
-}
-
-void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (app && !app->_UI.isHoverOnUI()) {
-        app->_camera.zoom(static_cast<float>(yoffset));
     }
 }
 

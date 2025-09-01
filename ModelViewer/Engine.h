@@ -11,26 +11,18 @@
 #include "UIManager.h"
 #include "LightManager.h"
 #include "Time.h"
-
-
-void processInput(GLFWwindow* window);
+#include "Mouse.h"
 
 class Engine
 {
 	GLFWwindow* _window;
 	Renderer _renderer;
-	//Model _model;
 	std::vector<Model> _models;
 	Camera _camera;
 	UIManager _UI;
 	LightManager _lightManager;
-
 	Time time;
-
-	float _mouseLastX, _mouseLastY;
-	bool _mouseLeftPress;
-	bool _mouseRightPress;
-	bool _firstMouse; 
+	Mouse _mouse;
 
 	void initWindow();
 	void initOpenGL();
@@ -42,9 +34,6 @@ class Engine
 	void processInput(GLFWwindow* window);
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-	static void mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn);
-	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 
 public:
