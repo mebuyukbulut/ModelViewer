@@ -5,10 +5,12 @@
 #include <algorithm>
 #include <glad/glad.h>
 #include "Camera.h"
+#include <glm/gtc/random.hpp>
 
 struct Particle {
     glm::vec3 position{ 0.0f, 0.0f, 0.0f };
     glm::vec3 velocity{ 0.0f, 0.0f, 0.0f };
+    glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
     float lifetime{ 0.0f };
     float age{ 0.0f };
     float isactive{ 1.0f };
@@ -22,10 +24,40 @@ struct Particle {
         if (age > lifetime) isactive = false;
     }
 };
-//struct EmitterInfo {
-//    int spawnRate; // particle per second
-//
-//};
+
+struct IEmitterShape {
+    virtual glm::vec3 samplePosition() = 0; 
+};
+struct PointShape : IEmitterShape {
+    glm::vec3 samplePosition() {
+        return glm::vec3();
+    }
+};
+
+struct SphereShape : IEmitterShape {
+    float radius{ 0.1f };
+    glm::vec3 samplePosition() {
+        return glm::sphericalRand(radius);
+    }
+};
+
+struct TorusShape : IEmitterShape {
+    float innerRadius{ 0.1f };
+    float radius{ 1.0f };
+
+    glm::vec3 samplePosition() {
+        glm::vec2 bigOne = glm::circularRand(radius);
+        glm::vec3 littleOne = glm::sphericalRand(innerRadius);//glm::diskRand(innerRadius);
+        glm::vec3 a{bigOne.x, 0, bigOne.y};
+        return a + littleOne;
+        //return glm::sphericalRand(radius);
+    }
+};
+
+struct EmitterInfo {
+    int spawnRate{}; // particle per second
+    IEmitterShape* shape{};
+};
 
 class ParticleSystem
 {
@@ -34,6 +66,41 @@ class ParticleSystem
     int _PCount{};
     Camera* _camera; 
     unsigned int _vao, _vbo;
+
+    EmitterInfo info{ 200, new TorusShape{} };
+
+    Particle emit() {
+        Particle newParticle;
+
+
+        newParticle.position = info.shape->samplePosition();
+        //newParticle.color
+
+
+
+
+
+
+        float rx = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
+        float ry = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
+        float rz = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
+        rx += 0.5;
+        //ry += 0.5;
+        rz -= 0.5;
+
+        rx *= 0.8;
+        ry *= .2; ry += 0.9;
+        rz *= 0.2;
+        float rlife = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
+        //newParticle.velocity.x = 0.5;//rx;
+        //newParticle.velocity.y = ry;
+        //newParticle.velocity.z = rz;
+
+
+        //newParticle.velocity.y = 0.1;
+        newParticle.lifetime = 3 * rlife + 3;
+        return newParticle;
+    }
 
 public:
     void init(Camera* camera){ 
@@ -64,14 +131,16 @@ public:
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, position));
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, velocity));
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, lifetime));
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, age));
-        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, isactive));
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, color));
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, lifetime));
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, age));
+        glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, isactive));
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
         glEnableVertexAttribArray(3);
         glEnableVertexAttribArray(4);
+        glEnableVertexAttribArray(5);
 
 
 
@@ -119,7 +188,7 @@ public:
         _particles.erase(it, _particles.end());
 
 
-        float spawnRate = 100; // 100 particle per second 
+        float spawnRate = info.spawnRate; // 100 particle per second 
         static float newParticleCount = 0;
         newParticleCount += spawnRate * deltaTime;
         //std::cout << "Dtime: " << deltaTime << std::endl;
@@ -133,25 +202,8 @@ public:
             for (int i{}; i < N; i++) {
                 if (_particles.size() + 1 >= _maxPCount)
                     break;
-                Particle newParticle;
-                //newParticle.position;
-                float rx = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-                float ry = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-                float rz = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-                rx += 0.5;
-                //ry += 0.5;
-                rz -= 0.5;
 
-                rx*= 0.8;
-                ry *= .2; ry += 0.9;
-                rz*= 0.2;
-                float rlife = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-                newParticle.velocity.x = 0.5;//rx;
-                newParticle.velocity.y = ry;
-                newParticle.velocity.z = rz;
-                //newParticle.velocity.y = 0.1;
-                newParticle.lifetime = 3 * rlife+3;
-                _particles.push_back(newParticle);
+                _particles.push_back(emit());
             }
             //std::cout << "psize: " << _particles.size() << std::endl; 
         }

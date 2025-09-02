@@ -150,7 +150,7 @@ void Engine::mainLoop()
         ps.update(deltaTime);
         ps.draw();
 
-
+        
         //material.use(&_renderer.getShader());
         //for(Model& model : _models) {
         //    _renderer.drawModel(model);
