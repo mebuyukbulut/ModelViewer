@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
+#include "EventDispatcher.h"
+
 
 Mouse* Mouse::_this = nullptr; 
 UIManager* Mouse::_UI = nullptr;
@@ -19,10 +21,6 @@ void Mouse::init(GLFWwindow* window, UIManager* UI)
 
 void Mouse::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    //std::cout << _this << std::endl; 
-    //if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
-    //std::cout << _engine->_UI.isHoverOnUI() << std::endl;
-
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !_UI->isHoverOnUI())
         _this->_mouseLeftPress = true;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
@@ -40,8 +38,6 @@ void Mouse::mouse_button_callback(GLFWwindow* window, int button, int action, in
 }
 void Mouse::mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    //Engine* _engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    //if (!_engine) return;
     if (!(_this->_mouseLeftPress || _this->_mouseRightPress)) return;
 
     if (ImGuizmo::IsUsing()) {
@@ -66,16 +62,23 @@ void Mouse::mouse_cursor_callback(GLFWwindow* window, double xposIn, double ypos
     _this->_mouseLastY = yposIn;
 
     if (_this->_mouseLeftPress) {
-        xoffset = glm::radians(.4f) * xoffset;
-        yoffset = glm::radians(.4f) * yoffset;
-        //std::cout << xoffset << "\t" << yoffset << std::endl;
-        _this->onRotate(xoffset, yoffset);
+        xoffset = glm::radians(_this->_rotSens) * xoffset;
+        yoffset = glm::radians(_this->_rotSens) * yoffset;
+        glm::vec3 vec(xoffset, yoffset, 0);
+
+        Event e{ EventType::onRotate, EventData{glm::vec3(xoffset,yoffset,0)}};
+        dispatcher.dispatch(e);
     }
     else { //_mouseRightPress
-        _this->onMove(xoffset * 0.01f, yoffset * 0.01f);
+        glm::vec3 vec(xoffset * _this->_moveSens, yoffset * _this->_moveSens, 0);
+        Event e{ EventType::onMove, EventData{vec} };
+        dispatcher.dispatch(e);
     }
 }
 void Mouse::scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
-    if (!_UI->isHoverOnUI())
-        _this->onZoom(yoffset);
+    if (!_UI->isHoverOnUI()) {
+        glm::vec3 vec(0, yoffset, 0);
+        Event e{ EventType::onZoom, EventData{vec} };
+        dispatcher.dispatch(e);
+    }
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 
 struct GLFWwindow;
 class UIManager;
@@ -15,6 +14,9 @@ class Mouse
 	bool _mouseRightPress = false;
 	bool _firstMouse = true;
 
+	float _rotSens = .4f; // rotation sensitivity
+	float _moveSens = 0.01f; // move sensitivity
+
 public:
 	void init(GLFWwindow* window, UIManager* UI);
 
@@ -22,9 +24,5 @@ public:
 	static void mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn);
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-
-	std::function<void(float dx, float dy)> onMove;
-	std::function<void(float dx, float dy)> onRotate;
-	std::function<void(float dy)> onZoom;
 };
 

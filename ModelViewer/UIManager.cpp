@@ -11,6 +11,8 @@
 #include "Material.h"
 #include <iostream>
 
+#include "EventDispatcher.h"
+
 void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* camera) {
 	_window = window;
 	_lightManager = lightManager;
@@ -69,8 +71,16 @@ void UIManager::mainMenu(){
     // Main menu bar
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Exit")) { onEngineExit(); }
-            if (ImGui::MenuItem("Open", "Ctrl+O")) { onOpenModel(FileUtils::openFileDialog()); }
+            if (ImGui::MenuItem("Exit")) { 
+                Event e{ EventType::EngineExit, EventData{} };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Open", "Ctrl+O")) {
+                EventData ed{};
+                ed.text = FileUtils::openFileDialog();
+                Event e{ EventType::ModelOpened, ed };
+                dispatcher.dispatch(e);
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("View")) {
@@ -90,7 +100,10 @@ void UIManager::shaderPanel()
 
     if (ImGui::Begin("Shader Controls")) {
         if (ImGui::Combo("Shader", &currentItem, items, IM_ARRAYSIZE(items))) {
-            onShaderSelected(items[currentItem]);
+            EventData ed{};
+            ed.text = items[currentItem];
+            Event e{ EventType::ShaderSelected, ed };
+            dispatcher.dispatch(e);
         }
     }
     ImGui::End();

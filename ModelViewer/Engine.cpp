@@ -14,6 +14,8 @@
 #include "ParticleSystem.h"
 #include "Mouse.h"
 
+#include "EventDispatcher.h"
+
 
 void Engine::initWindow()
 {   // glfw: initialize and configure
@@ -42,12 +44,17 @@ void Engine::initWindow()
     glfwSetWindowUserPointer(_window, this);
     glfwSetFramebufferSizeCallback(_window, Engine::framebuffer_size_callback);
 
+
     _mouse.init(_window, &_UI);
-    _mouse.onMove = [&](float dx, float dy) { _camera.move(dx, dy); };
-    _mouse.onRotate = [&](float dx, float dy) { _camera.rotate(dx, dy); };
-    _mouse.onZoom = [&](float dy) { _camera.zoom(dy); };
-
-
+    dispatcher.subscribe(EventType::onMove, [&](const Event& e) {
+        _camera.move(e.data.vec.x, e.data.vec.y); 
+        });
+    dispatcher.subscribe(EventType::onRotate, [&](const Event& e) {
+        _camera.rotate(e.data.vec.x, e.data.vec.y); 
+        });
+    dispatcher.subscribe(EventType::onZoom, [&](const Event& e) {
+        _camera.zoom(e.data.vec.y); 
+        });
 }
 
 void Engine::initOpenGL()
@@ -67,13 +74,17 @@ void Engine::initUI()
     _UI.init(_window, &_lightManager, &_camera);
 	//_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
 
-    _UI.onShaderSelected = ([&](std::string shaderName) {
-        _renderer.setShader(shaderName);
+    dispatcher.subscribe(EventType::ShaderSelected, [&](const Event& e) {
+        _renderer.setShader(e.data.text);
         });
-    _UI.onEngineExit = [&]() {
+
+    dispatcher.subscribe(EventType::EngineExit, [&](const Event& e) {
         glfwSetWindowShouldClose(_window, true);
-        };
-    _UI.onOpenModel = [&](std::string modelPath) {
+        });
+
+    dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
+        std::string modelPath = e.data.text;
+
         if (modelPath.empty())
             return;
 
@@ -90,7 +101,8 @@ void Engine::initUI()
         else {
             std::cout << "Failed to load model: " << modelPath << std::endl;
         }
-        };
+        });
+
 }
 
 void Engine::init(){
