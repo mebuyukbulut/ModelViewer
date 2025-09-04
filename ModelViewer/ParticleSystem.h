@@ -6,6 +6,10 @@
 #include <glad/glad.h>
 #include "Camera.h"
 #include <glm/gtc/random.hpp>
+#include <glm/gtc/noise.hpp>
+#include <noise/noise.h>
+
+#include <memory>
 
 struct Particle {
     glm::vec3 position{ 0.0f, 0.0f, 0.0f };
@@ -15,14 +19,8 @@ struct Particle {
     float age{ 0.0f };
     float isactive{ 1.0f };
 
-    void update(float deltaTime) {
-        age += deltaTime;
-        position = position + velocity * deltaTime;
-        //gravity
-        velocity.y -= deltaTime;// *0.1;
-        //std::cout << position.x << std::endl; 
-        if (age > lifetime) isactive = false;
-    }
+    void init() {};
+    void update(float deltaTime, float elapsedTime); 
 };
 
 struct IEmitterShape {
@@ -33,14 +31,12 @@ struct PointShape : IEmitterShape {
         return glm::vec3();
     }
 };
-
 struct SphereShape : IEmitterShape {
     float radius{ 0.1f };
     glm::vec3 samplePosition() {
         return glm::sphericalRand(radius);
     }
 };
-
 struct TorusShape : IEmitterShape {
     float innerRadius{ 0.1f };
     float radius{ 1.0f };
@@ -54,9 +50,47 @@ struct TorusShape : IEmitterShape {
     }
 };
 
+struct IForce {
+    virtual glm::vec3 apply(Particle& p, float dt) = 0;
+};
+
+struct GravityForce : public IForce {
+    glm::vec3 apply(Particle& p, float dt) {
+        return glm::vec3(0.0f, -9.8f, 0.0f);
+    }
+};
+struct WindForce : public IForce {
+    glm::vec3 direction{ 0.0f,0.0f,0.0f };
+    glm::vec3 apply(Particle& p, float dt) {
+        return direction;
+    }
+};
+struct NoiseForce : public IForce {
+    float strength{};
+    glm::vec3 apply(Particle& p, float dt) {
+        glm::vec3 f{};
+        f += glm::sphericalRand(strength) ;
+        //f *= /*glm::perlin(glm::vec3{ p.age }) **/ strength;
+        return f;
+    }
+};
+struct DragForce : public IForce {
+    float strength{1};
+    glm::vec3 apply(Particle& p, float dt) {
+        return p.velocity * -strength;
+    }
+};
+struct QuadraticDragForce : public IForce {
+    float strength{5};
+    glm::vec3 apply(Particle& p, float dt) {
+        return p.velocity * glm::length(p.velocity) * - strength;
+    }
+};
+
+
 struct EmitterInfo {
     int spawnRate{}; // particle per second
-    IEmitterShape* shape{};
+    std::unique_ptr<IEmitterShape> shape;
 };
 
 class ParticleSystem
@@ -67,7 +101,7 @@ class ParticleSystem
     Camera* _camera; 
     unsigned int _vao, _vbo;
 
-    EmitterInfo info{ 200, new TorusShape{} };
+    EmitterInfo info{ 100, std::make_unique<PointShape>()};
 
     Particle emit() {
         Particle newParticle;
@@ -81,24 +115,25 @@ class ParticleSystem
 
 
 
-        float rx = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-        float ry = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-        float rz = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-        rx += 0.5;
-        //ry += 0.5;
-        rz -= 0.5;
+        //float rx = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
+        //float ry = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
+        //float rz = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
+        //rx += 0.5;
+        ////ry += 0.5;
+        //rz -= 0.5;
 
-        rx *= 0.8;
-        ry *= .2; ry += 0.9;
-        rz *= 0.2;
+        //rx *= 0.8;
+        //ry *= .2; ry += 0.9;
+        //rz *= 0.2;
+        ////newParticle.velocity.x = 0.5;//rx;
+        ////newParticle.velocity.y = ry;
+        ////newParticle.velocity.z = rz;
+
+
         float rlife = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-        //newParticle.velocity.x = 0.5;//rx;
-        //newParticle.velocity.y = ry;
-        //newParticle.velocity.z = rz;
-
-
         //newParticle.velocity.y = 0.1;
-        newParticle.lifetime = 3 * rlife + 3;
+        //newParticle.lifetime = 3 * rlife + 3;
+        newParticle.lifetime = 20;
         return newParticle;
     }
 
@@ -167,10 +202,11 @@ public:
     }
 
     void update(double deltaTime) {
-
+        static float elapsedTime = 0;
+        elapsedTime += deltaTime;
         for (Particle& p : _particles) {
             if(p.isactive)
-                p.update(deltaTime);
+                p.update(deltaTime, elapsedTime);
         }
         //for (int i{}; i < _particles.size();) {
         //    if (_particles[i].isactive)
