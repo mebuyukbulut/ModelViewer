@@ -1,4 +1,4 @@
-#include "UIManager.h"
+﻿#include "UIManager.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -22,8 +22,27 @@ void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* cam
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
+
+    ImGuiIO& io = ImGui::GetIO();
+    // Türkçe karakter aralığını ekleyelim
+    static const ImWchar ranges[] = {
+        0x0020, 0x00FF, // Latin + Latin Supplement
+        0x0100, 0x017F, // Latin Extended-A (Türkçe karakterler burada)
+        0
+    };
+    //// Yeni font yükleme (örnek: Roboto)
+    //io.Fonts->AddFontFromFileTTF("fonts/Roboto-VariableFont_wdth,wght.ttf", 16.0f, NULL, ranges);
+
+    // Eğer default fontu da korumak istersen:
+    io.FontDefault = io.Fonts->AddFontFromFileTTF("fonts/Roboto-VariableFont_wdth,wght.ttf", 16.0f, NULL, ranges);
+
+
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 410");
+
+    
+    // Son olarak font atlasını yeniden yükle
+    ImGui_ImplOpenGL3_CreateFontsTexture();
 }
 
 void UIManager::terminate() {
@@ -42,8 +61,8 @@ void UIManager::draw(Material* material) {
     _lightManager->drawGizmo();
     material->drawUI();
 
+    ImGui::ShowDemoWindow();
 	endFrame();
-
 
 
 
