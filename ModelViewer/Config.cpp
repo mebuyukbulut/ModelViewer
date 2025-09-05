@@ -12,6 +12,12 @@ void Config::load(std::string path)
 	window.title = config["Window.title"].as<std::string>();
 	window.fullscreen = config["Window.fullscreen"].as<bool>();
 
+
+	ui.isCreditsPanelOpen  = config["UI.isCreditsPanelOpen"].as<bool>();
+	ui.isLightPanelOpen    = config["UI.isLightPanelOpen"].as<bool>();
+	ui.isMaterialPanelOpen = config["UI.isMaterialPanelOpen"].as<bool>();
+	ui.isShaderPanelOpen   = config["UI.isShaderPanelOpen"].as<bool>();
+
 }
 
 void Config::save(std::string path)
@@ -22,7 +28,12 @@ void Config::save(std::string path)
 	config["Window.height"] = window.height;
 	config["Window.title"] = window.title;
 	config["Window.fullscreen"] = window.fullscreen;
-	 
+
+	config["UI.isCreditsPanelOpen"] = ui.isCreditsPanelOpen;
+	config["UI.isLightPanelOpen"] = ui.isLightPanelOpen;
+	config["UI.isMaterialPanelOpen"] = ui.isMaterialPanelOpen;
+	config["UI.isShaderPanelOpen"] = ui.isShaderPanelOpen;
+
 	std::ofstream fout(path);
 	fout << config;
 }

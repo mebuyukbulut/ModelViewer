@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "EventDispatcher.h"
+#include "Config.h"
 
 void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* camera) {
 	_window = window;
@@ -39,10 +40,17 @@ void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* cam
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 410");
-
-    
+        
     // Son olarak font atlasını yeniden yükle
     ImGui_ImplOpenGL3_CreateFontsTexture();
+
+
+    // load config 
+    isCreditsPanelOpen = config.ui.isCreditsPanelOpen;
+    isLightPanelOpen = config.ui.isLightPanelOpen;
+    isMaterialPanelOpen = config.ui.isMaterialPanelOpen;
+    isShaderPanelOpen = config.ui.isShaderPanelOpen;
+
 }
 
 void UIManager::terminate() {
@@ -57,11 +65,13 @@ void UIManager::draw(Material* material) {
 	mainMenu();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
-	_lightManager->drawUI();
-    _lightManager->drawGizmo();
-    material->drawUI();
+    if (isLightPanelOpen) {
+	    _lightManager->drawUI();
+        _lightManager->drawGizmo();
+    }
+    if(isMaterialPanelOpen) material->drawUI();
 
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
 	endFrame();
 
 
@@ -103,8 +113,22 @@ void UIManager::mainMenu(){
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("View")) {
-            ImGui::MenuItem("Shader Panel", nullptr, &isShaderPanelOpen);
-            ImGui::MenuItem("Credits Panel", nullptr, &isCreditsPanelOpen);
+            if (ImGui::MenuItem("Shader Panel", nullptr, &isShaderPanelOpen)) {
+                config.ui.isShaderPanelOpen = isShaderPanelOpen;
+                config.save();
+            }
+            if(ImGui::MenuItem("Credits Panel", nullptr, &isCreditsPanelOpen)) {
+                config.ui.isCreditsPanelOpen = isCreditsPanelOpen;
+                config.save();
+            }
+            if(ImGui::MenuItem("Light Panel", nullptr, &isLightPanelOpen)) {
+                config.ui.isLightPanelOpen = isLightPanelOpen;
+                config.save();
+            }
+            if(ImGui::MenuItem("Material Panel", nullptr, &isMaterialPanelOpen)) {
+                config.ui.isMaterialPanelOpen = isMaterialPanelOpen;
+                config.save();
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

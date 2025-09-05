@@ -31,6 +31,8 @@ private:
 
 	bool isShaderPanelOpen = false;
 	bool isCreditsPanelOpen = false;
+	bool isLightPanelOpen = false; 
+	bool isMaterialPanelOpen = false; 
 
 	void mainMenu();
 	void shaderPanel();

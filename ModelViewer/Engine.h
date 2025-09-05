@@ -24,7 +24,7 @@ class Engine
 	LightManager _lightManager;
 	Mouse _mouse;
 	Time time;
-	Config config;
+	//Config config;
 
 	void initWindow();
 	void initOpenGL();
