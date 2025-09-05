@@ -132,6 +132,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EventDispatcher.cpp" />
     <ClCompile Include="FileUtils.cpp" />
+    <ClCompile Include="Gradient.cpp" />
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EventDispatcher.h" />
     <ClInclude Include="FileUtils.h" />
+    <ClInclude Include="Gradient.h" />
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />

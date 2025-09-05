@@ -53,7 +53,6 @@ struct TorusShape : IEmitterShape {
 struct IForce {
     virtual glm::vec3 apply(Particle& p, float dt) = 0;
 };
-
 struct GravityForce : public IForce {
     glm::vec3 apply(Particle& p, float dt) {
         return glm::vec3(0.0f, -9.8f, 0.0f);
