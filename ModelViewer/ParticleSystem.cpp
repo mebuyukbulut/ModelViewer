@@ -16,7 +16,7 @@ glm::vec3 bezier(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, con
 
 void Particle::update(float deltaTime, float elapsedTime) {
     age += deltaTime;
-    
+    float normalizedAge = age / lifetime;
     //float mass = 1;
     //glm::vec3 totalForce{};
     //glm::vec3 acceleration{};
@@ -67,9 +67,11 @@ void Particle::update(float deltaTime, float elapsedTime) {
     //position.y = glm::perlin(glm::vec3((a + elapsedTime) * 2, 0, 0));
     //position.x = a;
 
-    color.r = position.y + 0.5;
-    color.g = 0;
-    color.b = 1 - position.y - 0.2;
+    color = _colorFunction->evaluate(normalizedAge);
+
+    //color.r = position.y + 0.5;
+    //color.g = 0;
+    //color.b = 1 - position.y - 0.2;
 
 
     //// perlin

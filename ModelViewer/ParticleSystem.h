@@ -10,6 +10,8 @@
 #include <noise/noise.h>
 
 #include <memory>
+#include "IColorProvider.h"
+
 
 struct Particle {
     glm::vec3 position{ 0.0f, 0.0f, 0.0f };
@@ -19,7 +21,12 @@ struct Particle {
     float age{ 0.0f };
     float isactive{ 1.0f };
 
-    void init() {};
+    std::shared_ptr<IColorProvider> _colorFunction;
+
+
+    void init(std::shared_ptr<IColorProvider> colorFunction){
+        _colorFunction = colorFunction;
+    }
     void update(float deltaTime, float elapsedTime); 
 };
 
@@ -87,6 +94,7 @@ struct QuadraticDragForce : public IForce {
 };
 
 
+
 struct EmitterInfo {
     int spawnRate{}; // particle per second
     std::unique_ptr<IEmitterShape> shape;
@@ -107,26 +115,16 @@ class ParticleSystem
 
 
         newParticle.position = info.shape->samplePosition();
-        //newParticle.color
+        GradientProvider gp; 
+        gp.addStop(GradientProviderStop{ 0,     glm::vec4(0,1,0,1) });
+        gp.addStop(GradientProviderStop{ 0.25,  glm::vec4(1,0,1,1) });
+        gp.addStop(GradientProviderStop{ 0.75,  glm::vec4(0,1,1,1) });
+        gp.addStop(GradientProviderStop{ 1,     glm::vec4(1,1,0,1) });
 
-
-
-
-
-
-        //float rx = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-        //float ry = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-        //float rz = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
-        //rx += 0.5;
-        ////ry += 0.5;
-        //rz -= 0.5;
-
-        //rx *= 0.8;
-        //ry *= .2; ry += 0.9;
-        //rz *= 0.2;
-        ////newParticle.velocity.x = 0.5;//rx;
-        ////newParticle.velocity.y = ry;
-        ////newParticle.velocity.z = rz;
+        std::shared_ptr<IColorProvider> cp;
+        //cp.reset(new GradientProvider());
+        cp = std::make_shared<GradientProvider>(gp);
+        newParticle.init(cp);
 
 
         float rlife = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
