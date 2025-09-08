@@ -108,7 +108,7 @@ class ParticleSystem
     Camera* _camera; 
     unsigned int _vao, _vbo;
 
-    EmitterInfo info{ 100, std::make_unique<PointShape>()};
+    EmitterInfo info{ 100, std::make_unique<TorusShape>()};
 
     Particle emit() {
         Particle newParticle;

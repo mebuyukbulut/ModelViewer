@@ -17,35 +17,36 @@ glm::vec3 bezier(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, con
 void Particle::update(float deltaTime, float elapsedTime) {
     age += deltaTime;
     float normalizedAge = age / lifetime;
-    //float mass = 1;
-    //glm::vec3 totalForce{};
-    //glm::vec3 acceleration{};
-    //std::vector<std::unique_ptr<IForce>> forces;
-    //WindForce wf{};
-    //GravityForce gf{};
-    //NoiseForce nf{};
 
-    //wf.direction = glm::vec3(1.0f, 0.0f, 0.0f);
-    //nf.strength = 3;
+    float mass = 1;
+    glm::vec3 totalForce{};
+    glm::vec3 acceleration{};
+    std::vector<std::unique_ptr<IForce>> forces;
+    WindForce wf{};
+    GravityForce gf{};
+    NoiseForce nf{};
 
-    ////forces.push_back(std::make_unique<WindForce>(wf));
-    //forces.push_back(std::make_unique<NoiseForce>(nf));
+    wf.direction = glm::vec3(1.0f, 0.0f, 0.0f);
+    nf.strength = 3;
+
+    forces.push_back(std::make_unique<WindForce>(wf));
+    forces.push_back(std::make_unique<NoiseForce>(nf));
     //forces.push_back(std::make_unique<GravityForce>(gf));
-    //forces.push_back(std::make_unique<QuadraticDragForce>());
-    //
-    //for (auto& f : forces)
-    //    totalForce += f->apply(*this, deltaTime);
+    forces.push_back(std::make_unique<QuadraticDragForce>());
+    
+    for (auto& f : forces)
+        totalForce += f->apply(*this, deltaTime);
 
-    //acceleration = totalForce / mass; 
-    //velocity += acceleration * deltaTime;
-    //position += velocity * deltaTime;
+    acceleration = totalForce / mass; 
+    velocity += acceleration * deltaTime;
+    position += velocity * deltaTime;
 
-    glm::vec3 a{ 0.0f, 0.0f, 0.0f };
-    glm::vec3 b{ 5.0f, 0.0f, 0.0f };
-    glm::vec3 c{ -5.0f, 0.0f, 10.0f };
-    glm::vec3 d{ 0.0f, 0.0f, 10.0f };
-    float t = age / lifetime;
-    position = bezier(a, b, c, d, t);
+    ///glm::vec3 a{ 0.0f, 0.0f, 0.0f };
+    ///glm::vec3 b{ 5.0f, 0.0f, 0.0f };
+    ///glm::vec3 c{ -5.0f, 0.0f, 10.0f };
+    ///glm::vec3 d{ 0.0f, 0.0f, 10.0f };
+    ///float t = age / lifetime;
+    ///position = bezier(a, b, c, d, t);
 
 
 

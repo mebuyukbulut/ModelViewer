@@ -13,7 +13,7 @@ struct GradientProviderStop {
 	float positon; // [0,1]
 	glm::vec4 rgba;
 };
-
+// TO-DO: https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline
 class GradientProvider : public IColorProvider
 {
 	std::vector<GradientProviderStop> _stops;
@@ -47,3 +47,19 @@ public:
 	}
 };
 
+class ConstantColorProvider {
+public:
+	glm::vec4 rgba;
+	glm::vec4 evaluate(float t) const {
+		return rgba;
+	}
+};
+
+class ColorOverLifeProvider {
+public:
+	glm::vec4 start;
+	glm::vec4 end;
+	glm::vec4 evaluate(float t) const {
+		return glm::mix(start, end, t);
+	}
+};
