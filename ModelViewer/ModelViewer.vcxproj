@@ -129,10 +129,12 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="EmitterShape.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EventDispatcher.cpp" />
     <ClCompile Include="FileUtils.cpp" />
-    <ClCompile Include="IColorProvider.cpp" />
+    <ClCompile Include="ColorProvider.cpp" />
+    <ClCompile Include="Force.cpp" />
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -149,10 +151,12 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="EmitterShape.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EventDispatcher.h" />
     <ClInclude Include="FileUtils.h" />
-    <ClInclude Include="IColorProvider.h" />
+    <ClInclude Include="ColorProvider.h" />
+    <ClInclude Include="Force.h" />
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />

@@ -10,8 +10,9 @@
 #include <noise/noise.h>
 
 #include <memory>
-#include "IColorProvider.h"
-
+#include "ColorProvider.h"
+#include "Force.h"
+#include "EmitterShape.h"
 
 struct Particle {
     glm::vec3 position{ 0.0f, 0.0f, 0.0f };
@@ -29,70 +30,6 @@ struct Particle {
     }
     void update(float deltaTime, float elapsedTime); 
 };
-
-struct IEmitterShape {
-    virtual glm::vec3 samplePosition() = 0; 
-};
-struct PointShape : IEmitterShape {
-    glm::vec3 samplePosition() {
-        return glm::vec3();
-    }
-};
-struct SphereShape : IEmitterShape {
-    float radius{ 0.1f };
-    glm::vec3 samplePosition() {
-        return glm::sphericalRand(radius);
-    }
-};
-struct TorusShape : IEmitterShape {
-    float innerRadius{ 0.1f };
-    float radius{ 1.0f };
-
-    glm::vec3 samplePosition() {
-        glm::vec2 bigOne = glm::circularRand(radius);
-        glm::vec3 littleOne = glm::sphericalRand(innerRadius);//glm::diskRand(innerRadius);
-        glm::vec3 a{bigOne.x, 0, bigOne.y};
-        return a + littleOne;
-        //return glm::sphericalRand(radius);
-    }
-};
-
-struct IForce {
-    virtual glm::vec3 apply(Particle& p, float dt) = 0;
-};
-struct GravityForce : public IForce {
-    glm::vec3 apply(Particle& p, float dt) {
-        return glm::vec3(0.0f, -9.8f, 0.0f);
-    }
-};
-struct WindForce : public IForce {
-    glm::vec3 direction{ 0.0f,0.0f,0.0f };
-    glm::vec3 apply(Particle& p, float dt) {
-        return direction;
-    }
-};
-struct NoiseForce : public IForce {
-    float strength{};
-    glm::vec3 apply(Particle& p, float dt) {
-        glm::vec3 f{};
-        f += glm::sphericalRand(strength) ;
-        //f *= /*glm::perlin(glm::vec3{ p.age }) **/ strength;
-        return f;
-    }
-};
-struct DragForce : public IForce {
-    float strength{1};
-    glm::vec3 apply(Particle& p, float dt) {
-        return p.velocity * -strength;
-    }
-};
-struct QuadraticDragForce : public IForce {
-    float strength{5};
-    glm::vec3 apply(Particle& p, float dt) {
-        return p.velocity * glm::length(p.velocity) * - strength;
-    }
-};
-
 
 
 struct EmitterInfo {
