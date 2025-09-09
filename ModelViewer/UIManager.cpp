@@ -14,6 +14,8 @@
 #include "EventDispatcher.h"
 #include "Config.h"
 
+#include "ParticleSystem.h"
+
 void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* camera) {
 	_window = window;
 	_lightManager = lightManager;
@@ -63,6 +65,7 @@ void UIManager::terminate() {
 void UIManager::draw(Material* material) {
 	beginFrame();
 	mainMenu();
+    ps->drawUI();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
     if (isLightPanelOpen) {

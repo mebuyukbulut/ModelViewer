@@ -13,6 +13,7 @@
 #include "Time.h"
 #include "Mouse.h"
 #include "Config.h"
+#include "ParticleSystem.h"
 
 class Engine
 {
@@ -25,6 +26,7 @@ class Engine
 	Mouse _mouse;
 	Time time;
 	//Config config;
+	ParticleSystem ps; 
 
 	void initWindow();
 	void initOpenGL();

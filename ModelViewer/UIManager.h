@@ -25,6 +25,8 @@ public:
 
 	bool isHoverOnUI();
 
+	class ParticleSystem* ps;
+
 private: 
 	void beginFrame();
 	void endFrame(); 
@@ -37,6 +39,7 @@ private:
 	void mainMenu();
 	void shaderPanel();
 	void creditsPanel();
+
 
 };
 

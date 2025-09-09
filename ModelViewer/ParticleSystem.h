@@ -1,19 +1,18 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glad/glad.h>
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <glad/glad.h>
-#include "Camera.h"
-#include <glm/gtc/random.hpp>
-#include <glm/gtc/noise.hpp>
-#include <noise/noise.h>
-
 #include <memory>
+
+#include "Inspectable.h"
+#include "Camera.h"
 #include "ColorProvider.h"
 #include "Force.h"
 #include "EmitterShape.h"
-
+ 
 struct Particle {
     glm::vec3 position{ 0.0f, 0.0f, 0.0f };
     glm::vec3 velocity{ 0.0f, 0.0f, 0.0f };
@@ -32,12 +31,17 @@ struct Particle {
 };
 
 
-struct EmitterInfo {
+struct EmitterInfo : public IInspectable{
     int spawnRate{}; // particle per second
     std::unique_ptr<IEmitterShape> shape;
+
+    EmitterInfo() : spawnRate{ 100 }, shape{new PointShape} {}
+    EmitterInfo(int spawnRate, std::unique_ptr<IEmitterShape> shape) 
+        : spawnRate{ spawnRate }, shape{ std::move(shape) } {}
+    void drawUI();
 };
 
-class ParticleSystem
+class ParticleSystem : public IInspectable
 {
     std::vector<Particle> _particles{};
     int _maxPCount;
@@ -179,5 +183,7 @@ public:
         }
 
     }
+
+    void drawUI();
 };
 

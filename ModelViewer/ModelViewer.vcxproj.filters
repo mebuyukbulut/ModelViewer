@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Particle System">
+      <UniqueIdentifier>{1fa69d29-f5da-4d41-bc21-c96c1bd334f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Particle System">
+      <UniqueIdentifier>{7582991d-43b5-4681-a086-961e92143a1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -51,9 +57,6 @@
     <ClCompile Include="Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -66,13 +69,19 @@
     <ClCompile Include="EventDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ColorProvider.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="EmitterShape.cpp">
+      <Filter>Source Files\Particle System</Filter>
     </ClCompile>
     <ClCompile Include="Force.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Particle System</Filter>
     </ClCompile>
-    <ClCompile Include="EmitterShape.cpp">
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files\Particle System</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorProvider.cpp">
+      <Filter>Source Files\Particle System</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspectable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -110,9 +119,6 @@
     <ClInclude Include="Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -125,13 +131,19 @@
     <ClInclude Include="EventDispatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EmitterShape.h">
+      <Filter>Header Files\Particle System</Filter>
+    </ClInclude>
     <ClInclude Include="ColorProvider.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Particle System</Filter>
     </ClInclude>
     <ClInclude Include="Force.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Particle System</Filter>
     </ClInclude>
-    <ClInclude Include="EmitterShape.h">
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files\Particle System</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspectable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

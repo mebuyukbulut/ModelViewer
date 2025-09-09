@@ -11,7 +11,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <ImGuizmo.h>
-#include "ParticleSystem.h"
 #include "Mouse.h"
 
 #include "EventDispatcher.h"
@@ -77,11 +76,9 @@ void Engine::initUI()
     dispatcher.subscribe(EventType::ShaderSelected, [&](const Event& e) {
         _renderer.setShader(e.data.text);
         });
-
     dispatcher.subscribe(EventType::EngineExit, [&](const Event& e) {
         glfwSetWindowShouldClose(_window, true);
         });
-
     dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
         std::string modelPath = e.data.text;
 
@@ -103,6 +100,7 @@ void Engine::initUI()
         }
         });
 
+    _UI.ps = &ps;
 }
 
 void Engine::init(){
@@ -133,7 +131,7 @@ void Engine::mainLoop()
 
 
     _renderer.setShader("particle0");
-    ParticleSystem ps;
+    //ParticleSystem ps;
     ps.init(&_camera);
     
     time.init();

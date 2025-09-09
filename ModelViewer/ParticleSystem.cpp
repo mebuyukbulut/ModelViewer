@@ -1,5 +1,9 @@
 #include "ParticleSystem.h"
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 glm::vec3 lerp(const glm::vec3& x, const glm::vec3& y, float t) {
     return x * (1.f - t) + y * t;
 }
@@ -94,4 +98,42 @@ void Particle::update(float deltaTime, float elapsedTime) {
 
     //std::cout << position.x << std::endl; 
     if (age > lifetime) isactive = false;
+}
+
+
+void EmitterInfo::drawUI() {
+    ImGui::Text("Emitter Info");
+    ImGui::DragInt("spawn rate: ", &spawnRate, 1, 0, 300);
+
+    static const char* items[]{ "Point","Sphere","Torus" }; // box
+    static int Selecteditem = 0;
+    bool check = ImGui::Combo("Emitter Shape", &Selecteditem, items, IM_ARRAYSIZE(items));
+    if (check)
+    {
+        switch (Selecteditem)
+        {
+        case 0:
+            shape.reset(new PointShape);
+            break;
+        case 1:
+            shape.reset(new SphereShape);
+            break;
+        case 2:
+            shape.reset(new TorusShape);
+            break;
+        default:
+            std::cout << "Error: line 122 ParticleSystem.cpp" << std::endl;
+            break;
+        }
+    }
+    // info.drawUI emitter shape
+}
+void ParticleSystem::drawUI() {
+    ImGui::Begin("Particle System");
+
+    ImGui::Text("particle system");
+
+
+    info.drawUI();
+    ImGui::End();
 }
