@@ -49,7 +49,7 @@ class ParticleSystem : public IInspectable
     Camera* _camera; 
     unsigned int _vao, _vbo;
 
-    EmitterInfo info{ 100, std::make_unique<TorusShape>()};
+    EmitterInfo info{ 100, std::make_unique<PointShape>()};
 
     Particle emit() {
         Particle newParticle;

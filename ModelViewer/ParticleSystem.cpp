@@ -102,7 +102,7 @@ void Particle::update(float deltaTime, float elapsedTime) {
 
 
 void EmitterInfo::drawUI() {
-    ImGui::Text("Emitter Info");
+    ImGui::SeparatorText("Emitter Info");
     ImGui::DragInt("spawn rate: ", &spawnRate, 1, 0, 300);
 
     static const char* items[]{ "Point","Sphere","Torus" }; // box
@@ -126,14 +126,13 @@ void EmitterInfo::drawUI() {
             break;
         }
     }
-    // info.drawUI emitter shape
+    shape->drawUI();
 }
 void ParticleSystem::drawUI() {
     ImGui::Begin("Particle System");
 
-    ImGui::Text("particle system");
-
-
+    //ImGui::SeparatorText("Particle System");
     info.drawUI();
+
     ImGui::End();
 }
