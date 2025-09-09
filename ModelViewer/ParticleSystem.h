@@ -13,6 +13,24 @@
 #include "Force.h"
 #include "EmitterShape.h"
  
+// Use Info for configuration
+// Use Context for runtime
+
+struct ParticleUpdateContext : IInspectable {
+    float deltaTime{};
+    float elapsedTime{};
+    std::vector<std::unique_ptr<IForce>> forces{};
+    std::unique_ptr<IColorProvider> colorProvider{new ConstantColorProvider()};
+
+    // Inherited via IInspectable
+    void drawUI() override;
+
+private:
+    void addForce();
+    //void setColorProvider();
+    // drawUI
+};
+
 struct Particle {
     glm::vec3 position{ 0.0f, 0.0f, 0.0f };
     glm::vec3 velocity{ 0.0f, 0.0f, 0.0f };
@@ -21,13 +39,7 @@ struct Particle {
     float age{ 0.0f };
     float isactive{ 1.0f };
 
-    std::shared_ptr<IColorProvider> _colorFunction;
-
-
-    void init(std::shared_ptr<IColorProvider> colorFunction){
-        _colorFunction = colorFunction;
-    }
-    void update(float deltaTime, float elapsedTime); 
+    void update(const ParticleUpdateContext& ctx);
 };
 
 
@@ -50,24 +62,12 @@ class ParticleSystem : public IInspectable
     unsigned int _vao, _vbo;
 
     EmitterInfo info{ 100, std::make_unique<PointShape>()};
-
+    ParticleUpdateContext _particleCtx;
     Particle emit() {
         Particle newParticle;
 
-
         newParticle.position = info.shape->samplePosition();
-        GradientProvider gp; 
-        gp.addStop(GradientProviderStop{ 0,     glm::vec4(0,1,0,1) });
-        gp.addStop(GradientProviderStop{ 0.25,  glm::vec4(1,0,1,1) });
-        gp.addStop(GradientProviderStop{ 0.75,  glm::vec4(0,1,1,1) });
-        gp.addStop(GradientProviderStop{ 1,     glm::vec4(1,1,0,1) });
-
-        std::shared_ptr<IColorProvider> cp;
-        //cp.reset(new GradientProvider());
-        cp = std::make_shared<GradientProvider>(gp);
-        newParticle.init(cp);
-
-
+        
         float rlife = static_cast <float>(rand()) / static_cast <float>(RAND_MAX);
         //newParticle.velocity.y = 0.1;
         //newParticle.lifetime = 3 * rlife + 3;
@@ -140,11 +140,12 @@ public:
     }
 
     void update(double deltaTime) {
-        static float elapsedTime = 0;
-        elapsedTime += deltaTime;
+        _particleCtx.deltaTime = deltaTime;
+        _particleCtx.elapsedTime += deltaTime;
+
         for (Particle& p : _particles) {
             if(p.isactive)
-                p.update(deltaTime, elapsedTime);
+                p.update(_particleCtx);
         }
         //for (int i{}; i < _particles.size();) {
         //    if (_particles[i].isactive)

@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <string>
 
 glm::vec3 lerp(const glm::vec3& x, const glm::vec3& y, float t) {
     return x * (1.f - t) + y * t;
@@ -18,7 +19,11 @@ glm::vec3 bezier(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, con
     return lerp(ab_bc, bc_cd, t);
 }
 
-void Particle::update(float deltaTime, float elapsedTime) {
+void Particle::update(const ParticleUpdateContext& ctx) {
+    float deltaTime = ctx.deltaTime;
+    float elapsedTime = ctx.elapsedTime;
+
+
     age += deltaTime;
     float normalizedAge = age / lifetime;
 
@@ -37,28 +42,13 @@ void Particle::update(float deltaTime, float elapsedTime) {
     forces.push_back(std::make_unique<NoiseForce>(nf));
     //forces.push_back(std::make_unique<GravityForce>(gf));
     forces.push_back(std::make_unique<QuadraticDragForce>());
-    
-    for (auto& f : forces)
+
+    for (auto& f : ctx.forces)
         totalForce += f->apply(*this, deltaTime);
 
     acceleration = totalForce / mass; 
     velocity += acceleration * deltaTime;
     position += velocity * deltaTime;
-
-    ///glm::vec3 a{ 0.0f, 0.0f, 0.0f };
-    ///glm::vec3 b{ 5.0f, 0.0f, 0.0f };
-    ///glm::vec3 c{ -5.0f, 0.0f, 10.0f };
-    ///glm::vec3 d{ 0.0f, 0.0f, 10.0f };
-    ///float t = age / lifetime;
-    ///position = bezier(a, b, c, d, t);
-
-
-
-
-
-
-
-
 
 
 
@@ -72,33 +62,14 @@ void Particle::update(float deltaTime, float elapsedTime) {
     //position.y = glm::perlin(glm::vec3((a + elapsedTime) * 2, 0, 0));
     //position.x = a;
 
-    color = _colorFunction->evaluate(normalizedAge);
-
-    //color.r = position.y + 0.5;
-    //color.g = 0;
-    //color.b = 1 - position.y - 0.2;
-
-
-    //// perlin
-    ////glm::vec1 nv {position.y}; 
-    //glm::vec3 p = position; //+ glm::vec3(age * 0.5f);
-    //glm::perlin(p);
-    //// Use perlin with offsets for each axis
-    //glm::vec3 force(
-    //    (float)glm::perlin(p), //+ glm::vec3(31.4f, 0.0f, 0.0f)),
-    //    0,//(float)glm::perlin(p), //+ glm::vec3(0.0f, 71.2f, 0.0f)),
-    //    (float)glm::perlin(p) //+ glm::vec3(0.0f, 0.0f, 19.7f))
-    //);
-    //position += force;
-    ////velocity += force * 0.05f;
-
-    ////gravity
-    //velocity.y -= deltaTime;// *0.1;
+    //color = _colorFunction->evaluate(normalizedAge);
+    color = ctx.colorProvider->evaluate(normalizedAge);
 
 
     //std::cout << position.x << std::endl; 
     if (age > lifetime) isactive = false;
 }
+
 
 
 void EmitterInfo::drawUI() {
@@ -122,11 +93,109 @@ void EmitterInfo::drawUI() {
             shape.reset(new TorusShape);
             break;
         default:
-            std::cout << "Error: line 122 ParticleSystem.cpp" << std::endl;
+            std::cout << "Error: line 130 ParticleSystem.cpp" << std::endl;
             break;
         }
     }
     shape->drawUI();
+}
+void ParticleUpdateContext::drawUI()
+{
+    ImGui::SeparatorText("Particle Context");
+
+    // COLOR
+    static const char* items[]{ "Constant","LifeTime","Gradient" }; // box
+    static int colorSelecteditem = 0;
+    if (ImGui::Combo("Color Provider", &colorSelecteditem, items, IM_ARRAYSIZE(items)))
+    {
+        switch (colorSelecteditem)
+        {
+        case 0:
+            colorProvider.reset(new ConstantColorProvider);
+            break;
+        case 1:
+            colorProvider.reset(new ColorOverLifeProvider);
+            break;
+        case 2:
+            colorProvider.reset(new GradientProvider);
+            break;
+        default:
+            std::cout << "Error: line 157 ParticleSystem.cpp" << std::endl;
+            break;
+        }
+    }
+    colorProvider->drawUI();
+
+
+    // FORCES
+    // Gravity
+    // Wind
+    // Noise
+    // Drag
+    // QuadraticDragForce
+
+    static const char* forceItems[]{ "Gravity","Wind","Noise","Drag", "QuadraticDrag" }; // box
+    static int forceSelecteditem = 0;
+    ImGui::Combo("Force Type", &forceSelecteditem, forceItems, IM_ARRAYSIZE(forceItems));
+    //std::vector<std::unique_ptr<IForce>> forces{};
+    
+    if (ImGui::Button("Add Force")) {
+        switch (forceSelecteditem)
+        {
+        case 0: {// Gravity
+            forces.push_back(std::make_unique<GravityForce>());
+            break;
+        }
+        case 1: {// Wind
+            forces.push_back(std::make_unique<WindForce>());
+            break;
+        }
+        case 2: {// Noise
+            forces.push_back(std::make_unique<NoiseForce>());
+            break;
+        }
+        case 3: {// Drag
+            forces.push_back(std::make_unique<DragForce>());
+            break;
+        }
+        case 4: {// QuadraticDrag
+            forces.push_back(std::make_unique<QuadraticDragForce>());
+            break;
+        }
+        default:
+            std::cout << "Error: line 160 ParticleSystem.cpp" << std::endl;
+            break;
+        }
+    }
+        
+
+    static int selectedIndex = -1;
+    if (ImGui::BeginListBox("Force"))
+    {
+        for (int i{}; i < forces.size(); i++) //(int n = 0; n < IM_ARRAYSIZE(items); n++)
+        {
+            const bool is_selected = (selectedIndex == i);
+            if (ImGui::Selectable(std::to_string(i).c_str(), is_selected)) {
+                //std::cout << "Selected light: " << light.name << std::endl;
+                selectedIndex = i;
+            }
+            //if (ImGui::IsItemHovered())
+            //    std::cout << "hovered light: " << light.name << std::endl;
+            //// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+            //if (is_selected)
+            //    ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndListBox();
+    }
+
+    if (selectedIndex == -1) {  return; } // No force selected
+
+    if (ImGui::Button("Delete Force")) {
+        forces.erase(forces.begin() + selectedIndex);
+        selectedIndex = -1;
+        return;
+    }
+    forces[selectedIndex]->drawUI();
 }
 void ParticleSystem::drawUI() {
     ImGui::Begin("Particle System");
@@ -134,5 +203,8 @@ void ParticleSystem::drawUI() {
     //ImGui::SeparatorText("Particle System");
     info.drawUI();
 
+    _particleCtx.drawUI();
+
     ImGui::End();
 }
+

@@ -2,8 +2,9 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <algorithm>
+#include "Inspectable.h"
 
-class IColorProvider{
+class IColorProvider : public IInspectable {
 public:
 	virtual glm::vec4 evaluate(float t) const = 0;
 };
@@ -45,21 +46,30 @@ public:
 
 		return color;
 	}
+
+	// Inherited via IColorProvider
+	void drawUI() override;
 };
 
-class ConstantColorProvider {
+class ConstantColorProvider : public IColorProvider {
 public:
-	glm::vec4 rgba;
+	glm::vec4 rgba{1,1,1,1};
 	glm::vec4 evaluate(float t) const {
 		return rgba;
 	}
+
+	// Inherited via IColorProvider
+	void drawUI() override;
 };
 
-class ColorOverLifeProvider {
+class ColorOverLifeProvider : public IColorProvider {
 public:
-	glm::vec4 start;
-	glm::vec4 end;
+	glm::vec4 start{ 1,1,1,1 };
+	glm::vec4 end{ 1,1,1,0 };
 	glm::vec4 evaluate(float t) const {
 		return glm::mix(start, end, t);
 	}
+
+	// Inherited via IColorProvider
+	void drawUI() override;
 };
