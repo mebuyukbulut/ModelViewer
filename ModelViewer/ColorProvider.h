@@ -19,7 +19,7 @@ struct GradientStop {
 class GradientProvider : public IColorProvider
 {
 	int _selectedStop{};
-	std::vector<GradientStop> _stops{ GradientStop{0,{0,1,0,1}}, GradientStop{1,{0,1,0,0}} };
+	std::vector<GradientStop> _stops{ GradientStop{0,{1,1,1,1}}, GradientStop{1,{1,1,1,0}} };
 	// Maybe we can add a LUT
 
 	bool GradientEditor(std::vector<GradientStop>& stops, ImVec2 size = ImVec2(200, 40));
@@ -29,12 +29,19 @@ public:
 		_stops.push_back(stop);
 		std::sort(_stops.begin(), _stops.end(), [](GradientStop a, GradientStop b) {return a.position < b.position; });
 	}
-
+	void addStop(float position) {
+		GradientStop stop;
+		stop.position = position; 
+		stop.color = evaluate(position);
+		_stops.push_back(stop);
+		std::sort(_stops.begin(), _stops.end(), [](GradientStop a, GradientStop b) {return a.position < b.position; });
+	}
+	
 	glm::vec4 evaluate(float t) const {
 		if (_stops.empty()) return glm::vec4(1, 1, 1, 1);
 		else if (_stops.size() == 1) return _stops[0].color;
-		else if (t <= 0) return _stops[0].color;
-		else if (t >= 1) return _stops.back().color;
+		else if (t <= _stops[0].position) return _stops[0].color;
+		else if (t >= _stops.back().position) return _stops.back().color;
 
 		glm::vec4 color{};
 

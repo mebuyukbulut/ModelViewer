@@ -41,7 +41,24 @@ bool GradientProvider::GradientEditor(std::vector<GradientStop>& stops, ImVec2 s
             ImVec2(x0, p0.y), ImVec2(x1, p1.y),
             col0, col1, col1, col0
         );
+
+
+        if (i == 0 && _stops[i].position != 0) {
+            draw_list->AddRectFilledMultiColor(
+                ImVec2(p0.x, p0.y), ImVec2(x0, p1.y),
+                col0, col0, col0, col0
+            );
+        }
+        if (i+2 == _stops.size() && _stops[i+1].position != 1) {
+            draw_list->AddRectFilledMultiColor(
+                ImVec2(x1, p0.y), ImVec2(p1.x, p1.y),
+                col1, col1, col1, col1
+            );
+
+        }
     }
+
+
 
     ImGui::InvisibleButton("gradientRect", size);
 
@@ -49,8 +66,8 @@ bool GradientProvider::GradientEditor(std::vector<GradientStop>& stops, ImVec2 s
         float newPos = (ImGui::GetIO().MousePos.x - p0.x) / size.x;
         float clampedNewPos = std::clamp(newPos, 0.0f, 1.0f);
 
-        addStop(GradientStop{ clampedNewPos,{1,0,0,1} });
-        std::cout << "new stop added" << std::endl;
+        addStop(clampedNewPos);
+        //std::cout << "new stop added" << std::endl;
     }
 
 
@@ -65,7 +82,7 @@ bool GradientProvider::GradientEditor(std::vector<GradientStop>& stops, ImVec2 s
         ImVec2 handleMax(pos.x + 5, p1.y + 10);
 
         ImGui::SetCursorScreenPos(handleMin);
-        ImGui::InvisibleButton(("stop" + std::to_string(i)).c_str(), ImVec2(10, 10));
+        ImGui::InvisibleButton(("stop" + std::to_string(i)).c_str(), ImVec2(10, 15));
 
         if (ImGui::IsItemActive() && ImGui::IsMouseClicked(ImGuiMouseButton_::ImGuiMouseButton_Left))
             _selectedStop = i;
