@@ -36,6 +36,10 @@ public:
 		_stops.push_back(stop);
 		std::sort(_stops.begin(), _stops.end(), [](GradientStop a, GradientStop b) {return a.position < b.position; });
 	}
+	void deleteStop(int index) {
+		if (_stops.size() <= 2) return;
+		_stops.erase(_stops.begin() + index);
+	}
 	
 	glm::vec4 evaluate(float t) const {
 		if (_stops.empty()) return glm::vec4(1, 1, 1, 1);

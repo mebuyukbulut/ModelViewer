@@ -15,7 +15,7 @@ void PointShape::drawUI()
     //ImGui::SeparatorText("Point");
 }
 glm::vec3 SphereShape::samplePosition() {
-    return glm::sphericalRand(radius);
+    return glm::ballRand(radius);
 }
 void SphereShape::drawUI()
 {

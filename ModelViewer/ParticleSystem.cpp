@@ -101,7 +101,7 @@ void EmitterInfo::drawUI() {
 }
 void ParticleUpdateContext::drawUI()
 {
-    ImGui::SeparatorText("Particle Context");
+    ImGui::SeparatorText("Color");
 
     // COLOR
     static const char* items[]{ "Constant","LifeTime","Gradient" }; // box
@@ -127,6 +127,7 @@ void ParticleUpdateContext::drawUI()
     colorProvider->drawUI();
 
 
+    ImGui::SeparatorText("Force");
     // FORCES
     // Gravity
     // Wind

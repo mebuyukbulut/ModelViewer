@@ -8,14 +8,13 @@
 void GradientProvider::drawUI()
 {
     GradientEditor(_stops);
-    ImGui::ColorEdit4("color edit", &_stops[_selectedStop].color[0]);
+    ImGui::ColorEdit4("Color Edit", &_stops[_selectedStop].color[0],
+        ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel | 
+        ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
     
-	////ImGui::SeparatorText("Gradient");
-	//auto a = ImGui::GetWindowDrawList();
-
-	//ImVec4 color(1, 1, 1, 1);
-	//a->AddRectFilled(a->GetClipRectMin(), ImVec2(200, 200), ImGui::GetColorU32(color));
-	////a->AddRectFilledMultiColor(a->GetClipRectMin())
+    if (_stops.size()>2 && ImGui::Button("Delete selected stop")) {
+        deleteStop(_selectedStop);
+    }
 }
 bool GradientProvider::GradientEditor(std::vector<GradientStop>& stops, ImVec2 size) {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -86,6 +85,7 @@ bool GradientProvider::GradientEditor(std::vector<GradientStop>& stops, ImVec2 s
 
         if (ImGui::IsItemActive() && ImGui::IsMouseClicked(ImGuiMouseButton_::ImGuiMouseButton_Left))
             _selectedStop = i;
+
         if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
             float newPos = (ImGui::GetIO().MousePos.x - p0.x) / size.x;
             float safeOffset = 0.02;
@@ -104,12 +104,12 @@ bool GradientProvider::GradientEditor(std::vector<GradientStop>& stops, ImVec2 s
             _selectedStop = i;
             changed = true;
         }
-
+        ImU32 stopBgColor = (_selectedStop == i) ? IM_COL32(255, 128, 0, 255) : IM_COL32(79, 79, 79, 255);
         draw_list->AddTriangleFilled(
             ImVec2(pos.x, p1.y - 3),
             ImVec2(pos.x - 5, p1.y + 3),
             ImVec2(pos.x + 5, p1.y + 3),
-            IM_COL32(79, 79, 79, 255)
+            stopBgColor
         );
         draw_list->AddRectFilled(
             ImVec2(pos.x - 5, p1.y + 3),

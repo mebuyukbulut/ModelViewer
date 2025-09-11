@@ -12,6 +12,8 @@
 #include "ColorProvider.h"
 #include "Force.h"
 #include "EmitterShape.h"
+#include <execution>
+#include <chrono>
  
 // Use Info for configuration
 // Use Context for runtime
@@ -143,10 +145,33 @@ public:
         _particleCtx.deltaTime = deltaTime;
         _particleCtx.elapsedTime += deltaTime;
 
-        for (Particle& p : _particles) {
-            if(p.isactive)
-                p.update(_particleCtx);
+        auto start = std::chrono::high_resolution_clock::now();
+
+        // ~0.0025 
+        std::for_each(std::execution::par, _particles.begin(), _particles.end(),
+            [&](Particle& p) { if(p.isactive) p.update(_particleCtx); });
+
+        // ~0.0075 
+        //for (Particle& p : _particles) {
+        //    if(p.isactive)
+        //        p.update(_particleCtx);
+        //}
+
+        auto finish = std::chrono::high_resolution_clock::now();
+        double elapsed_time = std::chrono::duration_cast<
+            std::chrono::duration<double>>(finish - start).count();
+
+        //std::cout << elapsed_time << "\n"; 
+        static std::vector<double> timeSteps(60, 0);
+        static int timeIterator = 0;
+        if (timeIterator == 60) {
+            timeIterator = 0;
+            std::cout << std::accumulate(timeSteps.begin(), timeSteps.end(), 0.0) / 60 << "\n";
         }
+        timeSteps[timeIterator++] = elapsed_time;
+
+
+
         //for (int i{}; i < _particles.size();) {
         //    if (_particles[i].isactive)
         //        i++;
