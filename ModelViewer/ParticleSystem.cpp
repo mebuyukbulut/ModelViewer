@@ -8,15 +8,33 @@
 glm::vec3 lerp(const glm::vec3& x, const glm::vec3& y, float t) {
     return x * (1.f - t) + y * t;
 }
-glm::vec3 bezier(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, const glm::vec3& d, float t) {
-    glm::vec3 ab = lerp(a, b, t);
-    glm::vec3 bc = lerp(b, c, t);
-    glm::vec3 cd = lerp(c, d, t);
 
-    glm::vec3 ab_bc = lerp(ab, bc, t);
-    glm::vec3 bc_cd = lerp(bc, cd, t);
+glm::vec3 bezierCubic(
+    const glm::vec3& a,
+    const glm::vec3& b,
+    const glm::vec3& c,
+    const glm::vec3& d,
+    float t)
+{
+    glm::vec3 ab = glm::mix(a, b, t);
+    glm::vec3 bc = glm::mix(b, c, t);
+    glm::vec3 cd = glm::mix(c, d, t);
 
-    return lerp(ab_bc, bc_cd, t);
+    glm::vec3 ab_bc = glm::mix(ab, bc, t);
+    glm::vec3 bc_cd = glm::mix(bc, cd, t);
+
+    return glm::mix(ab_bc, bc_cd, t);
+}
+glm::vec3 bezierQuadratic(
+    const glm::vec3& a,
+    const glm::vec3& b,
+    const glm::vec3& c,
+    float t)
+{
+    glm::vec3 ab = glm::mix(a, b, t);
+    glm::vec3 bc = glm::mix(b, c, t);
+
+    return glm::mix(ab, bc, t);
 }
 
 void Particle::update(const ParticleUpdateContext& ctx) {
