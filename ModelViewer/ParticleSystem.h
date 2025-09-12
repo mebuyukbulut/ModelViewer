@@ -60,7 +60,7 @@ class ParticleSystem : public IInspectable
     std::vector<Particle> _particles{};
     int _maxPCount;
     int _PCount{};
-    Camera* _camera; 
+    std::shared_ptr<Camera> _camera;
     unsigned int _vao, _vbo;
 
     EmitterInfo info{ 100, std::make_unique<PointShape>()};
@@ -78,7 +78,7 @@ class ParticleSystem : public IInspectable
     }
 
 public:
-    void init(Camera* camera){ 
+    void init(std::shared_ptr<Camera> camera){
         _maxPCount = 10'000;
         _camera = camera; 
         glEnable(GL_PROGRAM_POINT_SIZE);

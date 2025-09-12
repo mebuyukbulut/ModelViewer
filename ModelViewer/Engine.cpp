@@ -46,13 +46,13 @@ void Engine::initWindow()
 
     _mouse.init(_window, &_UI);
     dispatcher.subscribe(EventType::onMove, [&](const Event& e) {
-        _camera.move(e.data.vec.x, e.data.vec.y); 
+        _camera->move({ e.data.vec.x, e.data.vec.y, e.data.vec.z });
         });
     dispatcher.subscribe(EventType::onRotate, [&](const Event& e) {
-        _camera.rotate(e.data.vec.x, e.data.vec.y); 
+        _camera->rotate({ e.data.vec.x, e.data.vec.y, e.data.vec.z });
         });
     dispatcher.subscribe(EventType::onZoom, [&](const Event& e) {
-        _camera.zoom(e.data.vec.y); 
+        _camera->zoom(e.data.vec.y);
         });
 }
 
@@ -70,7 +70,7 @@ void Engine::initOpenGL()
 
 void Engine::initUI()
 {
-    _UI.init(_window, &_lightManager, &_camera);
+    _UI.init(_window, &_lightManager, _camera);
 	//_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
 
     dispatcher.subscribe(EventType::ShaderSelected, [&](const Event& e) {
@@ -108,12 +108,12 @@ void Engine::init(){
 
     initWindow();
 	initOpenGL();    
-
-	_camera.init();
-	_camera.setWindowSize(config.window.width, config.window.height);
+    
+	_camera->init();
+	_camera->setWindowSize(config.window.width, config.window.height);
     _renderer.init();
-	_renderer.setCamera(&_camera);
-	_lightManager.init(&_camera);
+	_renderer.setCamera(_camera);
+	_lightManager.init(_camera);
     //_renderer.enableWireframe();
     //_model.loadDefault();
     Model model;
@@ -132,7 +132,7 @@ void Engine::mainLoop()
 
     _renderer.setShader("particle0");
     //ParticleSystem ps;
-    ps.init(&_camera);
+    ps.init(_camera);
     
     time.init();
     // render loop
@@ -192,7 +192,7 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (app) {
 		//std::cout << "Window resized to: " << width << "x" << height << std::endl;
-        app->_camera.setWindowSize(width,height);
+        app->_camera->setWindowSize(width,height);
 		//app->_UI.setWindowSize(width, height);
 		//app->_camera.setAspectRatio(width, height);
     }
@@ -206,7 +206,7 @@ void  Engine::processInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
     
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-        _camera.resetFrame();
+        _camera->resetFrame();
 
 }
 

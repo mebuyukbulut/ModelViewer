@@ -1,6 +1,7 @@
 #pragma once
 #include "Model.h"
 #include "ShaderManager.h"
+#include <memory>
 
 class Camera;
 class Shader;
@@ -9,7 +10,7 @@ class Renderer
 {
 	ShaderManager _shaderManager;
 	Shader* _shader{};
-	Camera* _camera;
+	std::shared_ptr<Camera> _camera;
 public:
 
 	void init();
@@ -20,7 +21,7 @@ public:
 
 	void drawModel(Model& model);
 
-	void setCamera(Camera* camera);
+	void setCamera(std::shared_ptr<Camera> camera);
 	void setShader(const std::string name);
 	void enableWireframe();
 

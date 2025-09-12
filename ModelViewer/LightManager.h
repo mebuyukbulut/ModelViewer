@@ -2,7 +2,9 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
+#include <memory>
 #include "Shader.h"
+class Camera; 
 
 struct Light {
     std::string name;
@@ -18,9 +20,9 @@ class LightManager
 	const int MAX_LIGHTS = 8;
 	std::vector<Light> _lights;
     int selectedLight = -1;
-    class Camera* _camera = nullptr;
+    std::shared_ptr<Camera> _camera = nullptr;
 public:
-	void init(Camera* camera) { _camera = camera; }
+	void init(std::shared_ptr<Camera> camera) { _camera = camera; }
     void drawUI();
 	void drawGizmo();
     void configShader(Shader& shader);

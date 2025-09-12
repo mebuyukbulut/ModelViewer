@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "Renderer.h"
 #include "Model.h"
@@ -20,7 +21,7 @@ class Engine
 	GLFWwindow* _window;
 	Renderer _renderer;
 	std::vector<Model> _models;
-	Camera _camera;
+	std::shared_ptr<Camera> _camera{new OrbitCamera()};
 	UIManager _UI;
 	LightManager _lightManager;
 	Mouse _mouse;

@@ -16,7 +16,7 @@
 
 #include "ParticleSystem.h"
 
-void UIManager::init(GLFWwindow* window, LightManager* lightManager, Camera* camera) {
+void UIManager::init(GLFWwindow* window, LightManager* lightManager, std::shared_ptr<Camera> camera) {
 	_window = window;
 	_lightManager = lightManager;
     _camera = camera;

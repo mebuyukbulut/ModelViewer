@@ -44,7 +44,7 @@ void Renderer::drawModel(Model& model) {
 }
 
 
-void Renderer::setCamera(Camera* camera) { _camera = camera; }
+void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
 void Renderer::setShader(const std::string name) {
     _shader = &_shaderManager.getShader(name);
     _shader->use();
