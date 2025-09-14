@@ -37,15 +37,42 @@ float near = 0.1; // near plane
 float far = 100.0; // far plane
 
 float D_GGX(float NoH, float roughness) {
-    float a = NoH * roughness;
-    float k = roughness / (1.0 - NoH * NoH + a * a);
-    return k * k * (1.0 / PI);
+    float a2     = roughness*roughness;
+    float NdotH  = NoH;
+    float NdotH2 = NdotH*NdotH;
+	
+    float nom    = a2;
+    float denom  = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom        = PI * denom * denom;
+	
+    return nom / denom;
+
+
+//    float a = NoH * roughness;
+//    float k = roughness / (1.0 - NoH * NoH + a * a);
+//    return k * k * (1.0 / PI);
 }
+//// ----------------------------------------------------------------------------
+//float GeometrySchlickGGX(float NdotV, float roughness)
+//{
+//    float r = (roughness + 1.0);
+//    float k = (r*r) / 8.0;
+//
+//    float nom   = NdotV;
+//    float denom = NdotV * (1.0 - k) + k;
+//
+//    return nom / denom;
+//}
 float V_SmithGGXCorrelated(float NoV, float NoL, float roughness) {
     float a2 = roughness * roughness;
     float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
     float GGXL = NoV * sqrt(NoL * NoL * (1.0 - a2) + a2);
     return 0.5 / (GGXV + GGXL);
+
+//    float ggx2 = GeometrySchlickGGX(NoV, roughness);
+//    float ggx1 = GeometrySchlickGGX(NoL, roughness);
+//
+//    return ggx1 * ggx2;
 }
 vec3 F_Schlick(float u, vec3 f0) {
     return f0 + (1 - f0) * pow(1.0 - u, 5.0);
@@ -61,21 +88,25 @@ float Fd_Burley(float NoV, float NoL, float LoH, float roughness) {
 }
 
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+float Fd_Lambert() {
+    return 1.0 / PI;
+}
+
+vec3 CalcPointLight(PointLight light)
 {
     float perceptualRoughness = material.specularIntensity;
     //float perceptualRoughness = 0.5; 
-    vec3 f0 = vec3(0,0,0);
+    vec3 f0 = vec3(0.1,0.1,0.1);
     vec3 diffuseColor = material.color;
 
 
     vec3 n = normalize(fNormal); // Surface normal vector
-    vec3 l = normalize(fPos - light.position); // Incident light vector
-    //vec3 l = normalize(light.position - fPos); // Incident light vector
+    vec3 l = normalize(light.position - fPos ); // Incident light vector
     vec3 v = normalize(viewPos - fPos); // View/Eye vector
-    vec3 h = normalize((n+v)/2); // halfway 
+    vec3 h = normalize((v+l)/2); // halfway 
 
-    float NoV = abs(dot(n,v)) + 1e-5;
+    //float NoV = abs(dot(n,v)) + 1e-5;
+    float NoV = clamp(dot(n,v) , 1e-5, 1.0);
     float NoL = clamp(dot(n, l), 0.0, 1.0);
     float NoH = clamp(dot(n, h), 0.0, 1.0);
     float LoH = clamp(dot(l, h), 0.0, 1.0);
@@ -89,9 +120,11 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
     // specular BRDF
     vec3 Fr = (D * V) * F;
+    //vec3 Fr = D * vec3(1,1,1); 
 
     // diffuse BRDF
     vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness);
+    //vec3 Fd = diffuseColor * Fd_Lambert();
 
 
 
@@ -117,11 +150,12 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 	float quadratic = 0.032f;
 
     // attenuation
-    float distance    = length(light.position - fragPos);
+    float distance    = length(light.position - fPos);
     float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
     
 
-    return (Fr + Fd)*attenuation;
+    //return (Fr + Fd);
+    return (Fr + Fd) * attenuation * light.intensity * light.color;
 } 
 
 float LinearizeDepth(float depth) 
@@ -133,22 +167,14 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-
-	// Calculate normals
-	vec3 surfaceNormal = normalize(fNormal);
-	//vec3 lightDir = normalize(lightPos - fPos);
-	vec3 viewDir = normalize(viewPos - fPos);
 	
-	// ambient 
-	//vec3 ambient = ambientIntensity * ambientColor; 
 
-    //vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     vec3 pLights = vec3(0.0);
     for(int i = 0; i < numLights; i++){
-        pLights += CalcPointLight(pointLights[i], surfaceNormal, fPos, viewDir);
+        pLights += CalcPointLight(pointLights[i]);
     }
 
-    vec3 result = pLights * material.color;
+    vec3 result = pLights;// * material.color;
     //vec3 result = (pLights + ambient) * material.color;
 
     FragColor = vec4(result, 1.0);    
