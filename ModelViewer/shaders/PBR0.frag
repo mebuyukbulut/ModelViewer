@@ -113,8 +113,8 @@ vec3 CalcPointLight(PointLight light)
     vec3 v = normalize(viewPos - fPos); // View/Eye vector
     vec3 h = normalize((v+l)/2); // halfway 
 
-    //float NoV = abs(dot(n,v)) + 1e-5;
-    float NoV = dot(n,v);
+    float NoV = abs(dot(n,v)) + 2e-5;
+    //float NoV = dot(n,v);
     float NoL = clamp(dot(n, l), 0.0, 1.0);
     float NoH = clamp(dot(n, h), 0.0, 1.0);
     float LoH = clamp(dot(l, h), 0.0, 1.0);
@@ -125,11 +125,10 @@ vec3 CalcPointLight(PointLight light)
     float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
 
     // specular BRDF
-    //vec3 Fr = (D * V) * F;
-    vec3 Fr = D * V * vec3(1,1,1); 
+    vec3 Fr = (D * V) * F;
 
     // diffuse BRDF
-    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness);
+    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness) * (1.0 - F);
     //vec3 Fd = diffuseColor * Fd_Lambert();
 
 
@@ -161,7 +160,11 @@ vec3 CalcPointLight(PointLight light)
     
 
     //return (Fr + Fd);
-    return (Fr + Fd) * attenuation * light.intensity * light.color;
+   // return (Fr + Fd) * attenuation * light.intensity * light.color;
+
+        // add to outgoing radiance Lo
+    return (Fd + Fr) * light.intensity * light.color * NoL;
+
 } 
 
 float LinearizeDepth(float depth) 
