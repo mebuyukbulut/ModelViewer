@@ -113,6 +113,7 @@ void Engine::init(){
 	_camera->setWindowSize(config.window.width, config.window.height);
     _renderer.init();
 	_renderer.setCamera(_camera);
+    _renderer.setShader("PBR0");
 	_lightManager.init(_camera);
     //_renderer.enableWireframe();
     //_model.loadDefault();
@@ -130,9 +131,9 @@ void Engine::mainLoop()
     Material material;
 
 
-    _renderer.setShader("particle0");
-    //ParticleSystem ps;
-    ps.init(_camera);
+    ///_renderer.setShader("particle0");
+    /////ParticleSystem ps;
+    ///ps.init(_camera);
     
     time.init();
     // render loop
@@ -145,19 +146,19 @@ void Engine::mainLoop()
         time.update();
         double deltaTime = time.deltaTime();
 
-        ps.update(deltaTime);
-        ps.draw();
+        ///ps.update(deltaTime);
+        ///ps.draw();
 
         
-        //material.use(&_renderer.getShader());
-        //for(Model& model : _models) {
-        //    _renderer.drawModel(model);
-		//}
-		//_lightManager.configShader(_renderer.getShader());
-        ////_renderer.drawModel(_model);
-        //_renderer.getShader().setVec3("viewPos", _camera.getPosition());
-        //_renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
-        //_renderer.getShader().setFloat("ambientIntensity", 0.1);
+        material.use(&_renderer.getShader());
+        for(Model& model : _models) {
+            _renderer.drawModel(model);
+		}
+		_lightManager.configShader(_renderer.getShader());
+        //_renderer.drawModel(_model);
+        _renderer.getShader().setVec3("viewPos", _camera->getPosition());
+        _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
+        _renderer.getShader().setFloat("ambientIntensity", 0.1);
 
 
 		_UI.draw(&material);

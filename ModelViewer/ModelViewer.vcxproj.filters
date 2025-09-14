@@ -158,5 +158,7 @@
     <None Include="shaders\basic_lighting.vert" />
     <None Include="shaders\particle_point.frag" />
     <None Include="shaders\particle_point.vert" />
+    <None Include="shaders\PBR0.frag" />
+    <None Include="shaders\PBR0.vert" />
   </ItemGroup>
 </Project>

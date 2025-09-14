@@ -182,6 +182,8 @@
     <None Include="shaders\normal.vert" />
     <None Include="shaders\particle_point.frag" />
     <None Include="shaders\particle_point.vert" />
+    <None Include="shaders\PBR0.frag" />
+    <None Include="shaders\PBR0.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

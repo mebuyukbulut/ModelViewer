@@ -31,6 +31,7 @@ public:
 
 	void setWindowSize(int width, int height);
 	glm::vec2 getWindowSize();
+	glm::vec3 getPosition() { return _position; }
 
 	virtual void move(glm::vec3 offset);
 	virtual void rotate(glm::vec3 angle);

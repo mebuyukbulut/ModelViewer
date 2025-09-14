@@ -21,6 +21,7 @@ class ShaderManager
 		{"particle0", "shaders/particle_point.vert", "shaders/particle_point.frag"},
 		{"blinn-phong", "shaders/blinn-phong.vert", "shaders/blinn-phong.frag"},
 		{"basic", "shaders/basic_lighting.vert", "shaders/basic_lighting.frag"},
+		{"PBR0", "shaders/PBR0.vert", "shaders/PBR0.frag"},
 		//{"gouraud", "shaders/gouraud.vert", "shaders/gouraud.frag"},
 		//{"flat", "shaders/flat.vert", "shaders/flat.frag"},
 	};
