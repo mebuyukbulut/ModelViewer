@@ -23,8 +23,12 @@ uniform vec3 ambientColor;
 uniform vec3 viewPos;
 
 struct Material{
-    vec3 color;
-    float specularIntensity;
+	vec4 baseColor;
+	vec4 emissive;
+	float metallic;
+	float roughness;
+	float reflectance;
+	float ao;
 };
 uniform Material material;
 
@@ -94,10 +98,14 @@ float Fd_Lambert() {
 
 vec3 CalcPointLight(PointLight light)
 {
-    float perceptualRoughness = material.specularIntensity;
-    //float perceptualRoughness = 0.5; 
-    vec3 f0 = vec3(0.1,0.1,0.1);
-    vec3 diffuseColor = material.color;
+    vec4 baseColor = material.baseColor;
+    float metallic = material.metallic;
+    float perceptualRoughness = material.roughness;
+    float reflectance = material.reflectance;
+
+    vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
+    vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
+    float roughness = perceptualRoughness * perceptualRoughness;
 
 
     vec3 n = normalize(fNormal); // Surface normal vector
@@ -106,21 +114,19 @@ vec3 CalcPointLight(PointLight light)
     vec3 h = normalize((v+l)/2); // halfway 
 
     //float NoV = abs(dot(n,v)) + 1e-5;
-    float NoV = clamp(dot(n,v) , 1e-5, 1.0);
+    float NoV = dot(n,v);
     float NoL = clamp(dot(n, l), 0.0, 1.0);
     float NoH = clamp(dot(n, h), 0.0, 1.0);
     float LoH = clamp(dot(l, h), 0.0, 1.0);
     
-    // perceptually linear roughness to roughness (see parameterization)
-    float roughness = perceptualRoughness * perceptualRoughness;
 
     float D = D_GGX(NoH, roughness);
     vec3  F = F_Schlick(LoH, f0);
     float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
 
     // specular BRDF
-    vec3 Fr = (D * V) * F;
-    //vec3 Fr = D * vec3(1,1,1); 
+    //vec3 Fr = (D * V) * F;
+    vec3 Fr = D * V * vec3(1,1,1); 
 
     // diffuse BRDF
     vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness);
