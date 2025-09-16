@@ -84,6 +84,9 @@
     <ClCompile Include="Inspectable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Chronometer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -144,6 +147,9 @@
       <Filter>Header Files\Particle System</Filter>
     </ClInclude>
     <ClInclude Include="Inspectable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chronometer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

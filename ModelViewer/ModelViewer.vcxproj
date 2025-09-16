@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Chronometer.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="EmitterShape.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -151,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Chronometer.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="EmitterShape.h" />
     <ClInclude Include="Engine.h" />

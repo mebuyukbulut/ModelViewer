@@ -13,7 +13,7 @@
 #include "Force.h"
 #include "EmitterShape.h"
 #include <execution>
-#include <chrono>
+#include "Chronometer.h"
  
 // Use Info for configuration
 // Use Context for runtime
@@ -76,7 +76,7 @@ class ParticleSystem : public IInspectable
         newParticle.lifetime = 20;
         return newParticle;
     }
-
+    Chronometer ch; 
 public:
     void init(std::shared_ptr<Camera> camera){
         _maxPCount = 10'000;
@@ -144,8 +144,8 @@ public:
     void update(double deltaTime) {
         _particleCtx.deltaTime = deltaTime;
         _particleCtx.elapsedTime += deltaTime;
-
-        auto start = std::chrono::high_resolution_clock::now();
+        
+        ch.start();
 
         // ~0.0025 
         std::for_each(std::execution::par, _particles.begin(), _particles.end(),
@@ -157,19 +157,8 @@ public:
         //        p.update(_particleCtx);
         //}
 
-        auto finish = std::chrono::high_resolution_clock::now();
-        double elapsed_time = std::chrono::duration_cast<
-            std::chrono::duration<double>>(finish - start).count();
-
-        //std::cout << elapsed_time << "\n"; 
-        static std::vector<double> timeSteps(60, 0);
-        static int timeIterator = 0;
-        if (timeIterator == 60) {
-            timeIterator = 0;
-            std::cout << std::accumulate(timeSteps.begin(), timeSteps.end(), 0.0) / 60 << "\n";
-        }
-        timeSteps[timeIterator++] = elapsed_time;
-
+        if (double avg = ch.stop())
+            std::cout << avg << "\n";
 
 
         //for (int i{}; i < _particles.size();) {

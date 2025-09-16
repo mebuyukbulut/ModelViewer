@@ -146,8 +146,8 @@ void Engine::mainLoop()
         time.update();
         double deltaTime = time.deltaTime();
 
-        ///ps.update(deltaTime);
-        ///ps.draw();
+        //ps.update(deltaTime);
+        //ps.draw();
 
         
         material.use(&_renderer.getShader());
