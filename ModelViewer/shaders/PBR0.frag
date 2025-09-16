@@ -112,8 +112,9 @@ vec3 CalcPointLight(PointLight light)
     vec3 l = normalize(light.position - fPos ); // Incident light vector
     vec3 v = normalize(viewPos - fPos); // View/Eye vector
     vec3 h = normalize((v+l)/2); // halfway 
-
-    float NoV = abs(dot(n,v)) + 2e-5;
+    
+    //+ 1e-5; // this create black dots on model maybe we can need this parameter in future but now I remove it 
+    float NoV = abs(dot(n,v)) ; //+ 1e-5; // <- this parameter.
     //float NoV = dot(n,v);
     float NoL = clamp(dot(n, l), 0.0, 1.0);
     float NoH = clamp(dot(n, h), 0.0, 1.0);
