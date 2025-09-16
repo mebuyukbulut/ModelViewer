@@ -109,7 +109,7 @@ void Engine::init(){
     initWindow();
 	initOpenGL();    
     
-	_camera->init();
+	_camera->init(glm::vec2(config.window.width, config.window.height));
 	_camera->setWindowSize(config.window.width, config.window.height);
     _renderer.init();
 	_renderer.setCamera(_camera);

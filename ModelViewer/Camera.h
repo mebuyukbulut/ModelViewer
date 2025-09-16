@@ -23,7 +23,7 @@ protected:
 	virtual void updateVectors() { isDirty = false; }
 
 public:
-	virtual void init();
+	virtual void init(glm::vec2 windowSize);
 
 	
 	glm::mat4 getProjectionMatrix();
@@ -56,8 +56,8 @@ class OrbitCamera : public Camera{
 		_up = glm::normalize(glm::cross(_right, _front)); // up vector
 	}
 public:
-	void init() override {
-		Camera::init();
+	void init(glm::vec2 windowSize) override {
+		Camera::init(windowSize);
 		_target = glm::vec3(0.0f, 0.0f, 0.0f); // _target is center point 
 
 		// Spherical coordinates for camera position
@@ -79,6 +79,6 @@ public:
 		_radius = glm::max(0.1f, _radius + amount);
 	}
 	virtual void resetFrame() override{
-		init();
+		init(_windowSize);
 	}
 };

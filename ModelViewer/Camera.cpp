@@ -3,10 +3,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-void Camera::init()
+void Camera::init(glm::vec2 windowSize)
 {
     _fov = glm::radians(45.0f); // 45 degrees in radians
-    _aspectRatio = 800.0f / 600.0f; // width / height
+    _windowSize = windowSize;
+    _aspectRatio = windowSize.x / windowSize.y; // width / height
     _nearPlane = 0.1f; // near clipping plane
     _farPlane = 100.0f; // far clipping plane
     _position = glm::vec3(0.0f, 0.0f, 3.0f); // camera position
@@ -44,5 +45,5 @@ void Camera::zoom(float amount) {
 
 void Camera::resetFrame()
 {
-    init();
+    init(_windowSize);
 }
