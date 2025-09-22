@@ -9,6 +9,7 @@ struct PointLight {
     vec3 position;
 	vec3 color;
 	float intensity;
+    float attenuation;
     int type; // 0: point, 1: dir, 2: spot
     vec3 direction; // only for dir and spot
     float cutoff; // only for spot
@@ -163,7 +164,7 @@ vec3 CalcPointLight(PointLight light)
     float distance    = max(length(light.position - fPos), 0.01);
     //float distance2    = max(dot(light.position, fPos), 0.0001); // squared distance 
     float distance2    = distance * distance; // squared distance 
-    float attRad = 30.0f; // 30 meter 
+    float attRad = light.attenuation; 
 
     float E = 1.0 / (distance2 * PI);
     float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 

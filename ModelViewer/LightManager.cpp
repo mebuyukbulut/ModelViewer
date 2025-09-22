@@ -66,9 +66,9 @@ void LightManager::drawUI() {
     {
         for (int i{}; i < _lights.size(); i++) //(int n = 0; n < IM_ARRAYSIZE(items); n++)
         {
-			Light& light = _lights[i];
+			std::string lightName = _lights[i]->name;
             const bool is_selected = (selectedLight == i);
-            if (ImGui::Selectable(light.name.c_str(), is_selected)) {
+            if (ImGui::Selectable(lightName.c_str(), is_selected)) {
 				//std::cout << "Selected light: " << light.name << std::endl;
                 selectedLight = i;
             }
@@ -84,32 +84,10 @@ void LightManager::drawUI() {
 
     ImGui::SeparatorText("Light properties");
 	if (selectedLight == -1) { ImGui::End(); return; } // No light selected
-	ImGui::DragFloat3("Position", &_lights[selectedLight].position[0], 0.1f);
-    ImGui::ColorEdit3("Color", &_lights[selectedLight].color[0]);
-	ImGui::DragFloat("Intensity", &_lights[selectedLight].intensity, 0.1f, 0.0f, 100.0f);
-	if (_lights[selectedLight].type != 0) // Directional light & Spot light
-	    ImGui::DragFloat3("Direction", &_lights[selectedLight].direction[0], 0.1f);
-	if (_lights[selectedLight].type == 2) // Spot light
-		ImGui::DragFloat("Cutoff", &_lights[selectedLight].cutoff, 1.0f, 0.0f, 90.0f);
 
-    static bool kelvinCB = false; 
-    static float kelvin{ 1000.0f };
-    ImGui::Checkbox("Use temperature", &kelvinCB);
-    if (kelvinCB) {
-        ImGui::DragFloat("Kelvin", &kelvin, 10.0f, 1000.0f, 15'000.0f);
-        _lights[selectedLight].color = kelvin2RGB_fast(kelvin);
-    }
-
-
+    _lights[selectedLight]->drawUI();
 
     ImGui::End();
-
-
-
-
-
-
-    //ImGui::ShowDemoWindow();
 }
 
 void LightManager::drawGizmo()
@@ -132,7 +110,7 @@ void LightManager::drawGizmo()
     static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 
     glm::mat4 modelMatrix(1);
-	modelMatrix = glm::translate(glm::mat4(1.0f), _lights[selectedLight].position);
+	modelMatrix = glm::translate(glm::mat4(1.0f), _lights[selectedLight]->position);
 
     ImGuizmo::Manipulate(
         glm::value_ptr(_camera->getViewMatrix()),
@@ -145,21 +123,15 @@ void LightManager::drawGizmo()
 
     // If modified, write back into your glm::mat4
     if (ImGuizmo::IsUsing()) {
-		_lights[selectedLight].position = glm::vec3(modelMatrix[3]); 
+		_lights[selectedLight]->position = glm::vec3(modelMatrix[3]); 
     }
 }
 
 void LightManager::configShader(Shader& shader)
 {
     for (int i{}; i < _lights.size(); i++) {
-		Light& light = _lights[i]; 
 		std::string prefix = "pointLights[" + std::to_string(i) + "].";
-        shader.setVec3 (prefix + "position",     light.position);
-        shader.setVec3 (prefix + "color",        light.color);
-        shader.setFloat(prefix + "intensity",    light.intensity);
-		shader.setInt  (prefix + "type",         light.type);
-        shader.setVec3 (prefix + "direction",    light.color);
-        shader.setFloat(prefix + "cutoff",       light.intensity);
+        _lights[i]->configShader(shader, prefix);
     }
 	shader.setInt("numLights", static_cast<int>(_lights.size()));
 
@@ -176,16 +148,75 @@ void LightManager::addLight(int lightType)
 		std::cout << "ERROR: Maximum number of lights reached!" << std::endl;
 		return; // Prevent adding more lights if the limit is reached
     }
+    std::unique_ptr<Light> newLight; 
 
-	Light newLight;
-	newLight.name = "Light " + std::to_string(lightCounter++);
-    newLight.position = glm::vec3(0,0,0);
-    newLight.color = glm::vec3(1,1,1);
-    newLight.intensity = 1.0f;
-    newLight.type = lightType; // 0=Point, 1=Directional, 2=Spot
-    newLight.direction = glm::vec3(0,0,1);
-    newLight.cutoff = 15; // spot için
+    if (lightType == 0) { // Point 
+        newLight = std::make_unique<PointLight>(); 
+        newLight->type = 0; 
+    } 
+    else if (lightType == 1) { // Spot 
+        newLight = std::make_unique<SpotLight>(); 
+        newLight->type = 0; 
+    }
+    else if (lightType == 2) { // Directional 
+        newLight = std::make_unique<DirectionalLight>();
+        newLight->type = 0;
+    }
 
-	_lights.push_back(newLight);
+	_lights.push_back(std::move(newLight));
 }
-//ImGui::SameLine();
+
+void Light::configShader(Shader& shader, std::string prefix) {
+    shader.setVec3(prefix + "position", position);
+    shader.setVec3(prefix + "color", color);
+    shader.setFloat(prefix + "intensity", intensity);
+    shader.setInt(prefix + "type", type);
+}
+void PointLight::configShader(Shader& shader, std::string prefix)
+{
+    Light::configShader(shader, prefix);
+    shader.setFloat(prefix + "attenuation", attenuation);
+}
+void SpotLight::configShader(Shader& shader, std::string prefix)
+{
+    Light::configShader(shader, prefix);
+    shader.setVec3(prefix + "direction", direction);
+    shader.setFloat(prefix + "cutoff", cutoff);
+    shader.setFloat(prefix + "attenuation", attenuation);
+}
+void DirectionalLight::configShader(Shader& shader, std::string prefix)
+{
+    Light::configShader(shader, prefix);
+    shader.setVec3(prefix + "direction", direction);
+}
+void Light::drawUI()
+{
+    ImGui::DragFloat3("Position", &position[0], 0.1f);
+    ImGui::ColorEdit3("Color", &color[0]);
+    static bool kelvinCB = false;
+    static float kelvin{ 1000.0f };
+    ImGui::Checkbox("Use temperature", &kelvinCB);
+    if (kelvinCB) {
+        ImGui::DragFloat("Kelvin", &kelvin, 10.0f, 1000.0f, 15'000.0f);
+        color = kelvin2RGB_fast(kelvin);
+    }
+
+    ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 100.0f);
+}
+void PointLight::drawUI()
+{
+    Light::drawUI();
+    ImGui::DragFloat("Attenuation", &attenuation, 0.1f, 0.1f, FLT_MAX);
+}
+void SpotLight::drawUI()
+{
+    Light::drawUI();
+    ImGui::DragFloat3("Direction", &direction[0], 0.1f);
+    ImGui::DragFloat("Cutoff", &cutoff, 1.0f, 0.0f, 90.0f);
+    ImGui::DragFloat("Attenuation", &attenuation, 0.1f, 0.1f, FLT_MAX);
+}
+void DirectionalLight::drawUI()
+{
+    Light::drawUI();
+    ImGui::DragFloat3("Direction", &direction[0], 0.1f);
+}
