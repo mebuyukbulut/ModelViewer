@@ -6,11 +6,46 @@
 #include <ImGuizmo.h>
 
 #include <iostream>
+#include <algorithm>
+#include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 
 #include "Camera.h"
+
+// I cannot find yet true formula for this conversation  
+// for that reason I use that approximation
+glm::vec3 kelvin2RGB_fast(float kelvin) {
+    kelvin /= 100; 
+    glm::vec3 color{ 0,0,0 };
+
+    if (kelvin <= 66) {
+        color.r = 255;
+
+        color.g = kelvin;
+        color.g = 99.4708025861 * std::log(color.g) - 161.1195681661;
+
+        if (kelvin <= 19) {
+            color.b = 0;
+        }
+        else {
+            color.b = kelvin - 10;
+            color.b = 138.5177312231 * std::log(color.b) - 305.0447927307;
+        }
+    }
+    else {
+        color.r = kelvin - 66;
+        color.r = 329.698727446 * std::pow(color.r, -0.1332047592);
+
+        color.g = kelvin - 60;
+        color.g = 288.1221695283 * std::pow(color.g, -0.0755148492);
+
+        color.b = 255;
+    }
+
+    return  glm::clamp(color / 255.f, glm::vec3(0), glm::vec3(1));
+}
 
 void LightManager::drawUI() {
     // Shader selection combo box
@@ -56,6 +91,15 @@ void LightManager::drawUI() {
 	    ImGui::DragFloat3("Direction", &_lights[selectedLight].direction[0], 0.1f);
 	if (_lights[selectedLight].type == 2) // Spot light
 		ImGui::DragFloat("Cutoff", &_lights[selectedLight].cutoff, 1.0f, 0.0f, 90.0f);
+
+    static bool kelvinCB = false; 
+    static float kelvin{ 1000.0f };
+    ImGui::Checkbox("Use temperature", &kelvinCB);
+    if (kelvinCB) {
+        ImGui::DragFloat("Kelvin", &kelvin, 10.0f, 1000.0f, 15'000.0f);
+        _lights[selectedLight].color = kelvin2RGB_fast(kelvin);
+    }
+
 
 
     ImGui::End();

@@ -105,8 +105,10 @@ vec3 CalcPointLight(PointLight light)
 
     vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
     vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
-    float roughness = perceptualRoughness * perceptualRoughness;
-
+    float roughness = perceptualRoughness; 
+    roughness = clamp(roughness, 0.01,1); 
+    roughness *= roughness; 
+    //float roughness = perceptualRoughness * perceptualRoughness;
 
     vec3 n = normalize(fNormal); // Surface normal vector
     vec3 l = normalize(light.position - fPos ); // Incident light vector
@@ -151,20 +153,29 @@ vec3 CalcPointLight(PointLight light)
 //    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 //    vec3 specular =  material.specularIntensity * spec * light.intensity * light.color; 
 //
-	float constant = 1.0f;
-	float linear   = 0.09f;
-	float quadratic = 0.032f;
+
+
+//	float constant = 1.0f;
+//	float linear   = 0.09f;
+//	float quadratic = 0.032f;
 
     // attenuation
-    float distance    = length(light.position - fPos);
-    float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+    float distance    = max(length(light.position - fPos), 0.01);
+    //float distance2    = max(dot(light.position, fPos), 0.0001); // squared distance 
+    float distance2    = distance * distance; // squared distance 
+    float attRad = 30.0f; // 30 meter 
+
+    float E = 1.0 / (distance2 * PI);
+    float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
+    E *= pow(clamp(window, 0.0, 1.0), 2.0); 
+
     
 
     //return (Fr + Fd);
    // return (Fr + Fd) * attenuation * light.intensity * light.color;
 
         // add to outgoing radiance Lo
-    return (Fd + Fr) * light.intensity * light.color * NoL;
+    return (Fd + Fr) * light.intensity * light.color * NoL * E;
 
 } 
 
@@ -186,6 +197,10 @@ void main()
 
     vec3 result = pLights;// * material.color;
     //vec3 result = (pLights + ambient) * material.color;
+
+    //// HDR ? 
+    //result = result / (result + vec3(1.0));
+    //result = pow(result, vec3(1.0/2.2)); 
 
     FragColor = vec4(result, 1.0);    
     //float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
