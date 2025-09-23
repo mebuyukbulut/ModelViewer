@@ -5,17 +5,17 @@ in vec3 fNormal;
 in vec2 fTexCoords;
 out vec4 FragColor;
 
-struct PointLight {    
+struct Light {    
     vec3 position;
 	vec3 color;
 	float intensity;
     float attenuation;
-    int type; // 0: point, 1: dir, 2: spot
+    int type; // 0: point, 1: spot, 2: directional
     vec3 direction; // only for dir and spot
     float cutoff; // only for spot
 };  
-#define NR_POINT_LIGHTS 8  
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+#define NR_LIGHTS 8  
+uniform Light _lights[NR_LIGHTS];
 uniform int numLights;
 
 uniform float ambientIntensity;
@@ -97,20 +97,17 @@ float Fd_Lambert() {
     return 1.0 / PI;
 }
 
-vec3 CalcPointLight(PointLight light)
-{
+vec3 CalcPointLight(Light light){
     vec4 baseColor = material.baseColor;
     float metallic = material.metallic;
-    float perceptualRoughness = material.roughness;
+    float perceptualRoughness = material.roughness;  
+    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
     float reflectance = material.reflectance;
+    float attRad = light.attenuation;
 
     vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
     vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
-    float roughness = perceptualRoughness; 
-    roughness = clamp(roughness, 0.01,1); 
-    roughness *= roughness; 
-    //float roughness = perceptualRoughness * perceptualRoughness;
-
+  
     vec3 n = normalize(fNormal); // Surface normal vector
     vec3 l = normalize(light.position - fPos ); // Incident light vector
     vec3 v = normalize(viewPos - fPos); // View/Eye vector
@@ -118,7 +115,6 @@ vec3 CalcPointLight(PointLight light)
     
     //+ 1e-5; // this create black dots on model maybe we can need this parameter in future but now I remove it 
     float NoV = abs(dot(n,v)) ; //+ 1e-5; // <- this parameter.
-    //float NoV = dot(n,v);
     float NoL = clamp(dot(n, l), 0.0, 1.0);
     float NoH = clamp(dot(n, h), 0.0, 1.0);
     float LoH = clamp(dot(l, h), 0.0, 1.0);
@@ -133,67 +129,141 @@ vec3 CalcPointLight(PointLight light)
 
     // diffuse BRDF
     vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness) * (1.0 - F);
-    //vec3 Fd = diffuseColor * Fd_Lambert();
 
-
-
-
-
-
-
-
-//    vec3 lightDir = normalize(light.position - fragPos);
-//
-//
-//    // diffuse shading
-//    float diff = max(dot(normal, lightDir), 0.0);
-//    vec3 diffuse  = (1.0f -  material.specularIntensity) * diff * light.intensity * light.color; 
-//
-//    // specular shading
-//    vec3 reflectDir = reflect(-lightDir, normal);
-//    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-//    vec3 specular =  material.specularIntensity * spec * light.intensity * light.color; 
-//
-
-
-//	float constant = 1.0f;
-//	float linear   = 0.09f;
-//	float quadratic = 0.032f;
 
     // attenuation
     float distance    = max(length(light.position - fPos), 0.01);
-    //float distance2    = max(dot(light.position, fPos), 0.0001); // squared distance 
     float distance2    = distance * distance; // squared distance 
-    float attRad = light.attenuation; 
-
-    float E = 1.0 / (distance2 * PI);
+    
+    float E = 1.0 / (distance2 * PI); // inverse square law and 1/PI
     float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
     E *= pow(clamp(window, 0.0, 1.0), 2.0); 
 
-    
-
-    //return (Fr + Fd);
-   // return (Fr + Fd) * attenuation * light.intensity * light.color;
-
-        // add to outgoing radiance Lo
     return (Fd + Fr) * light.intensity * light.color * NoL * E;
-
 } 
 
-float LinearizeDepth(float depth) 
-{
+vec3 CalcDirectionalLight(Light light){
+    vec4 baseColor = material.baseColor;
+    float metallic = material.metallic;
+    float perceptualRoughness = material.roughness;  
+    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
+    float reflectance = material.reflectance;
+    //float attRad = light.attenuation;
+
+    vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
+    vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
+  
+    vec3 n = normalize(fNormal); // Surface normal vector
+    vec3 l = normalize(light.direction); // Incident light vector
+    vec3 v = normalize(viewPos - fPos); // View/Eye vector
+    vec3 h = normalize((v+l)/2); // halfway 
+    
+    //+ 1e-5; // this create black dots on model maybe we can need this parameter in future but now I remove it 
+    float NoV = abs(dot(n,v)) ; //+ 1e-5; // <- this parameter.
+    float NoL = clamp(dot(n, l), 0.0, 1.0);
+    float NoH = clamp(dot(n, h), 0.0, 1.0);
+    float LoH = clamp(dot(l, h), 0.0, 1.0);
+    
+
+    float D = D_GGX(NoH, roughness);
+    vec3  F = F_Schlick(LoH, f0);
+    float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
+
+    // specular BRDF
+    vec3 Fr = (D * V) * F;
+
+    // diffuse BRDF
+    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness) * (1.0 - F);
+
+
+    // attenuation
+    float distance    = max(length(light.position - fPos), 0.01);
+    float distance2    = distance * distance; // squared distance 
+    
+    //float E = 1.0 / (distance2 * PI); // inverse square law and 1/PI
+    //float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
+    //E *= pow(clamp(window, 0.0, 1.0), 2.0); 
+
+    return (Fd + Fr) * light.intensity * light.color * NoL;// * E;
+} 
+
+
+vec3 CalcSpotLight(Light light){
+    vec3 lightDir = normalize(fPos - light.position);
+    float theta = dot(lightDir, normalize(light.direction));
+    float phi = cos(radians(light.cutoff)); 
+
+    if(theta < phi) 
+      return vec3(0,0,0); 
+
+
+    vec4 baseColor = material.baseColor;
+    float metallic = material.metallic;
+    float perceptualRoughness = material.roughness;  
+    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
+    float reflectance = material.reflectance;
+    float attRad = light.attenuation;
+
+    vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
+    vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
+  
+    vec3 n = normalize(fNormal); // Surface normal vector
+    vec3 l = normalize(light.position - fPos ); // Incident light vector
+    vec3 v = normalize(viewPos - fPos); // View/Eye vector
+    vec3 h = normalize((v+l)/2); // halfway 
+    
+    //+ 1e-5; // this create black dots on model maybe we can need this parameter in future but now I remove it 
+    float NoV = abs(dot(n,v)) ; //+ 1e-5; // <- this parameter.
+    float NoL = clamp(dot(n, l), 0.0, 1.0);
+    float NoH = clamp(dot(n, h), 0.0, 1.0);
+    float LoH = clamp(dot(l, h), 0.0, 1.0);
+    
+
+    float D = D_GGX(NoH, roughness);
+    vec3  F = F_Schlick(LoH, f0);
+    float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
+
+    // specular BRDF
+    vec3 Fr = (D * V) * F;
+
+    // diffuse BRDF
+    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness) * (1.0 - F);
+
+
+    // attenuation
+    float distance    = max(length(light.position - fPos), 0.01);
+    float distance2    = distance * distance; // squared distance 
+    
+    float E = 1.0 / (distance2 * PI); // inverse square law and 1/PI
+    float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
+    E *= pow(clamp(window, 0.0, 1.0), 2.0); 
+
+
+
+    float angleWindow = 1 - (pow (1 - theta, 4) / pow(1 - phi, 4)); 
+    E*= angleWindow; 
+
+    return (Fd + Fr) * light.intensity * light.color * NoL * E;
+} 
+
+
+float LinearizeDepth(float depth) {
     // Convert depth from NDC to linear depth
     float z = depth * 2.0 - 1.0; // back to NDC 
     return (2.0 * near * far) / (far + near - z * (far - near));	
 }
 
-void main()
-{
+void main(){
 	
 
     vec3 pLights = vec3(0.0);
     for(int i = 0; i < numLights; i++){
-        pLights += CalcPointLight(pointLights[i]);
+        if(_lights[i].type == 0) 
+            pLights += CalcPointLight(_lights[i]);
+        if(_lights[i].type == 1) 
+            pLights += CalcSpotLight(_lights[i]);
+        if(_lights[i].type == 2) 
+            pLights += CalcDirectionalLight(_lights[i]);
     }
 
     vec3 result = pLights;// * material.color;

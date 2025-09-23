@@ -50,6 +50,7 @@ public:
     float attenuation;
 
     SpotLight() {
+        std::cout << "Spot Light constructor called \n";
         name = "Spot Light";
         type = 1;
 

@@ -126,16 +126,6 @@ void LightManager::drawGizmo()
 		_lights[selectedLight]->position = glm::vec3(modelMatrix[3]); 
     }
 }
-
-void LightManager::configShader(Shader& shader)
-{
-    for (int i{}; i < _lights.size(); i++) {
-		std::string prefix = "pointLights[" + std::to_string(i) + "].";
-        _lights[i]->configShader(shader, prefix);
-    }
-	shader.setInt("numLights", static_cast<int>(_lights.size()));
-
-}
 void LightManager::addLight(int lightType)
 {
     static int lightCounter = 0; // Static counter to keep track of light names
@@ -152,20 +142,26 @@ void LightManager::addLight(int lightType)
 
     if (lightType == 0) { // Point 
         newLight = std::make_unique<PointLight>(); 
-        newLight->type = 0; 
     } 
     else if (lightType == 1) { // Spot 
         newLight = std::make_unique<SpotLight>(); 
-        newLight->type = 0; 
     }
     else if (lightType == 2) { // Directional 
         newLight = std::make_unique<DirectionalLight>();
-        newLight->type = 0;
     }
 
 	_lights.push_back(std::move(newLight));
 }
 
+void LightManager::configShader(Shader& shader)
+{
+    for (int i{}; i < _lights.size(); i++) {
+		std::string prefix = "_lights[" + std::to_string(i) + "].";
+        _lights[i]->configShader(shader, prefix);
+    }
+	shader.setInt("numLights", static_cast<int>(_lights.size()));
+
+}
 void Light::configShader(Shader& shader, std::string prefix) {
     shader.setVec3(prefix + "position", position);
     shader.setVec3(prefix + "color", color);
@@ -189,6 +185,8 @@ void DirectionalLight::configShader(Shader& shader, std::string prefix)
     Light::configShader(shader, prefix);
     shader.setVec3(prefix + "direction", direction);
 }
+
+
 void Light::drawUI()
 {
     ImGui::DragFloat3("Position", &position[0], 0.1f);
