@@ -85,19 +85,19 @@ void Engine::initUI()
         if (modelPath.empty())
             return;
 
-        for (Model& i : _models)
-            i.terminate();
-        _models.clear();
+        //for (Model& i : _models)
+        //    i.terminate();
+        //_models.clear();
 
-        Model model;
-        if (model.loadFromFile(modelPath)) {
-            _models.push_back(model);
-            //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
-            std::cout << "Success to load model: " << modelPath << std::endl;
-        }
-        else {
-            std::cout << "Failed to load model: " << modelPath << std::endl;
-        }
+        //Model model;
+        //if (model.loadFromFile(modelPath)) {
+        //    _models.push_back(model);
+        //    //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
+        //    std::cout << "Success to load model: " << modelPath << std::endl;
+        //}
+        //else {
+        //    std::cout << "Failed to load model: " << modelPath << std::endl;
+        //}
         });
 
     _UI.ps = &ps;
@@ -116,11 +116,12 @@ void Engine::init(){
     _renderer.setShader("PBR0");
 	_lightManager.init(_camera);
     //_renderer.enableWireframe();
-    //_model.loadDefault();
-    Model model;
-	model.loadFromFile("models\\monkey.obj");
-	//model.loadFromFile("models\\bellapais_abbey\\Bellapais Abbey.obj");
-	_models.push_back(model);
+
+    Entity* entity = new Entity;
+    entity->model.reset(new Model); 
+    entity->model->loadFromFile("models\\monkey.obj");
+    entity->_renderer = &_renderer;
+    _entities.emplace_back(entity);
 
 
 
@@ -148,20 +149,24 @@ void Engine::mainLoop()
 
         //ps.update(deltaTime);
         //ps.draw();
-
         
-        material.use(&_renderer.getShader());
-        for(Model& model : _models) {
-            _renderer.drawModel(model);
-		}
+        material.use(&_renderer.getShader()); 
+        for (auto& entity : _entities) {
+            entity->draw();
+        }
+
+
+
 		_lightManager.configShader(_renderer.getShader());
-        //_renderer.drawModel(_model);
+        
         _renderer.getShader().setVec3("viewPos", _camera->getPosition());
         _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
         _renderer.getShader().setFloat("ambientIntensity", 0.1);
 
-
-		_UI.draw(&material);
+        selected_entity = _entities.front().get();
+        //if(selected_entity)
+        //    selected_entity->drawUI();
+		_UI.draw(&material, selected_entity);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);
@@ -169,8 +174,8 @@ void Engine::mainLoop()
     }
 }
 void Engine::terminate() {
-    for (Model& model : _models) 
-        model.terminate();
+    ////for (Model& model : _models) 
+    ////    model.terminate();
     //_model.terminate();
     _renderer.terminate();
     _UI.terminate();
@@ -192,8 +197,9 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     // Retrieve the instance pointer
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (app) {
-		//std::cout << "Window resized to: " << width << "x" << height << std::endl;
-        app->_camera->setWindowSize(width,height);
+		std::cout << "Window resized to: " << width << "x" << height << std::endl;
+        if(width && height)
+            app->_camera->setWindowSize(width,height);
 		//app->_UI.setWindowSize(width, height);
 		//app->_camera.setAspectRatio(width, height);
     }

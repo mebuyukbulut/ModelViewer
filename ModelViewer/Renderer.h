@@ -19,7 +19,7 @@ public:
 	void beginFrame();
 	void endFrame();
 
-	void drawModel(Model& model);
+	void drawModel(Model* model, const glm::mat4& transform);
 
 	void setCamera(std::shared_ptr<Camera> camera);
 	void setShader(const std::string name);

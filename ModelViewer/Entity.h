@@ -14,9 +14,9 @@ class Transform : public IInspectable{
 	glm::vec3 _scale{ 1.0f, 1.0f, 1.0f };
 
 	//Global space information concatenate in matrix
-	glm::mat4 m_modelMatrix = glm::mat4(1.0f);
+	glm::mat4 _modelMatrix = glm::mat4(1.0f);
 
-	glm::mat4 update();
+	void update();
 public: 
 
 	glm::vec3 getPosition();
@@ -28,6 +28,7 @@ public:
 
 	glm::mat4 getModelMatrix();
 
+	// draw gizmo ? 
 
 	// Inherited via IInspectable
 	void drawUI() override;
@@ -36,17 +37,21 @@ public:
 
 class Renderer; 
 
-class Entity
+class Entity : public IInspectable
 {
+public:
 	Renderer* _renderer; 
 
 	Transform transform; 
-	Model model; 
+	std::unique_ptr <Model> model;
 	std::string name; 
 
 	std::list<std::unique_ptr<Entity>> children; 
 	Entity* parent; 
 
 	void draw();
+
+	// Inherited via IInspectable
+	void drawUI() override;
 };
 

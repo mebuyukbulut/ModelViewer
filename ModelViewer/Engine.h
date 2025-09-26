@@ -15,12 +15,15 @@
 #include "Mouse.h"
 #include "Config.h"
 #include "ParticleSystem.h"
-
+#include "Entity.h"
 class Engine
 {
+	
 	GLFWwindow* _window;
 	Renderer _renderer;
-	std::vector<Model> _models;
+	std::list<std::shared_ptr<Entity>> _entities;
+	Entity* selected_entity{};
+
 	std::shared_ptr<Camera> _camera{new OrbitCamera()};
 	UIManager _UI;
 	LightManager _lightManager;

@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-glm::mat4  Transform::update() {
+void Transform::update() {
     const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f),
         glm::radians(_rotation.x),
         glm::vec3(1.0f, 0.0f, 0.0f));
@@ -22,7 +22,7 @@ glm::mat4  Transform::update() {
     const glm::mat4 roationMatrix = transformY * transformX * transformZ;
 
     // translation * rotation * scale (also know as TRS matrix)
-    return glm::translate(glm::mat4(1.0f), _position) *
+    _modelMatrix = glm::translate(glm::mat4(1.0f), _position) *
         roationMatrix *
         glm::scale(glm::mat4(1.0f), _scale);
 }
@@ -35,17 +35,37 @@ void Transform::setRotation(const glm::vec3& rotation) { _rotation = rotation; _
 void Transform::setScale(const glm::vec3& scale) { _scale = scale; _isDirty = true; }
 
 
+glm::mat4 Transform::getModelMatrix() {
+    if (_isDirty) {
+        update();
+        _isDirty = false;
+    }
+
+    return _modelMatrix;
+}
+
 void Transform::drawUI()
 {
-	ImGui::SeparatorText("Transform"); 
-	ImGui::DragFloat3("Position:", &_position[0], 0.01);
-	ImGui::DragFloat3("Rotation:", &_rotation[0], 0.01);
-	ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
+
+    ImGui::SeparatorText("Transform");
+    bool p = ImGui::DragFloat3("Position:", &_position[0], 0.01);
+    bool r = ImGui::DragFloat3("Rotation:", &_rotation[0], 0.01);
+    bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
+    if (p || r || s) _isDirty = true;
+}
+
+void Entity::drawUI()
+{
+
+    ImGui::Begin("Properties");
+    transform.drawUI();
+    ImGui::End();
 }
 
 void Entity::draw() {
-	_renderer->drawModel(model);
+	_renderer->drawModel(model.get(), transform.getModelMatrix());
 
 	for (auto& i : children)
 		i->draw();
 }
+
