@@ -37,7 +37,7 @@ void Renderer::endFrame() {
     
 }
 
-void Renderer::drawModel(Model& model) {
+void Renderer::drawModel(Model& model) { // maybe we can add transform to here 
     // draw our first triangle
     //_shader.use();
 	_shader->setMat4("model", glm::mat4(1.0f)); // identity matrix for model transformation
