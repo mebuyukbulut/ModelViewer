@@ -15,15 +15,15 @@
 #include "Mouse.h"
 #include "Config.h"
 #include "ParticleSystem.h"
-#include "Entity.h"
+
+#include "SceneManager.h"
+
 class Engine
 {
 	
 	GLFWwindow* _window;
 	Renderer _renderer;
-	std::list<std::shared_ptr<Transform>> _transforms;
-	Transform* selected_transform{};
-
+	SceneManager SM;
 	std::shared_ptr<Camera> _camera{new OrbitCamera()};
 	UIManager _UI;
 	LightManager _lightManager;

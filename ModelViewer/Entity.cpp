@@ -78,6 +78,16 @@ void Transform::draw(Renderer* renderer)
 void Transform::drawUI()
 {
 
+    ImGui::Begin("Scene");
+    ImGuiTreeNodeFlags flag = ImGuiTreeNodeFlags_DefaultOpen;
+    if (ImGui::TreeNodeEx("root", flag))
+    {
+        // Call ImGui::TreeNodeEx() recursively to populate each level of children
+        ImGui::TreePop();  // This is required at the end of the if block
+    }
+    ImGui::End();
+    
+
     ImGui::Begin("Properties");
 
     ImGui::SeparatorText("Transform");
