@@ -7,6 +7,10 @@
 #include "Model.h"
 
 class Transform : public IInspectable{
+	std::list<std::unique_ptr<Transform>> children;
+	Transform* parent{};
+	class Entity* _entity{};
+
 	bool _isDirty{ true };
 
 	glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
@@ -14,9 +18,11 @@ class Transform : public IInspectable{
 	glm::vec3 _scale{ 1.0f, 1.0f, 1.0f };
 
 	//Global space information concatenate in matrix
-	glm::mat4 _modelMatrix = glm::mat4(1.0f);
+	glm::mat4 _globalModelMatrix = glm::mat4(1.0f);
+	glm::mat4 _localModelMatrix = glm::mat4(1.0f);
 
 	void update();
+	glm::mat4 getLocalMatrix();
 public: 
 
 	glm::vec3 getPosition();
@@ -26,7 +32,11 @@ public:
 	void setRotation(const glm::vec3& rotation);
 	void setScale(const glm::vec3& scale);
 
-	glm::mat4 getModelMatrix();
+	glm::mat4 getGlobalMatrix();
+
+	void addChild(std::unique_ptr<Transform> child); 
+	void setEntity(Entity* entity);
+	void draw(class Renderer* renderer);
 
 	// draw gizmo ? 
 
@@ -41,15 +51,10 @@ class Entity : public IInspectable
 {
 public:
 	Renderer* _renderer; 
+	Transform* transform; 
 
-	Transform transform; 
 	std::unique_ptr <Model> model;
 	std::string name; 
-
-	std::list<std::unique_ptr<Entity>> children; 
-	Entity* parent; 
-
-	void draw();
 
 	// Inherited via IInspectable
 	void drawUI() override;

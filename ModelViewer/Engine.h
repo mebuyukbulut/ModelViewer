@@ -21,8 +21,8 @@ class Engine
 	
 	GLFWwindow* _window;
 	Renderer _renderer;
-	std::list<std::shared_ptr<Entity>> _entities;
-	Entity* selected_entity{};
+	std::list<std::shared_ptr<Transform>> _transforms;
+	Transform* selected_transform{};
 
 	std::shared_ptr<Camera> _camera{new OrbitCamera()};
 	UIManager _UI;

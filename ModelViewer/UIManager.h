@@ -22,7 +22,7 @@ public:
 
 	void terminate(); 
 
-	void draw(Material* material, class Entity* entity);
+	void draw(Material* material, class Transform* entity);
 
 	bool isHoverOnUI();
 

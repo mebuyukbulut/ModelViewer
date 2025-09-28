@@ -117,11 +117,13 @@ void Engine::init(){
 	_lightManager.init(_camera);
     //_renderer.enableWireframe();
 
+    Transform* transform = new Transform; 
     Entity* entity = new Entity;
     entity->model.reset(new Model); 
     entity->model->loadFromFile("models\\monkey.obj");
     entity->_renderer = &_renderer;
-    _entities.emplace_back(entity);
+    transform->setEntity(entity);
+    _transforms.emplace_back(transform);
 
 
 
@@ -151,8 +153,9 @@ void Engine::mainLoop()
         //ps.draw();
         
         material.use(&_renderer.getShader()); 
-        for (auto& entity : _entities) {
-            entity->draw();
+
+        for (auto& transform : _transforms) {
+            transform->draw(&_renderer);
         }
 
 
@@ -163,10 +166,10 @@ void Engine::mainLoop()
         _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
         _renderer.getShader().setFloat("ambientIntensity", 0.1);
 
-        selected_entity = _entities.front().get();
+        selected_transform = _transforms.front().get();
         //if(selected_entity)
         //    selected_entity->drawUI();
-		_UI.draw(&material, selected_entity);
+		_UI.draw(&material, selected_transform);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);

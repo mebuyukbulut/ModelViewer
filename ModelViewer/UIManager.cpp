@@ -63,11 +63,11 @@ void UIManager::terminate() {
 
 }
 
-void UIManager::draw(Material* material, Entity* entity ) {
+void UIManager::draw(Material* material, Transform* transform ) {
 	beginFrame();
 
-    if (entity)
-        entity->drawUI();
+    if (transform)
+        transform->drawUI();
 
 	mainMenu();
     ps->drawUI();
@@ -77,7 +77,7 @@ void UIManager::draw(Material* material, Entity* entity ) {
 	    _lightManager->drawUI();
         _lightManager->drawGizmo();
     }
-    if(isMaterialPanelOpen) material->drawUI();
+    //if(isMaterialPanelOpen) material->drawUI();
 
     //ImGui::ShowDemoWindow();
 	endFrame();
