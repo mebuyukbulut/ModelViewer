@@ -23,6 +23,7 @@ class Transform : public IInspectable{
 
 	void update();
 	glm::mat4 getLocalMatrix();
+
 public: 
 	std::string name{};
 	glm::vec3 getPosition();
@@ -31,6 +32,7 @@ public:
 	void setPosition(const glm::vec3& position);
 	void setRotation(const glm::vec3& rotation);
 	void setScale(const glm::vec3& scale);
+
 
 	glm::mat4 getGlobalMatrix();
 

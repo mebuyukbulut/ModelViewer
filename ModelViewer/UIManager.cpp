@@ -67,8 +67,10 @@ void UIManager::terminate() {
 void UIManager::draw(Material* material, SceneManager* sm ) {
 	beginFrame();
 
-    if (sm)
+    if (sm) {
         sm->drawUI();
+        sm->drawGizmo();
+    }
 
 	mainMenu();
     ps->drawUI();
@@ -76,7 +78,7 @@ void UIManager::draw(Material* material, SceneManager* sm ) {
 	if(isCreditsPanelOpen) creditsPanel();
     if (isLightPanelOpen) {
 	    _lightManager->drawUI();
-        _lightManager->drawGizmo();
+        //_lightManager->drawGizmo();
     }
     //if(isMaterialPanelOpen) material->drawUI();
 

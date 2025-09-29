@@ -86,7 +86,7 @@ class LightManager : public IInspectable
     std::shared_ptr<Camera> _camera = nullptr;
 public:
 	void init(std::shared_ptr<Camera> camera) { _camera = camera; }
-	void drawGizmo();
+	//
     void configShader(Shader& shader);
 
     // Inherited via IInspectable

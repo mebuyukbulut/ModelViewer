@@ -117,7 +117,7 @@ void Engine::init(){
 	_lightManager.init(_camera);
     //_renderer.enableWireframe();
 
-    SM.init(&_renderer);
+    SM.init(&_renderer, _camera.get());
 
 
 	initUI();

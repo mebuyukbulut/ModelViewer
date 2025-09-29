@@ -11,9 +11,11 @@ class SceneManager : public IInspectable
     Transform* _selectedTransform{};
 
     Renderer* _renderer;
+    class Camera* _camera;
 public:
-	void init(Renderer* renderer) {
+	void init(Renderer* renderer, Camera* camera) {
         _renderer = renderer; 
+        _camera = camera; 
 
         Transform* transform = new Transform;
         Entity* entity = new Entity;
@@ -46,5 +48,6 @@ public:
     // Inherited via IInspectable
     void drawUI() override;
 
+    void drawGizmo();
 };
 

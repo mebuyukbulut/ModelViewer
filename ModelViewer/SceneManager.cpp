@@ -1,5 +1,8 @@
 #include "SceneManager.h"
 #include <imgui.h>
+#include <ImGuizmo.h>
+#include "Camera.h"
+#include <glm/gtc/type_ptr.hpp>
 
 
 void SceneManager::drawUI()
@@ -93,4 +96,44 @@ void SceneManager::drawUI()
 
 
     ImGui::End();
+}
+
+
+void SceneManager::drawGizmo()
+{
+    if (!_selectedTransform) return;
+
+
+    // Make sure to call inside ImGui frame:
+    ImGuizmo::BeginFrame();
+
+    // Get viewport size
+    ImVec2 windowPos(0, 0);// = ImGui::GetWindowPos();
+
+    auto windowSize = _camera->getWindowSize();
+
+    // Setup ImGuizmo rect
+    ImGuizmo::SetRect(windowPos.x, windowPos.y, windowSize.x, windowSize.y);
+
+
+
+    // Choose operation: translate / rotate / scale
+    static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+
+    glm::mat4 modelMatrix(1);
+    modelMatrix = glm::translate(glm::mat4(1.0f), _selectedTransform->getPosition());
+
+    ImGuizmo::Manipulate(
+        glm::value_ptr(_camera->getViewMatrix()),
+        glm::value_ptr(_camera->getProjectionMatrix()),
+        mCurrentGizmoOperation,
+        ImGuizmo::LOCAL,
+        glm::value_ptr(modelMatrix)
+    );
+
+
+    // If modified, write back into your glm::mat4
+    if (ImGuizmo::IsUsing()) {
+        _selectedTransform->setPosition(glm::vec3(modelMatrix[3]));
+    }
 }
