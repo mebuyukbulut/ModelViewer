@@ -6,12 +6,15 @@
 
 
 enum class EventType {
-	onMove,
-	onRotate,
-	onZoom,
+    onMove,
+    onRotate,
+    onZoom,
     ShaderSelected,
     EngineExit,
-    ModelOpened
+    ModelOpened,
+    AddPointLight,
+    AddDirectionalLight,
+    AddSpotLight,
 };
 
 struct EventData {

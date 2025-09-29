@@ -14,10 +14,9 @@ class UIManager
 {
 	GLFWwindow* _window;
 	std::shared_ptr<Camera> _camera;
-	LightManager* _lightManager;
 	//glm::vec2 _windowSize;
 public:
-	void init(GLFWwindow* window, LightManager* lightManager, std::shared_ptr <Camera> camera);
+	void init(GLFWwindow* window,  std::shared_ptr <Camera> camera);
 	//void setWindowSize(int width, int height) { _windowSize = glm::vec2(width, height); }
 
 	void terminate(); 

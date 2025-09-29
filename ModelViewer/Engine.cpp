@@ -70,7 +70,7 @@ void Engine::initOpenGL()
 
 void Engine::initUI()
 {
-    _UI.init(_window, &_lightManager, _camera);
+    _UI.init(_window, _camera);
 	//_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
 
     dispatcher.subscribe(EventType::ShaderSelected, [&](const Event& e) {
@@ -114,7 +114,6 @@ void Engine::init(){
     _renderer.init();
 	_renderer.setCamera(_camera);
     _renderer.setShader("PBR0");
-	_lightManager.init(_camera);
     //_renderer.enableWireframe();
 
     SM.init(&_renderer, _camera.get());
@@ -151,7 +150,7 @@ void Engine::mainLoop()
 
 
 
-		_lightManager.configShader(_renderer.getShader());
+		SM.configShader(_renderer.getShader());
         
         _renderer.getShader().setVec3("viewPos", _camera->getPosition());
         _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));

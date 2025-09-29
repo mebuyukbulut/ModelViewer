@@ -26,7 +26,6 @@ class Engine
 	SceneManager SM;
 	std::shared_ptr<Camera> _camera{new OrbitCamera()};
 	UIManager _UI;
-	LightManager _lightManager;
 	Mouse _mouse;
 	Time time;
 	//Config config;

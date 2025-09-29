@@ -49,7 +49,13 @@ glm::mat4 Transform::getGlobalMatrix() {
 glm::vec3 Transform::getPosition() { return _position; }
 glm::vec3 Transform::getRotation() { return _rotation; }
 glm::vec3 Transform::getScale() { return _scale; }
-void Transform::setPosition(const glm::vec3& position) { _position = position; _isDirty = true; }
+void Transform::setPosition(const glm::vec3& position) { 
+    _position = position; 
+    _isDirty = true; 
+
+    if (Light* light = _entity->light.get()) 
+        light->position = _position;
+}
 void Transform::setRotation(const glm::vec3& rotation) { _rotation = rotation; _isDirty = true; }
 void Transform::setScale(const glm::vec3& scale) { _scale = scale; _isDirty = true; }
 
@@ -64,6 +70,11 @@ void Transform::addChild(std::unique_ptr<Transform> child)
 void Transform::setEntity(Entity* entity) {
     _entity = entity;
     _entity->transform = this;
+}
+
+Entity* Transform::getEntity()
+{
+    return _entity;
 }
 
 void Transform::draw(Renderer* renderer)
@@ -81,6 +92,13 @@ void Transform::drawUI()
     bool r = ImGui::DragFloat3("Rotation:", &_rotation[0], 0.01);
     bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
     if (p || r || s) _isDirty = true;
+
+    if (Light* light = _entity->light.get()) {
+        light->drawUI();
+        if (p)
+            light->position = _position;
+
+    }
 }
 
 

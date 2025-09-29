@@ -18,9 +18,8 @@
 #include "Entity.h"
 #include "SceneManager.h"
 
-void UIManager::init(GLFWwindow* window, LightManager* lightManager, std::shared_ptr<Camera> camera) {
+void UIManager::init(GLFWwindow* window, std::shared_ptr<Camera> camera) {
 	_window = window;
-	_lightManager = lightManager;
     _camera = camera;
 
     IMGUI_CHECKVERSION();
@@ -76,10 +75,7 @@ void UIManager::draw(Material* material, SceneManager* sm ) {
     ps->drawUI();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
-    if (isLightPanelOpen) {
-	    _lightManager->drawUI();
-        //_lightManager->drawGizmo();
-    }
+
     //if(isMaterialPanelOpen) material->drawUI();
 
     //ImGui::ShowDemoWindow();
@@ -142,6 +138,24 @@ void UIManager::mainMenu(){
             }
             ImGui::EndMenu();
         }
+        
+
+        if (ImGui::BeginMenu("Add")) {
+            if (ImGui::MenuItem("Add Point Light")) {
+                Event e{ EventType::AddPointLight };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Spot Light")) {
+                Event e{ EventType::AddSpotLight };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Direction Light")) {
+                Event e{ EventType::AddDirectionalLight };
+                dispatcher.dispatch(e);
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMainMenuBar();
     }
 }

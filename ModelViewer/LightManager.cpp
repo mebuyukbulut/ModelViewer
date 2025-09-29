@@ -46,85 +46,6 @@ glm::vec3 kelvin2RGB_fast(float kelvin) {
     return  glm::clamp(color / 255.f, glm::vec3(0), glm::vec3(1));
 }
 
-void LightManager::drawUI() {
-    // Shader selection combo box
-    const char* items[] = { "Point", "Direction", "Spot" };
-    static int currentItem = 0;
-
-    ImGui::Begin("Light Controls"); 
-
-    ImGui::SeparatorText("Add Light");
-    ImGui::Combo("type", &currentItem, items, IM_ARRAYSIZE(items));
-	if(ImGui::Button("Add Light"))
-        addLight(currentItem);
-
-
-    ImGui::SeparatorText("Light List");
-	
-    if (ImGui::BeginListBox("listbox 1"))
-    {
-        for (int i{}; i < _lights.size(); i++) //(int n = 0; n < IM_ARRAYSIZE(items); n++)
-        {
-			std::string lightName = _lights[i]->name;
-            const bool is_selected = (selectedLight == i);
-            if (ImGui::Selectable(lightName.c_str(), is_selected)) {
-				//std::cout << "Selected light: " << light.name << std::endl;
-                selectedLight = i;
-            }
-            //if (ImGui::IsItemHovered())
-            //    std::cout << "hovered light: " << light.name << std::endl;
-            //// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-            //if (is_selected)
-            //    ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndListBox();
-    }
-
-
-    ImGui::SeparatorText("Light properties");
-	if (selectedLight == -1) { ImGui::End(); return; } // No light selected
-
-    _lights[selectedLight]->drawUI();
-
-    ImGui::End();
-}
-
-void LightManager::addLight(int lightType)
-{
-    static int lightCounter = 0; // Static counter to keep track of light names
-
-    if (lightType < 0 || lightType > 2) {
-		std::cout << "ERROR: light type must be 0, 1 or 2!" << std::endl;
-		return; // Invalid light type
-    }
-    if (_lights.size() >= MAX_LIGHTS) {
-		std::cout << "ERROR: Maximum number of lights reached!" << std::endl;
-		return; // Prevent adding more lights if the limit is reached
-    }
-    std::unique_ptr<Light> newLight; 
-
-    if (lightType == 0) { // Point 
-        newLight = std::make_unique<PointLight>(); 
-    } 
-    else if (lightType == 1) { // Spot 
-        newLight = std::make_unique<SpotLight>(); 
-    }
-    else if (lightType == 2) { // Directional 
-        newLight = std::make_unique<DirectionalLight>();
-    }
-
-	_lights.push_back(std::move(newLight));
-}
-
-void LightManager::configShader(Shader& shader)
-{
-    for (int i{}; i < _lights.size(); i++) {
-		std::string prefix = "_lights[" + std::to_string(i) + "].";
-        _lights[i]->configShader(shader, prefix);
-    }
-	shader.setInt("numLights", static_cast<int>(_lights.size()));
-
-}
 void Light::configShader(Shader& shader, std::string prefix) {
     shader.setVec3(prefix + "position", position);
     shader.setVec3(prefix + "color", color);
@@ -152,7 +73,7 @@ void DirectionalLight::configShader(Shader& shader, std::string prefix)
 
 void Light::drawUI()
 {
-    ImGui::DragFloat3("Position", &position[0], 0.1f);
+    //ImGui::DragFloat3("Position", &position[0], 0.1f);
     ImGui::ColorEdit3("Color", &color[0]);
     static bool kelvinCB = false;
     static float kelvin{ 1000.0f };

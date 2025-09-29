@@ -5,6 +5,7 @@
 
 #include "Inspectable.h"
 #include "Model.h"
+#include "LightManager.h"
 
 class Transform : public IInspectable{
 	std::list<std::unique_ptr<Transform>> children;
@@ -38,6 +39,7 @@ public:
 
 	void addChild(std::unique_ptr<Transform> child); 
 	void setEntity(Entity* entity);
+	Entity* getEntity(); 
 	void draw(class Renderer* renderer);
 
 	bool isSelected() { return _isSelected; }
@@ -48,6 +50,7 @@ public:
 	void deselect() {
 		_isSelected = false;
 	}
+	
 	// draw gizmo ? 
 
 	// Inherited via IInspectable
@@ -60,10 +63,11 @@ class Renderer;
 class Entity : public IInspectable
 {
 public:
-	Renderer* _renderer; 
-	Transform* transform; 
+	Renderer* _renderer{};
+	Transform* transform{};
 
-	std::unique_ptr <Model> model;
+	std::unique_ptr <Model> model{};
+	std::unique_ptr <Light> light{};
 
 	// Inherited via IInspectable
 	void drawUI() override;

@@ -3,7 +3,7 @@
 #include <ImGuizmo.h>
 #include "Camera.h"
 #include <glm/gtc/type_ptr.hpp>
-
+#include "LightManager.h"
 
 void SceneManager::drawUI()
 {
@@ -118,7 +118,7 @@ void SceneManager::drawGizmo()
 
 
     // Choose operation: translate / rotate / scale
-    static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+    static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;// | ImGuizmo::ROTATE | ImGuizmo::SCALE;
 
     glm::mat4 modelMatrix(1);
     modelMatrix = glm::translate(glm::mat4(1.0f), _selectedTransform->getPosition());
@@ -131,9 +131,109 @@ void SceneManager::drawGizmo()
         glm::value_ptr(modelMatrix)
     );
 
-
+    
     // If modified, write back into your glm::mat4
     if (ImGuizmo::IsUsing()) {
         _selectedTransform->setPosition(glm::vec3(modelMatrix[3]));
     }
+}
+
+
+// LIGHTS 
+
+//void SceneManager::lightUI() {
+//    // Shader selection combo box
+//    const char* items[] = { "Point", "Direction", "Spot" };
+//    static int currentItem = 0;
+//
+//    ImGui::Begin("Light Controls");
+//
+//    ImGui::SeparatorText("Add Light");
+//    ImGui::Combo("type", &currentItem, items, IM_ARRAYSIZE(items));
+//    if (ImGui::Button("Add Light"))
+//        addLight(currentItem);
+//
+//
+//    ImGui::SeparatorText("Light List");
+//
+//    if (ImGui::BeginListBox("listbox 1"))
+//    {
+//        for (int i{}; i < _lights.size(); i++) //(int n = 0; n < IM_ARRAYSIZE(items); n++)
+//        {
+//            std::string lightName = _lights[i]->name;
+//            const bool is_selected = (selectedLight == i);
+//            if (ImGui::Selectable(lightName.c_str(), is_selected)) {
+//                //std::cout << "Selected light: " << light.name << std::endl;
+//                selectedLight = i;
+//            }
+//            //if (ImGui::IsItemHovered())
+//            //    std::cout << "hovered light: " << light.name << std::endl;
+//            //// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+//            //if (is_selected)
+//            //    ImGui::SetItemDefaultFocus();
+//        }
+//        ImGui::EndListBox();
+//    }
+//
+//
+//    ImGui::SeparatorText("Light properties");
+//    if (selectedLight == -1) { ImGui::End(); return; } // No light selected
+//
+//    _lights[selectedLight]->drawUI();
+//
+//    ImGui::End();
+//}
+const int MAX_LIGHTS = 8; 
+//int lightCount = 0;
+void SceneManager::addLight(LightType lightType)
+{
+    static int lightCounter = 0; // Static counter to keep track of light names
+
+    if (lightCounter >= MAX_LIGHTS) {
+        std::cout << "ERROR: Maximum number of lights reached!" << std::endl;
+        return; // Prevent adding more lights if the limit is reached
+    }
+    std::unique_ptr<Light> newLight;
+    std::string lightName = "";
+    switch (lightType)
+    {
+    case LightType::Directional:
+        newLight = std::make_unique<DirectionalLight>();
+        lightName = "Directional Light" + std::to_string(lightCounter);
+        break;
+    case LightType::Point:
+        newLight = std::make_unique<PointLight>();
+        lightName = "Point Light" + std::to_string(lightCounter);
+        break;
+    case LightType::Spot:
+        newLight = std::make_unique<SpotLight>();
+        lightName = "Spot Light" + std::to_string(lightCounter);
+        break;
+    default:
+        break;
+    }
+    Transform* t = new Transform; 
+    Entity* en = new Entity;
+    en->light = std::move(newLight);
+    t->setEntity(en);
+    t->name = lightName;
+    _transforms.emplace_back(t);
+
+
+    lightCounter++;
+
+}
+
+void SceneManager::configShader(Shader& shader)
+{
+    int counter = 0; 
+    for (auto t : _transforms) {
+        if (Light* light = t.get()->getEntity()->light.get()) {
+
+            std::string prefix = "_lights[" + std::to_string(counter++) + "].";
+            light->configShader(shader, prefix);
+        }
+    }
+
+    shader.setInt("numLights", counter);
 }

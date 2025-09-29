@@ -8,7 +8,11 @@
 #include "Inspectable.h"
 
 class Camera; 
-
+enum class LightType {
+    Directional,
+    Point,
+    Spot
+};
 class Light : public IInspectable {
 public:
     std::string name;
@@ -76,23 +80,5 @@ public:
 
     void drawUI() override;
 
-};
-
-class LightManager : public IInspectable
-{
-	const int MAX_LIGHTS = 8;
-    std::vector<std::unique_ptr<Light>> _lights{};
-    int selectedLight = -1;
-    std::shared_ptr<Camera> _camera = nullptr;
-public:
-	void init(std::shared_ptr<Camera> camera) { _camera = camera; }
-	//
-    void configShader(Shader& shader);
-
-    // Inherited via IInspectable
-    void drawUI() override;
-
-private:
-    void addLight(int lightType);    
 };
 
