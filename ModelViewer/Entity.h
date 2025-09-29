@@ -10,7 +10,7 @@ class Transform : public IInspectable{
 	std::list<std::unique_ptr<Transform>> children;
 	Transform* parent{};
 	class Entity* _entity{};
-
+	bool _isSelected{ false };
 	bool _isDirty{ true };
 
 	glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
@@ -24,7 +24,7 @@ class Transform : public IInspectable{
 	void update();
 	glm::mat4 getLocalMatrix();
 public: 
-
+	std::string name{};
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
 	glm::vec3 getScale();
@@ -38,6 +38,14 @@ public:
 	void setEntity(Entity* entity);
 	void draw(class Renderer* renderer);
 
+	bool isSelected() { return _isSelected; }
+	void select() {
+		_isSelected = true;
+
+	}
+	void deselect() {
+		_isSelected = false;
+	}
 	// draw gizmo ? 
 
 	// Inherited via IInspectable
@@ -54,7 +62,6 @@ public:
 	Transform* transform; 
 
 	std::unique_ptr <Model> model;
-	std::string name; 
 
 	// Inherited via IInspectable
 	void drawUI() override;

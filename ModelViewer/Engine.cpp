@@ -158,7 +158,7 @@ void Engine::mainLoop()
         _renderer.getShader().setFloat("ambientIntensity", 0.1);
 
 
-		_UI.draw(&material, SM.getSelectedTransform());
+		_UI.draw(&material, &SM);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);

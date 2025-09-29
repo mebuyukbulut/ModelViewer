@@ -77,26 +77,11 @@ void Transform::draw(Renderer* renderer)
 
 void Transform::drawUI()
 {
-
-    ImGui::Begin("Scene");
-    ImGuiTreeNodeFlags flag = ImGuiTreeNodeFlags_DefaultOpen;
-    if (ImGui::TreeNodeEx("root", flag))
-    {
-        // Call ImGui::TreeNodeEx() recursively to populate each level of children
-        ImGui::TreePop();  // This is required at the end of the if block
-    }
-    ImGui::End();
-    
-
-    ImGui::Begin("Properties");
-
     ImGui::SeparatorText("Transform");
     bool p = ImGui::DragFloat3("Position:", &_position[0], 0.01);
     bool r = ImGui::DragFloat3("Rotation:", &_rotation[0], 0.01);
     bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
     if (p || r || s) _isDirty = true;
-
-    ImGui::End();
 }
 
 

@@ -2,11 +2,14 @@
 #include <memory>
 #include "Entity.h"
 #include "Renderer.h"
+#include "Inspectable.h"
 
-class SceneManager
+class SceneManager : public IInspectable
 {
 	std::list<std::shared_ptr<Transform>> _transforms;
-	Transform* selected_transform{};
+    std::list <Transform*> _selectedTransforms{};
+    Transform* _selectedTransform{};
+
     Renderer* _renderer;
 public:
 	void init(Renderer* renderer) {
@@ -18,7 +21,13 @@ public:
         entity->model->loadFromFile("models\\monkey.obj");
         entity->_renderer = renderer;
         transform->setEntity(entity);
+        transform->name = "myobject"; 
         _transforms.emplace_back(transform);
+
+        Transform* t2 = new Transform;
+        t2->name = "my new object";
+        t2->setEntity(entity);
+        _transforms.emplace_back(t2);
 	}
 
     void draw() {
@@ -28,10 +37,14 @@ public:
     }
     
     Transform* getSelectedTransform() {
-        selected_transform = _transforms.front().get();
-        return selected_transform;
+        //if (_selectedTransforms.empty()) return nullptr; 
+        return _selectedTransform;
     }
 
+
+
+    // Inherited via IInspectable
+    void drawUI() override;
 
 };
 

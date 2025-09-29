@@ -16,6 +16,7 @@
 
 #include "ParticleSystem.h"
 #include "Entity.h"
+#include "SceneManager.h"
 
 void UIManager::init(GLFWwindow* window, LightManager* lightManager, std::shared_ptr<Camera> camera) {
 	_window = window;
@@ -63,11 +64,11 @@ void UIManager::terminate() {
 
 }
 
-void UIManager::draw(Material* material, Transform* transform ) {
+void UIManager::draw(Material* material, SceneManager* sm ) {
 	beginFrame();
 
-    if (transform)
-        transform->drawUI();
+    if (sm)
+        sm->drawUI();
 
 	mainMenu();
     ps->drawUI();
