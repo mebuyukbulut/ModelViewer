@@ -1,4 +1,4 @@
-#include "Engine.h"
+﻿#include "Engine.h"
 #include "Shader.h"
 #include "FileUtils.h"
 #include "Model.h"
@@ -14,6 +14,7 @@
 #include "Mouse.h"
 
 #include "EventDispatcher.h"
+#include "Logger.h"
 
 
 void Engine::initWindow()
@@ -120,6 +121,10 @@ void Engine::init(){
 
 
 	initUI();
+
+    LOG_INFO("engine was initialized");
+    LOG_WARNING("test 0");
+    LOG_ERROR("test 1");
 }
 void Engine::mainLoop()
 {
