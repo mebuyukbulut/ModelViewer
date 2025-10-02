@@ -117,7 +117,7 @@ void Engine::init(){
     _renderer.setShader("PBR0");
     //_renderer.enableWireframe();
 
-    SM.init(&_renderer, _camera.get());
+    SM.init(&_renderer, _camera.get(),&(_renderer.getShader()));
 
 
 	initUI();
@@ -128,9 +128,6 @@ void Engine::init(){
 }
 void Engine::mainLoop()
 {
-    Material material;
-
-
     ///_renderer.setShader("particle0");
     /////ParticleSystem ps;
     ///ps.init(_camera);
@@ -149,7 +146,7 @@ void Engine::mainLoop()
         //ps.update(deltaTime);
         //ps.draw();
         
-        material.use(&_renderer.getShader()); 
+        //material.use(&_renderer.getShader()); 
 
         SM.draw();
 
@@ -162,7 +159,7 @@ void Engine::mainLoop()
         _renderer.getShader().setFloat("ambientIntensity", 0.1);
 
 
-		_UI.draw(&material, &SM);
+		_UI.draw(&SM);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(_window);

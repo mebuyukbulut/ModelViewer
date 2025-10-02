@@ -1,5 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <unordered_map>
+#include <memory>
 
 class Shader;
 
@@ -28,5 +30,28 @@ public:
 
 	void use(Shader* shader);
 	void drawUI();
+};
+
+
+struct MaterialHandle {
+	int id = -1;
+	bool isValid() const { return id >= 0; }
+};
+
+class MaterialManager {
+
+public:
+	MaterialManager(Shader* shader) :_shader{ shader } {}
+
+	MaterialHandle createMaterial();
+	Material* getMaterial(MaterialHandle handle);
+	MaterialHandle getDefaultMaterial();
+	void useMaterial(MaterialHandle handle);
+	void destroyMaterial(MaterialHandle handle);
+
+private:
+	Shader* _shader; 
+	int nextId = 0;
+	std::unordered_map<int, std::unique_ptr<Material>> materials;
 };
 

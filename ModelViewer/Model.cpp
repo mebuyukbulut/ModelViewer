@@ -205,6 +205,9 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 // draws the model, and thus all its meshes
 void Model::draw(Shader& shader) {
+    _materialManager->useMaterial(_materialManager->getDefaultMaterial());
+    //Material* mat = _materialManager->getDefaultMaterial();
+    //_materialManager->useMaterial()
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].draw(shader);
 }

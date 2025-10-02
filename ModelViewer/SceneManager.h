@@ -5,17 +5,21 @@
 #include "Inspectable.h"
 #include "LightManager.h"
 #include "EventDispatcher.h"
+#include "Material.h"
+#include "Shader.h"
 
 class SceneManager : public IInspectable
 {
-	std::list<std::shared_ptr<Transform>> _transforms;
+	std::list<std::shared_ptr<Transform>> _transforms{};
     std::list <Transform*> _selectedTransforms{};
     Transform* _selectedTransform{};
 
-    Renderer* _renderer;
-    class Camera* _camera;
+    Renderer* _renderer{};
+    class Camera* _camera{};
+    std::unique_ptr<MaterialManager> _materialMng{};
+
 public:
-	void init(Renderer* renderer, Camera* camera) {
+	void init(Renderer* renderer, Camera* camera, Shader* shader) {
         _renderer = renderer; 
         _camera = camera; 
 
@@ -34,7 +38,8 @@ public:
 
         Transform* transform = new Transform;
         Entity* entity = new Entity;
-        entity->model.reset(new Model);
+        _materialMng.reset(new MaterialManager(shader));
+        entity->model.reset(new Model(_materialMng.get()));
         entity->model->loadFromFile("models\\monkey.obj");
         entity->_renderer = renderer;
         transform->setEntity(entity);

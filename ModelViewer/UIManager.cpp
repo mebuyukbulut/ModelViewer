@@ -8,7 +8,6 @@
 #include "FileUtils.h"
 #include "LightManager.h"
 #include "Camera.h"
-#include "Material.h"
 #include <iostream>
 
 #include "EventDispatcher.h"
@@ -51,7 +50,6 @@ void UIManager::init(GLFWwindow* window, std::shared_ptr<Camera> camera) {
     // load config 
     isCreditsPanelOpen = config.ui.isCreditsPanelOpen;
     isLightPanelOpen = config.ui.isLightPanelOpen;
-    isMaterialPanelOpen = config.ui.isMaterialPanelOpen;
     isShaderPanelOpen = config.ui.isShaderPanelOpen;
 
 }
@@ -63,7 +61,7 @@ void UIManager::terminate() {
 
 }
 
-void UIManager::draw(Material* material, SceneManager* sm ) {
+void UIManager::draw(SceneManager* sm ) {
 	beginFrame();
 
     if (sm) {
@@ -76,14 +74,8 @@ void UIManager::draw(Material* material, SceneManager* sm ) {
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
 
-    //if(isMaterialPanelOpen) material->drawUI();
-
     //ImGui::ShowDemoWindow();
 	endFrame();
-
-
-
-
 }
 
 bool UIManager::isHoverOnUI()
@@ -130,10 +122,6 @@ void UIManager::mainMenu(){
             }
             if(ImGui::MenuItem("Light Panel", nullptr, &isLightPanelOpen)) {
                 config.ui.isLightPanelOpen = isLightPanelOpen;
-                config.save();
-            }
-            if(ImGui::MenuItem("Material Panel", nullptr, &isMaterialPanelOpen)) {
-                config.ui.isMaterialPanelOpen = isMaterialPanelOpen;
                 config.save();
             }
             ImGui::EndMenu();

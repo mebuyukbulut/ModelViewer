@@ -6,6 +6,7 @@
 #include "Inspectable.h"
 #include "Model.h"
 #include "LightManager.h"
+#include "Material.h"
 
 class Transform : public IInspectable{
 	std::list<std::unique_ptr<Transform>> children;
@@ -68,6 +69,7 @@ public:
 
 	std::unique_ptr <Model> model{};
 	std::unique_ptr <Light> light{};
+	std::vector<MaterialHandle> materials{};
 
 	// Inherited via IInspectable
 	void drawUI() override;

@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <assimp/types.h>
 
 // glm::vec4 baseColor;
 // glm::vec4 emissive;
@@ -38,3 +39,33 @@ void Material::drawUI() {
 	ImGui::End();
 }
 
+MaterialHandle MaterialManager::createMaterial() {
+	int id = nextId++;
+	materials[id] = std::make_unique<Material>();
+	return MaterialHandle{ id };
+}
+
+Material* MaterialManager::getMaterial(MaterialHandle handle) {
+	if (materials.empty()) return nullptr;
+	auto it = materials.find(handle.id);
+	if (it != materials.end())
+		return it->second.get();
+	return nullptr;
+}
+
+MaterialHandle MaterialManager::getDefaultMaterial()
+{
+	MaterialHandle mh; mh.id = 0; 
+	if (!getMaterial(mh))
+		return createMaterial();
+	return mh;
+}
+
+void MaterialManager::useMaterial(MaterialHandle handle){
+
+	materials[handle.id].get()->use(_shader);
+}
+
+void MaterialManager::destroyMaterial(MaterialHandle handle) {
+	materials.erase(handle.id);
+}

@@ -21,7 +21,7 @@ public:
 
 	void terminate(); 
 
-	void draw(Material* material, class SceneManager* sm);
+	void draw(class SceneManager* sm);
 
 	bool isHoverOnUI();
 
@@ -34,7 +34,6 @@ private:
 	bool isShaderPanelOpen = false;
 	bool isCreditsPanelOpen = false;
 	bool isLightPanelOpen = false; 
-	bool isMaterialPanelOpen = false; 
 
 	void mainMenu();
 	void shaderPanel();

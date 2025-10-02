@@ -20,16 +20,15 @@
 
 class Engine
 {
-	
-	GLFWwindow* _window;
-	Renderer _renderer;
-	SceneManager SM;
+	GLFWwindow* _window{};
+	Renderer _renderer{};
+	SceneManager SM{};
 	std::shared_ptr<Camera> _camera{new OrbitCamera()};
-	UIManager _UI;
-	Mouse _mouse;
-	Time time;
+	UIManager _UI{};
+	Mouse _mouse{};
+	Time time{};
 	//Config config;
-	ParticleSystem ps; 
+	ParticleSystem ps{};
 
 	void initWindow();
 	void initOpenGL();
@@ -42,8 +41,8 @@ class Engine
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-
 public:
+	Engine() = default;
 	void run();
 };
 

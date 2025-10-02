@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include "Mesh.h"
+#include "Material.h"
 
 #include <glad/glad.h>
 #include <assimp/Importer.hpp>
@@ -14,10 +15,12 @@
 
 class Model
 {
+    MaterialManager* _materialManager{};
+    //TextureManager* _textureManager{};
     std::vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	std::vector<Mesh> meshes;
 	std::string _directory;
-    
+    std::vector<MaterialHandle> _materials{};
 
     unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = 1);
     bool loadModel(std::string const& path);
@@ -30,5 +33,7 @@ public:
     void terminate();
     void loadDefault();
     bool loadFromFile(const std::string& filename);
+
+    Model(MaterialManager* materialManager) : _materialManager{ materialManager } {}
 };
 
