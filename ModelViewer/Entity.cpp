@@ -93,17 +93,18 @@ void Transform::drawUI()
     bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
     if (p || r || s) _isDirty = true;
 
-    if (Light* light = _entity->light.get()) {
-        light->drawUI();
-        if (p)
-            light->position = _position;
+    if (p)
+        _entity->light.get()->position = _position;
 
-    }
+    _entity->drawUI();
+
+
 }
 
 
 
 void Entity::drawUI()
 {
-
+    if (light.get()) light->drawUI();
+    if (model.get()) model->drawUI();
 }

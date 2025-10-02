@@ -26,8 +26,8 @@ void Material::use(Shader* shader) {
 }
 
 void Material::drawUI() {
-	ImGui::Begin("Material");
-	
+	//ImGui::Begin("Material");
+	ImGui::SeparatorText("MATERIAL");
 	ImGui::ColorEdit4("baseColor", glm::value_ptr(baseColor),ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel);
 	
 	ImGui::DragFloat("metallic", &metallic, 0.02f, 0.0f, 1.0f);
@@ -36,7 +36,7 @@ void Material::drawUI() {
 	ImGui::DragFloat("ao", &ao, 0.02f, 0.0f, 1.0f);
 	ImGui::ColorEdit4("emissive", glm::value_ptr(emissive),ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel);
 	
-	ImGui::End();
+	//ImGui::End();
 }
 
 MaterialHandle MaterialManager::createMaterial() {

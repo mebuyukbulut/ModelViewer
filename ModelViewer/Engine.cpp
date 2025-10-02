@@ -190,7 +190,8 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     // Retrieve the instance pointer
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (app) {
-		std::cout << "Window resized to: " << width << "x" << height << std::endl;
+        LOG_TRACE(std::format("Window resized to: {} x {}",width,height));
+
         if(width && height)
             app->_camera->setWindowSize(width,height);
 		//app->_UI.setWindowSize(width, height);

@@ -69,7 +69,7 @@ public:
 
 	std::unique_ptr <Model> model{};
 	std::unique_ptr <Light> light{};
-	std::vector<MaterialHandle> materials{};
+	//std::vector<MaterialHandle> materials{};
 
 	// Inherited via IInspectable
 	void drawUI() override;

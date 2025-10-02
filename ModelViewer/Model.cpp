@@ -58,6 +58,12 @@ bool Model::loadModel(std::string const& path)
     std::cout << "_directory: " << _directory << std::endl;
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
+
+    // if model loading not create a material use default one 
+    if (_materials.empty()) {
+        _materials.push_back(_materialManager->getDefaultMaterial());
+    }
+
     return true;
 }
 
@@ -205,9 +211,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 // draws the model, and thus all its meshes
 void Model::draw(Shader& shader) {
-    _materialManager->useMaterial(_materialManager->getDefaultMaterial());
-    //Material* mat = _materialManager->getDefaultMaterial();
-    //_materialManager->useMaterial()
+    _materialManager->useMaterial(_materials.at(0));
+
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].draw(shader);
 }
@@ -228,4 +233,14 @@ void Model::loadDefault()
 
 bool Model::loadFromFile(const std::string& filename) {
     return loadModel(filename);
+}
+
+void Model::drawUI()
+{
+
+    if (_materials.empty()) return;
+
+    Material * mat = _materialManager->getMaterial(*_materials.begin());
+
+    mat->drawUI(); 
 }
