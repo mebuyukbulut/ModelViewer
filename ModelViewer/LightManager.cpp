@@ -97,6 +97,23 @@ void SpotLight::drawUI()
     ImGui::DragFloat("Cutoff", &cutoff, 1.0f, 0.0f, 90.0f);
     ImGui::DragFloat("Attenuation", &attenuation, 0.1f, 0.1f, FLT_MAX);
 }
+void SpotLight::setDirection(glm::vec3 rotation)
+{
+    const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f),
+        glm::radians(rotation.x),
+        glm::vec3(1.0f, 0.0f, 0.0f));
+    const glm::mat4 transformY = glm::rotate(glm::mat4(1.0f),
+        glm::radians(rotation.y),
+        glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::mat4 transformZ = glm::rotate(glm::mat4(1.0f),
+        glm::radians(rotation.z),
+        glm::vec3(0.0f, 0.0f, 1.0f));
+    // Y * X * Z
+    const glm::mat4 rotationMatrix = transformY * transformX * transformZ;
+
+    direction = rotationMatrix * glm::vec4(0,1,0,1);
+
+}
 void DirectionalLight::drawUI()
 {
     Light::drawUI();

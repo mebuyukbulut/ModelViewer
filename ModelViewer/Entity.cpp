@@ -93,8 +93,15 @@ void Transform::drawUI()
     bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
     if (p || r || s) _isDirty = true;
 
-    if (p && _entity->light.get())
-        _entity->light.get()->position = _position;
+    Light* light = _entity->light.get();
+    if (p && light)
+        light->position = _position;
+
+    if (r && light) {
+        SpotLight* spotlight = dynamic_cast<SpotLight*>(light);
+        if (spotlight)
+            spotlight->setDirection(_rotation) ;
+    }
 
     _entity->drawUI();
 

@@ -6,6 +6,7 @@
 #include <memory>
 #include "Shader.h"
 #include "Inspectable.h"
+#include "Logger.h"
 
 class Camera; 
 enum class LightType {
@@ -54,7 +55,7 @@ public:
     float attenuation;
 
     SpotLight() {
-        std::cout << "Spot Light constructor called \n";
+        LOG_TRACE("Spot Light constructor called");
         name = "Spot Light";
         type = 1;
 
@@ -65,6 +66,8 @@ public:
     void configShader(Shader& shader, std::string prefix) override;
 
     void drawUI() override;
+
+    void setDirection(glm::vec3 rotation);
 };
 
 class DirectionalLight : public Light {
