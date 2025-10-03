@@ -177,9 +177,9 @@ vec3 CalcDirectionalLight(Light light){
 
 
     // attenuation
-    float distance    = max(length(light.position - fPos), 0.01);
-    float distance2    = distance * distance; // squared distance 
-    
+//    float distance    = max(length(light.position - fPos), 0.01);
+//    float distance2    = distance * distance; // squared distance 
+//    
     //float E = 1.0 / (distance2 * PI); // inverse square law and 1/PI
     //float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
     //E *= pow(clamp(window, 0.0, 1.0), 2.0); 

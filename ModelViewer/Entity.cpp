@@ -93,7 +93,7 @@ void Transform::drawUI()
     bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
     if (p || r || s) _isDirty = true;
 
-    if (p)
+    if (p && _entity->light.get())
         _entity->light.get()->position = _position;
 
     _entity->drawUI();
