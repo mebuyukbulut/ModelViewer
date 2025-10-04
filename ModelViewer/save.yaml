@@ -4,3 +4,15 @@ Lights:
     position: [0, 0.0873269737, 1.45235038]
     color: [1, 1, 1]
     intensity: 1
+  - type: spot
+    attenuation: 3
+    position: [0, 1.64952481, 0]
+    color: [1, 0, 0]
+    intensity: 1
+    direction: [0, -1, 0]
+    cutoff: 25
+  - type: directional
+    position: [0, 0, 0]
+    color: [0, 0.405063152, 1]
+    intensity: 1
+    direction: [0, -1, 0]

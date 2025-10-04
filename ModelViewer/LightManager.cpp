@@ -65,22 +65,29 @@ YAML::Node PointLight::serialize()
     n["position"] = position;
     n["color"] = color;
     n["intensity"] = intensity;
-
-    // float attenuation;
-    // std::string name;
-    // glm::vec3 position;
-    // glm::vec3 color;
-    // float intensity;
-    // int type; // 0=Point, 1=Spot, 2=Directional
     return n;
 }
 YAML::Node SpotLight::serialize()
 {
-    return YAML::Node();
+    YAML::Node n;
+    n["type"] = "spot";
+    n["attenuation"] = attenuation;
+    n["position"] = position;
+    n["color"] = color;
+    n["intensity"] = intensity;
+    n["direction"] = direction;
+    n["cutoff"] = cutoff;
+    return n;
 }
 YAML::Node DirectionalLight::serialize()
 {
-    return YAML::Node();
+    YAML::Node n;
+    n["type"] = "directional";
+    n["position"] = position;
+    n["color"] = color;
+    n["intensity"] = intensity;
+    n["direction"] = direction;
+    return n;
 }
 void SpotLight::configShader(Shader& shader, std::string prefix)
 {
@@ -184,6 +191,7 @@ std::unique_ptr<Light> LightFactory::create(const YAML::Node& node)
         light->color = node["color"].as<glm::vec3>();
         light->intensity = node["intensity"].as<float>();
         light->attenuation = node["attenuation"].as<float>();
+        light->type = 0;
         return light;
     }
     else if (typeStr == "spot") {
@@ -194,13 +202,16 @@ std::unique_ptr<Light> LightFactory::create(const YAML::Node& node)
         light->intensity = node["intensity"].as<float>();
         light->attenuation = node["attenuation"].as<float>();
         light->cutoff = node["cutoff"].as<float>();
+        light->type = 1;
         return light;
     }
     else if (typeStr == "directional") {
         auto light = std::make_unique<DirectionalLight>();
+        light->position = node["position"].as<glm::vec3>();
         light->direction = node["direction"].as<glm::vec3>();
         light->color = node["color"].as<glm::vec3>();
         light->intensity = node["intensity"].as<float>();
+        light->type = 2;
         return light;
     }
 
