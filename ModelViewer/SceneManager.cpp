@@ -97,8 +97,6 @@ void SceneManager::drawUI()
 
     ImGui::End();
 }
-
-
 void SceneManager::drawGizmo()
 {
     if (!_selectedTransform) return;
@@ -184,12 +182,12 @@ void SceneManager::drawGizmo()
 //    ImGui::End();
 //}
 const int MAX_LIGHTS = 8; 
-//int lightCount = 0;
+int lightCount = 0;
 void SceneManager::addLight(LightType lightType)
 {
-    static int lightCounter = 0; // Static counter to keep track of light names
+    //static int lightCounter = 0; // Static counter to keep track of light names
 
-    if (lightCounter >= MAX_LIGHTS) {
+    if (lightCount >= MAX_LIGHTS) {
         std::cout << "ERROR: Maximum number of lights reached!" << std::endl;
         return; // Prevent adding more lights if the limit is reached
     }
@@ -199,15 +197,15 @@ void SceneManager::addLight(LightType lightType)
     {
     case LightType::Directional:
         newLight = std::make_unique<DirectionalLight>();
-        lightName = "Directional Light" + std::to_string(lightCounter);
+        lightName = "Directional Light" + std::to_string(lightCount);
         break;
     case LightType::Point:
         newLight = std::make_unique<PointLight>();
-        lightName = "Point Light" + std::to_string(lightCounter);
+        lightName = "Point Light" + std::to_string(lightCount);
         break;
     case LightType::Spot:
         newLight = std::make_unique<SpotLight>();
-        lightName = "Spot Light" + std::to_string(lightCounter);
+        lightName = "Spot Light" + std::to_string(lightCount);
         break;
     default:
         break;
@@ -220,7 +218,23 @@ void SceneManager::addLight(LightType lightType)
     _transforms.emplace_back(t);
 
 
-    lightCounter++;
+    lightCount++;
+
+}
+
+void SceneManager::addLight(std::unique_ptr<Light> light)
+{
+
+    //std::unique_ptr<Light> newLight;
+    Transform* t = new Transform;
+    t->name = light->name;
+    Entity* en = new Entity;
+    en->light = std::move(light);
+    t->setEntity(en);
+    _transforms.emplace_back(t);
+
+
+    lightCount++;
 
 }
 

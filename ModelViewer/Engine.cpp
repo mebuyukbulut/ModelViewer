@@ -78,6 +78,7 @@ void Engine::initUI()
         _renderer.setShader(e.data.text);
         });
     dispatcher.subscribe(EventType::EngineExit, [&](const Event& e) {
+        SM.saveScene();
         glfwSetWindowShouldClose(_window, true);
         });
     dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
@@ -118,6 +119,7 @@ void Engine::init(){
     //_renderer.enableWireframe();
 
     SM.init(&_renderer, _camera.get(),&(_renderer.getShader()));
+    SM.loadScene("save.yaml");
 
 
 	initUI();

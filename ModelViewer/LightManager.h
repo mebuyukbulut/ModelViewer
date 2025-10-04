@@ -1,9 +1,12 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <yaml-cpp/yaml.h>
+
 #include <iostream>
 #include <vector>
 #include <string>
 #include <memory>
+
 #include "Shader.h"
 #include "Inspectable.h"
 #include "Logger.h"
@@ -16,11 +19,11 @@ enum class LightType {
 };
 class Light : public IInspectable {
 public:
-    std::string name;
-    glm::vec3 position;
-    glm::vec3 color;
-    float intensity;
-    int type; // 0=Point, 1=Spot, 2=Directional
+    std::string name{};
+    glm::vec3 position{};
+    glm::vec3 color{};
+    float intensity{};
+    int type{}; // 0=Point, 1=Spot, 2=Directional
 
     Light() {
         std::cout << "Light constructor called \n";
@@ -31,13 +34,14 @@ public:
         type = -1; 
     }
     virtual void configShader(Shader& shader, std::string prefix);
-
-    // Inherited via IInspectable
+    virtual YAML::Node serialize() { return YAML::Node(); }
     virtual void drawUI() override;
+
+    virtual ~Light() = default;
 };
 class PointLight : public Light {
 public:
-    float attenuation;
+    float attenuation{};
     
     PointLight() {
         std::cout << "Point Light constructor called \n";
@@ -46,13 +50,14 @@ public:
         attenuation = 3;
     }
     void configShader(Shader& shader, std::string prefix) override;
+    YAML::Node serialize() override;
     void drawUI() override;
 };
 class SpotLight : public Light {
 public:
-    glm::vec3 direction;
-    float cutoff;
-    float attenuation;
+    glm::vec3 direction{};
+    float cutoff{};
+    float attenuation{};
 
     SpotLight() {
         LOG_TRACE("Spot Light constructor called");
@@ -64,15 +69,14 @@ public:
         attenuation = 3;
     }
     void configShader(Shader& shader, std::string prefix) override;
-
+    YAML::Node serialize() override;
     void drawUI() override;
 
     void setDirection(glm::vec3 rotation);
 };
-
 class DirectionalLight : public Light {
 public:
-    glm::vec3 direction;
+    glm::vec3 direction{};
 
     DirectionalLight() {
         name = "Directional Light";
@@ -80,8 +84,14 @@ public:
         direction = glm::vec3(0, -1, 0);
     }
     void configShader(Shader& shader, std::string prefix) override;
-
+    YAML::Node serialize() override;
     void drawUI() override;
 
 };
 
+
+
+class LightFactory {
+public:
+    static std::unique_ptr<Light> create(const YAML::Node& node);
+};

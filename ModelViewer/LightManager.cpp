@@ -1,4 +1,4 @@
-#include "LightManager.h"
+﻿#include "LightManager.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -57,6 +57,31 @@ void PointLight::configShader(Shader& shader, std::string prefix)
     Light::configShader(shader, prefix);
     shader.setFloat(prefix + "attenuation", attenuation);
 }
+YAML::Node PointLight::serialize()
+{
+    YAML::Node n; 
+    n["type"] = "point";
+    n["attenuation"] = attenuation;
+    n["position"] = position;
+    n["color"] = color;
+    n["intensity"] = intensity;
+
+    // float attenuation;
+    // std::string name;
+    // glm::vec3 position;
+    // glm::vec3 color;
+    // float intensity;
+    // int type; // 0=Point, 1=Spot, 2=Directional
+    return n;
+}
+YAML::Node SpotLight::serialize()
+{
+    return YAML::Node();
+}
+YAML::Node DirectionalLight::serialize()
+{
+    return YAML::Node();
+}
 void SpotLight::configShader(Shader& shader, std::string prefix)
 {
     Light::configShader(shader, prefix);
@@ -69,6 +94,7 @@ void DirectionalLight::configShader(Shader& shader, std::string prefix)
     Light::configShader(shader, prefix);
     shader.setVec3(prefix + "direction", direction);
 }
+
 
 
 void Light::drawUI()
@@ -118,4 +144,65 @@ void DirectionalLight::drawUI()
 {
     Light::drawUI();
     ImGui::DragFloat3("Direction", &direction[0], 0.1f);
+}
+
+
+namespace YAML {
+    template<>
+    struct convert<glm::vec3> {
+        // glm::vec3 → YAML (C++ objesini dosyaya yazarken)
+        static Node encode(const glm::vec3& rhs) {
+            Node node;
+            //node.push_back(std::vector<float>{ rhs.x, rhs.y, rhs.z });
+            node.SetStyle(YAML::EmitterStyle::Flow);
+            node.push_back(rhs.x);
+            node.push_back(rhs.y);
+            node.push_back(rhs.z);
+            return node;
+        }
+
+        // YAML → glm::vec3 (dosyadan okurken)
+        static bool decode(const Node& node, glm::vec3& rhs) {
+            if (!node.IsSequence() || node.size() != 3)
+                return false;
+            rhs.x = node[0].as<float>();
+            rhs.y = node[1].as<float>();
+            rhs.z = node[2].as<float>();
+            return true;
+        }
+    };
+}
+
+
+std::unique_ptr<Light> LightFactory::create(const YAML::Node& node)
+{
+    std::string typeStr = node["type"].as<std::string>();
+
+    if (typeStr == "point") {
+        auto light = std::make_unique<PointLight>();
+        light->position = node["position"].as<glm::vec3>();
+        light->color = node["color"].as<glm::vec3>();
+        light->intensity = node["intensity"].as<float>();
+        light->attenuation = node["attenuation"].as<float>();
+        return light;
+    }
+    else if (typeStr == "spot") {
+        auto light = std::make_unique<SpotLight>();
+        light->position = node["position"].as<glm::vec3>();
+        light->direction = node["direction"].as<glm::vec3>();
+        light->color = node["color"].as<glm::vec3>();
+        light->intensity = node["intensity"].as<float>();
+        light->attenuation = node["attenuation"].as<float>();
+        light->cutoff = node["cutoff"].as<float>();
+        return light;
+    }
+    else if (typeStr == "directional") {
+        auto light = std::make_unique<DirectionalLight>();
+        light->direction = node["direction"].as<glm::vec3>();
+        light->color = node["color"].as<glm::vec3>();
+        light->intensity = node["intensity"].as<float>();
+        return light;
+    }
+
+    return nullptr;
 }

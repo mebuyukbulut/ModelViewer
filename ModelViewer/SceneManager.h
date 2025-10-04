@@ -1,5 +1,10 @@
 #pragma once
 #include <memory>
+#include <yaml-cpp/yaml.h>
+#include <iostream>
+#include <fstream>
+
+
 #include "Entity.h"
 #include "Renderer.h"
 #include "Inspectable.h"
@@ -7,9 +12,13 @@
 #include "EventDispatcher.h"
 #include "Material.h"
 #include "Shader.h"
+#include "Scene.h"
+
 
 class SceneManager : public IInspectable
 {
+    Scene scene; 
+
 	std::list<std::shared_ptr<Transform>> _transforms{};
     std::list <Transform*> _selectedTransforms{};
     Transform* _selectedTransform{};
@@ -64,7 +73,35 @@ public:
         return _selectedTransform;
     }
 
+    void loadScene(std::string path) {
+        LOG_TRACE("Load Scene");
 
+        YAML::Node root = YAML::LoadFile(path);
+
+        for (const auto& lightNode : root["Lights"]) {
+            auto light = LightFactory::create(lightNode);
+
+            if (light.get()) {
+
+                LOG_TRACE("Load light");
+                addLight(std::move(light));
+            }
+        }
+
+
+    }
+    void saveScene() {
+        LOG_TRACE("Save Scene");
+        YAML::Node node;
+        for (auto transform : _transforms) {
+            Light* light = transform->getEntity()->light.get();
+            if(light)
+                node["Lights"].push_back(light->serialize());
+        }
+        std::string path = "save.yaml"; 
+        std::ofstream fout(path);
+        fout << node;
+    }
 
     // Inherited via IInspectable
     void drawUI() override;
@@ -73,6 +110,7 @@ public:
 
     // LIGHTS
     void addLight(LightType lightType);
+    void addLight(std::unique_ptr<Light> light);
     void configShader(Shader& shader);
 };
 

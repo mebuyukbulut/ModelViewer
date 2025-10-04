@@ -19,7 +19,7 @@ bool Scene::load(const std::string& path)
     // attenuation 
     // type
 
-    
+
 
     // Load Lights
     if (root["Lights"]) {
@@ -42,19 +42,33 @@ bool Scene::load(const std::string& path)
     // emissive
     
 
-    // Load Materials
-    if (root["Materials"]) {
-        for (const auto& node : root["Materials"]) {
-            Material mat;
-            auto base = node["baseColor"].as<std::vector<float>>();
-            mat.baseColor = { base[0], base[1], base[2], base[3] };
-            mat.metallic = node["metallic"].as<float>();
-            mat.roughness = node["roughness"].as<float>();
-            //materials.push_back(mat);
-        }
-    }
+    //// Load Materials
+    //if (root["Materials"]) {
+    //    for (const auto& node : root["Materials"]) {
+    //        Material mat;
+    //        auto base = node["baseColor"].as<std::vector<float>>();
+    //        mat.baseColor = { base[0], base[1], base[2], base[3] };
+    //        mat.metallic = node["metallic"].as<float>();
+    //        mat.roughness = node["roughness"].as<float>();
+    //        //materials.push_back(mat);
+    //    }
+    //}
 }
 bool Scene::save(const std::string& path)
 {
+    YAML::Node root;
+    root["Scene"]["name"] = name;
+
+    for (size_t i = 0; i < lights.size(); i++) {
+        root["Lights"][i]["position"] = std::vector<float>{ lights[i].position.x, lights[i].position.y, lights[i].position.z };
+        root["Lights"][i]["color"] = std::vector<float>{ lights[i].color.x, lights[i].color.y, lights[i].color.z };
+        root["Lights"][i]["intensity"] = lights[i].intensity;
+        root["Lights"][i]["type"] = lights[i].type;
+    }
     return false;
+}
+
+void Scene::unload()
+{
+
 }

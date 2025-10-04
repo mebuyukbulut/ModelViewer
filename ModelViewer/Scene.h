@@ -8,7 +8,7 @@ public:
     std::string name;
 
     // Sahnenin sahip olduğu kaynaklar
-    std::vector<MaterialHandle> materials;
+    //std::vector<MaterialHandle> materials;
     std::vector<Light> lights;
 
     // TODO: entity list, camera list, vs.
