@@ -60,13 +60,13 @@ void SceneManager::drawUI()
         ImGui::PopStyleColor(1);
 
 
-        //fmt::format()
-        ImGui::TreeNodeEx("1bc", flag2); ImGui::TreePop();
-        if (ImGui::TreeNodeEx("2bc")) { 
-            ImGui::TreeNodeEx("0bc", flag2); ImGui::TreePop();
-            ImGui::TreeNodeEx("1bc", flag2); ImGui::TreePop();
-            ImGui::TreePop();
-        }
+        ////fmt::format()
+        //ImGui::TreeNodeEx("1bc", flag2); ImGui::TreePop();
+        //if (ImGui::TreeNodeEx("2bc")) { 
+        //    ImGui::TreeNodeEx("0bc", flag2); ImGui::TreePop();
+        //    ImGui::TreeNodeEx("1bc", flag2); ImGui::TreePop();
+        //    ImGui::TreePop();
+        //}
 
         ImGui::TreePop();  // This is required at the end of the if block
     }

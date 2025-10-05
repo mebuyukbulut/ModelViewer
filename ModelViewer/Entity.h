@@ -1,5 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <yaml-cpp/yaml.h>
+
 #include <list>
 #include <memory>
 
@@ -35,6 +37,7 @@ public:
 	void setRotation(const glm::vec3& rotation);
 	void setScale(const glm::vec3& scale);
 
+	YAML::Node serialize();
 
 	glm::mat4 getGlobalMatrix();
 
@@ -75,3 +78,7 @@ public:
 	void drawUI() override;
 };
 
+class TransformFactory {
+public:
+	static std::unique_ptr<Transform> create(const YAML::Node& node, MaterialManager* materialManager);
+};

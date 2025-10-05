@@ -1,10 +1,12 @@
-#include "Entity.h"
+﻿#include "Entity.h"
 #include <imgui.h>
 #include "Renderer.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <format>
 
 void Transform::update() 
 {
@@ -60,6 +62,54 @@ void Transform::setRotation(const glm::vec3& rotation) { _rotation = rotation; _
 void Transform::setScale(const glm::vec3& scale) { _scale = scale; _isDirty = true; }
 
 
+namespace YAML {
+    template<>
+    struct convert<glm::vec3> {
+        // glm::vec3 → YAML (C++ objesini dosyaya yazarken)
+        static Node encode(const glm::vec3& rhs) {
+            Node node;
+            //node.push_back(std::vector<float>{ rhs.x, rhs.y, rhs.z });
+            node.SetStyle(YAML::EmitterStyle::Flow);
+            node.push_back(rhs.x);
+            node.push_back(rhs.y);
+            node.push_back(rhs.z);
+            return node;
+        }
+
+        // YAML → glm::vec3 (dosyadan okurken)
+        static bool decode(const Node& node, glm::vec3& rhs) {
+            if (!node.IsSequence() || node.size() != 3)
+                return false;
+            rhs.x = node[0].as<float>();
+            rhs.y = node[1].as<float>();
+            rhs.z = node[2].as<float>();
+            return true;
+        }
+    };
+}
+
+
+YAML::Node Transform::serialize() {
+    YAML::Node node;
+
+    node["name"] = name;
+    node["position"] = _position;
+    node["rotation"] = _rotation; 
+    node["scale"] = _scale; 
+
+    // light    
+    if (_entity->light) node["light"].push_back(_entity->light->serialize());
+    //node["light"].push_back(_entity->light ? _entity->light->serialize() : YAML::Node());
+    // model 
+    if (_entity->model) node["modelPath"] = (_entity->model->getPath());
+    //node["modelPath"] = _entity->model ? _entity->model->getPath() : "";
+
+
+    // serialize child of transform 
+    //    // entity
+    // components -> model, light, materials etc. 
+    return node;
+}
 
 void Transform::addChild(std::unique_ptr<Transform> child)
 {
@@ -114,4 +164,43 @@ void Entity::drawUI()
 {
     if (light.get()) light->drawUI();
     if (model.get()) model->drawUI();
+}
+
+
+
+std::unique_ptr<Transform> TransformFactory::create(const YAML::Node& node, MaterialManager* materialManager)
+{
+
+    auto transform = std::make_unique<Transform>();
+    transform->setEntity(new Entity);
+    transform->name = node["name"].as<std::string>();
+    transform->setPosition(node["position"].as<glm::vec3>());
+    transform->setRotation(node["rotation"].as<glm::vec3>());
+    transform->setScale(node["scale"].as<glm::vec3>());
+
+    if (node["light"].IsDefined()) {
+        for(const auto& light : node["light"])
+            transform->getEntity()->light = std::move(LightFactory::create(light));
+        transform->getEntity()->light->position = transform->getPosition();
+    }
+
+    if (node["modelPath"].IsDefined()) {
+        std::string path = node["modelPath"].as<std::string>();
+        Model* model = new Model(materialManager);
+        model->loadFromFile(path);
+        transform->getEntity()->model.reset(model);
+        LOG_TRACE(std::format("Path:{}", path));
+
+    }
+
+
+
+    //if (auto lightNode = node["light"]; lightNode && lightNode.IsDefined()) {
+    //    LOG_INFO("Light was found");
+    //}
+    //else {
+    //    LOG_ERROR("Light was not found");
+    //}
+
+    return transform;
 }

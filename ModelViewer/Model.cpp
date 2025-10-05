@@ -43,6 +43,8 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 bool Model::loadModel(std::string const& path)
 {
+    _path = path; 
+
     // read file via ASSIMP
     Assimp::Importer importer;
     //std::string modelPathStr = std::string(path.begin(), path.end());

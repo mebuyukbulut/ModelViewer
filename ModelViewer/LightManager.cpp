@@ -46,6 +46,7 @@ glm::vec3 kelvin2RGB_fast(float kelvin) {
     return  glm::clamp(color / 255.f, glm::vec3(0), glm::vec3(1));
 }
 
+
 void Light::configShader(Shader& shader, std::string prefix) {
     shader.setVec3(prefix + "position", position);
     shader.setVec3(prefix + "color", color);
@@ -57,6 +58,20 @@ void PointLight::configShader(Shader& shader, std::string prefix)
     Light::configShader(shader, prefix);
     shader.setFloat(prefix + "attenuation", attenuation);
 }
+void SpotLight::configShader(Shader& shader, std::string prefix)
+{
+    Light::configShader(shader, prefix);
+    shader.setVec3(prefix + "direction", direction);
+    shader.setFloat(prefix + "cutoff", cutoff);
+    shader.setFloat(prefix + "attenuation", attenuation);
+}
+void DirectionalLight::configShader(Shader& shader, std::string prefix)
+{
+    Light::configShader(shader, prefix);
+    shader.setVec3(prefix + "direction", direction);
+}
+
+
 YAML::Node PointLight::serialize()
 {
     YAML::Node n; 
@@ -89,19 +104,6 @@ YAML::Node DirectionalLight::serialize()
     n["direction"] = direction;
     return n;
 }
-void SpotLight::configShader(Shader& shader, std::string prefix)
-{
-    Light::configShader(shader, prefix);
-    shader.setVec3(prefix + "direction", direction);
-    shader.setFloat(prefix + "cutoff", cutoff);
-    shader.setFloat(prefix + "attenuation", attenuation);
-}
-void DirectionalLight::configShader(Shader& shader, std::string prefix)
-{
-    Light::configShader(shader, prefix);
-    shader.setVec3(prefix + "direction", direction);
-}
-
 
 
 void Light::drawUI()

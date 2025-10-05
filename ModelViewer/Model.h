@@ -22,6 +22,7 @@ class Model : public IInspectable
     std::vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	std::vector<Mesh> meshes;
 	std::string _directory;
+    std::string _path{};
 
     unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = 1);
     bool loadModel(std::string const& path);
@@ -34,6 +35,8 @@ public:
     void terminate();
     void loadDefault();
     bool loadFromFile(const std::string& filename);
+    std::string getPath() { return _path; }
+
 
     Model(MaterialManager* materialManager) : _materialManager{ materialManager } {}
 
