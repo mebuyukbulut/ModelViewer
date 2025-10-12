@@ -159,7 +159,6 @@ void Transform::drawUI()
 }
 
 
-
 void Entity::drawUI()
 {
     if (light.get()) light->drawUI();

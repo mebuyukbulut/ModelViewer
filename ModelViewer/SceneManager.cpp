@@ -46,6 +46,13 @@ void SceneManager::drawUI()
 
             if (ImGui::IsItemClicked())
             {
+                // One item select 
+                for (auto&& i : _selectedTransforms)
+                    i->deselect();
+                _selectedTransforms.clear();
+
+                // TO-DO multiple item select
+
                 _selectedTransforms.push_back(i.get());
                 _selectedTransform = i.get();
 
