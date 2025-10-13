@@ -125,8 +125,8 @@ void Engine::init(){
 	initUI();
 
     LOG_INFO("engine was initialized");
-    LOG_WARNING("test 0");
-    LOG_ERROR("test 1");
+    //LOG_WARNING("test 0");
+    //LOG_ERROR("test 1");
 }
 void Engine::mainLoop()
 {
@@ -183,11 +183,7 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (app) {
         LOG_TRACE(std::format("Window resized to: {} x {}",width,height));
-
-        if(width && height)
-            app->_camera->setWindowSize(width,height);
-		//app->_UI.setWindowSize(width, height);
-		//app->_camera.setAspectRatio(width, height);
+        app->SM.ResizeRenderTarget(width, height);
     }
 }
 

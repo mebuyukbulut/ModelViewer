@@ -171,6 +171,7 @@ void SceneManager::drawUI()
     ImGui::Button("Toolbar goes here", ImVec2(0, 37));
 
     ImGui::End();
+    ResizeRenderTarget(panelSize.x, panelSize.y);
     // viewport toolbar END
 
 

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 #include <yaml-cpp/yaml.h>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include "Material.h"
 #include "Shader.h"
 #include "Scene.h"
+#include "Camera.h"
 
 struct RenderTarget {
     GLuint fbo;
@@ -60,6 +61,27 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void ResizeRenderTarget(int newWidth, int newHeight)
+    {
+        if (newWidth == _rt.width && newHeight == _rt.height)
+            return; // boyut değişmemiş
+
+        _rt.width = newWidth;
+        _rt.height = newHeight; 
+
+        if (_rt.width && _rt.height)
+            _camera->setWindowSize(_rt.width, _rt.height);
+
+        // Eski GPU kaynaklarını serbest bırak
+        glDeleteFramebuffers(1, &_rt.fbo);
+        glDeleteTextures(1, &_rt.colorTex);
+        glDeleteRenderbuffers(1, &_rt.depthRbo);
+
+        // Yeni boyutla tekrar oluştur
+        CreateRenderTarget(_rt, newWidth, newHeight);
+    }
+
+
 	void init(Renderer* renderer, Camera* camera, Shader* shader) {
         _renderer = renderer; 
         _camera = camera; 
@@ -97,7 +119,7 @@ public:
 	}
 
     void draw() {
-        // FBO�ya �iz
+        // FBO’ya çiz
         glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
         glViewport(0, 0, _rt.width, _rt.height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
