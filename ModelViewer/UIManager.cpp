@@ -154,11 +154,9 @@ void UIManager::draw(SceneManager* sm ) {
 
 
 
-bool UIManager::isHoverOnUI()
-{
-    
-    return ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_AnyWindow);
-     
+bool UIManager::isHoverOnUI(){   
+    return !_IsHoveringSceneViewport;
+    //return ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_AnyWindow);
 }
 
 void UIManager::beginFrame() {

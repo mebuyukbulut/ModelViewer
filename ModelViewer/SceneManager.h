@@ -32,6 +32,7 @@ class SceneManager : public IInspectable
 
     Renderer* _renderer{};
     class Camera* _camera{};
+    class UIManager* _UI{};
     std::unique_ptr<MaterialManager> _materialMng{};
     RenderTarget _rt{};
 public:
@@ -82,9 +83,10 @@ public:
     }
 
 
-	void init(Renderer* renderer, Camera* camera, Shader* shader) {
+	void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
         _renderer = renderer; 
         _camera = camera; 
+        _UI = UI;
 
 
         dispatcher.subscribe(EventType::AddPointLight, [&](const Event& e) {

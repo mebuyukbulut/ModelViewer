@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "LightManager.h"
 #include <imgui_internal.h>
+#include "UIManager.h"
 
 void SceneManager::drawUI()
 {
@@ -115,7 +116,7 @@ void SceneManager::drawUI()
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Viewport");// &viewport->get_active()); //ImGuiWindowFlags_NoTitleBar| ImGuiWindowFlags_UnsavedDocument
-
+    _UI->setHoverOnUI(ImGui::IsWindowHovered());
     //viewport->set_hovered(ImGui::IsWindowHovered());
     ////std::cout << ImGui::IsWindowHovered() << std::endl;
 

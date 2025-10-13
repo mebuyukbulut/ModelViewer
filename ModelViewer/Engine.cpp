@@ -118,7 +118,7 @@ void Engine::init(){
     _renderer.setShader("PBR0", Renderer::ShaderType::Main);
     //_renderer.enableWireframe();
 
-    SM.init(&_renderer, _camera.get(),&(_renderer.getShader()));
+    SM.init(&_renderer, _camera.get(),&(_renderer.getShader()),&_UI);
     SM.loadScene("save.yaml");
 
 

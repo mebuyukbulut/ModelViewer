@@ -14,6 +14,7 @@ class UIManager
 {
 	GLFWwindow* _window;
 	std::shared_ptr<Camera> _camera;
+	bool _IsHoveringSceneViewport = false;
 	//glm::vec2 _windowSize;
 public:
 	void init(GLFWwindow* window,  std::shared_ptr <Camera> camera);
@@ -24,6 +25,7 @@ public:
 	void draw(class SceneManager* sm);
 
 	bool isHoverOnUI();
+	void setHoverOnUI(bool flag) { _IsHoveringSceneViewport = flag; }
 
 	//void viewport_window();
 
