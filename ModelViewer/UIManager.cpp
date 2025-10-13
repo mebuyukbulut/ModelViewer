@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include "imgui_internal.h"
 
 
 #include "FileUtils.h"
@@ -38,6 +39,15 @@ void UIManager::init(GLFWwindow* window, std::shared_ptr<Camera> camera) {
 
     // Eğer default fontu da korumak istersen:
     io.FontDefault = io.Fonts->AddFontFromFileTTF("fonts/Roboto-VariableFont_wdth,wght.ttf", 16.0f, NULL, ranges);
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+
+    //io.ConfigViewportsNoAutoMerge = true;
+    //io.ConfigViewportsNoTaskBarIcon = true;
+
+    //io.ConfigWindowsResizeFromEdges = true;
+    //io.ConfigWindowsMoveFromTitleBarOnly = true;
+
 
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -64,6 +74,7 @@ void UIManager::terminate() {
 void UIManager::draw(SceneManager* sm ) {
 	beginFrame();
 
+    //viewport_window();
     if (sm) {
         sm->drawUI();
         sm->drawGizmo();
@@ -78,6 +89,71 @@ void UIManager::draw(SceneManager* sm ) {
 	endFrame();
 }
 
+
+//
+//void UIManager::viewport_window() {
+//
+//    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+//    ImGui::Begin("Viewport");// &viewport->get_active()); //ImGuiWindowFlags_NoTitleBar| ImGuiWindowFlags_UnsavedDocument
+//
+//    //viewport->set_hovered(ImGui::IsWindowHovered());
+//    ////std::cout << ImGui::IsWindowHovered() << std::endl;
+//
+//    auto t_size = ImGui::GetContentRegionAvail();//ImGui::GetWindowSize();
+//    glm::ivec2 window_size{ t_size.x, t_size.y };
+//
+//    //if (window_size != viewport->get_resolution()) {
+//    //    std::string res = "(" + std::to_string(window_size.x) + ", " + std::to_string(window_size.y) + ")";
+//    //    //LogUtils::get().log("New window size: " + res);
+//    //    viewport->set_resolution(window_size);
+//    //    viewport->set_dirty(true);
+//    //}
+//    GLint defaultFBO = 0;
+//    //glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES, &defaultFBO);
+//    ImGui::Image(
+//        (ImTextureID) defaultFBO,//viewport->texID(),
+//        ImGui::GetContentRegionAvail(),
+//        ImVec2(0, 1),
+//        ImVec2(1, 0)
+//    );
+//
+//
+//    // viewport toolbar BEGIN
+//    // https://gist.github.com/rmitton/f80cbb028fca4495ab1859a155db4cd8
+//    float menuBarHeight = 25;
+//    float toolbarSize = 30;
+//    ImGuiWindow* viewport = ImGui::GetCurrentWindow();
+//    //ImGuiViewport* viewport = ImGui::GetMainViewport();
+//    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + menuBarHeight));
+//    ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, toolbarSize));
+//    ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+//
+//    ImGuiWindowFlags window_flags = 0
+//        | ImGuiWindowFlags_NoDocking
+//        | ImGuiWindowFlags_NoTitleBar
+//        | ImGuiWindowFlags_NoResize
+//        | ImGuiWindowFlags_NoMove
+//        | ImGuiWindowFlags_NoScrollbar
+//        | ImGuiWindowFlags_NoSavedSettings
+//        ;
+//    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+//    ImGui::Begin("TOOLBAR", NULL, window_flags);
+//    ImGui::PopStyleVar();
+//
+//    ImGui::Button("Toolbar goes here", ImVec2(0, 37));
+//
+//    ImGui::End();
+//    // viewport toolbar END
+//
+//
+//    ImGui::End();
+//    ImGui::PopStyleVar();
+//
+//
+//}
+
+
+
 bool UIManager::isHoverOnUI()
 {
     
@@ -89,6 +165,10 @@ void UIManager::beginFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+
+    // dock directly to main window
+    ImGuiID dockspace_id = ImGui::DockSpaceOverViewport();
 }
 void UIManager::endFrame() {
     ImGui::Render();

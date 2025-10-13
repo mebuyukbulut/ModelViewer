@@ -75,7 +75,7 @@ void Engine::initUI()
 	//_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
 
     dispatcher.subscribe(EventType::ShaderSelected, [&](const Event& e) {
-        _renderer.setShader(e.data.text);
+        _renderer.setShader(e.data.text,Renderer::ShaderType::Main);
         });
     dispatcher.subscribe(EventType::EngineExit, [&](const Event& e) {
         SM.saveScene();
@@ -115,7 +115,7 @@ void Engine::init(){
 	_camera->setWindowSize(config.window.width, config.window.height);
     _renderer.init();
 	_renderer.setCamera(_camera);
-    _renderer.setShader("PBR0");
+    _renderer.setShader("PBR0", Renderer::ShaderType::Main);
     //_renderer.enableWireframe();
 
     SM.init(&_renderer, _camera.get(),&(_renderer.getShader()));
@@ -136,7 +136,6 @@ void Engine::mainLoop()
     
     time.init();
     // render loop
-    // -----------
     while (!glfwWindowShouldClose(_window))
     {
         processInput(_window);
@@ -148,22 +147,13 @@ void Engine::mainLoop()
         //ps.update(deltaTime);
         //ps.draw();
         
-        //material.use(&_renderer.getShader()); 
-
         SM.draw();
-
-
-
 		SM.configShader(_renderer.getShader());
         
-        _renderer.getShader().setVec3("viewPos", _camera->getPosition());
-        _renderer.getShader().setVec3("ambientColor", glm::vec3(1, 1, 1));
-        _renderer.getShader().setFloat("ambientIntensity", 0.1);
-
 
 		_UI.draw(&SM);
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
+
+
         glfwSwapBuffers(_window);
         glfwPollEvents();
     }

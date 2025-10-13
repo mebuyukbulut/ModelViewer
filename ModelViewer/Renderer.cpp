@@ -8,7 +8,7 @@
 
 void Renderer::init() {
 	_shaderManager.init(); // load all shaders
-	setShader("basic"); // set default shader
+	setShader("basic", ShaderType::Main); // set default shader
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
@@ -32,13 +32,13 @@ void Renderer::beginFrame() {
     _shader->setMat4("view", _camera->getViewMatrix());
     _shader->setMat4("projection", _camera->getProjectionMatrix());
     _shader->setMat4("model", glm::mat4(1.0f));
+    _shader->setVec3("viewPos", _camera->getPosition());
 }
 void Renderer::endFrame() {
     
 }
 
 void Renderer::drawModel(Model* model, const glm::mat4& transform) { 
-    // draw our first triangle
     //_shader.use();
 	_shader->setMat4("model", transform);
 
@@ -47,10 +47,25 @@ void Renderer::drawModel(Model* model, const glm::mat4& transform) {
 
 
 void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
-void Renderer::setShader(const std::string name) {
-    _shader = &_shaderManager.getShader(name);
-    _shader->use();
+void Renderer::setShader(const std::string name, ShaderType shaderType) {
+    Shader* shader{};
+    shader = &_shaderManager.getShader(name);
+    shader->use();
 
+    switch (shaderType)
+    {
+    case Renderer::ShaderType::Main:
+        _shader = shader;
+        break;
+    case Renderer::ShaderType::Light:
+        _lightShader = shader;
+        break;
+    case Renderer::ShaderType::Selection:
+        _selectShader = shader;
+        break;
+    default:
+        break;
+    }
 
     //_shader->setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
     //_shader->setFloat("lightIntensity", 30.0f);

@@ -25,6 +25,8 @@ public:
 
 	bool isHoverOnUI();
 
+	//void viewport_window();
+
 	class ParticleSystem* ps;
 
 private: 

@@ -14,6 +14,12 @@
 #include "Shader.h"
 #include "Scene.h"
 
+struct RenderTarget {
+    GLuint fbo;
+    GLuint colorTex;
+    GLuint depthRbo;
+    int width, height;
+};
 
 class SceneManager : public IInspectable
 {
@@ -26,8 +32,34 @@ class SceneManager : public IInspectable
     Renderer* _renderer{};
     class Camera* _camera{};
     std::unique_ptr<MaterialManager> _materialMng{};
-
+    RenderTarget _rt{};
 public:
+    void CreateRenderTarget(RenderTarget& rt, int width, int height) {
+        rt.width = width;
+        rt.height = height;
+
+        glGenTextures(1, &rt.colorTex);
+        glBindTexture(GL_TEXTURE_2D, rt.colorTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glGenRenderbuffers(1, &rt.depthRbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rt.depthRbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
+        glGenFramebuffers(1, &rt.fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, rt.fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt.colorTex, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rt.depthRbo);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            printf("RenderTarget incomplete!\n");
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
 	void init(Renderer* renderer, Camera* camera, Shader* shader) {
         _renderer = renderer; 
         _camera = camera; 
@@ -45,6 +77,8 @@ public:
 
         _materialMng.reset(new MaterialManager(shader));
 
+        
+        CreateRenderTarget(_rt, 300, 300);
 
         //Transform* transform = new Transform;
         //Entity* entity = new Entity;
@@ -63,10 +97,20 @@ public:
 	}
 
     void draw() {
+        // FBO’ya çiz
+        glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
+        glViewport(0, 0, _rt.width, _rt.height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
         for (auto& transform : _transforms) {
             if(transform.get()->getEntity()->model)
                 transform->draw(_renderer);
         }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
     }
     
     Transform* getSelectedTransform() {
