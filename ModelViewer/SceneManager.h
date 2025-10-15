@@ -133,8 +133,6 @@ public:
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
     }
     
     Transform* getSelectedTransform() {

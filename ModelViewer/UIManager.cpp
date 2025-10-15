@@ -74,16 +74,17 @@ void UIManager::terminate() {
 void UIManager::draw(SceneManager* sm ) {
 	beginFrame();
 
-    //viewport_window();
-    if (sm) {
-        sm->drawUI();
-        sm->drawGizmo();
-    }
-
 	mainMenu();
     ps->drawUI();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
+
+    //viewport_window();
+    if (sm) {
+        sm->drawUI();
+        //sm->drawGizmo();
+    }
+
 
     //ImGui::ShowDemoWindow();
 	endFrame();

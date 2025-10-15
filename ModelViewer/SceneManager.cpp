@@ -175,6 +175,7 @@ void SceneManager::drawUI()
     ResizeRenderTarget(panelSize.x, panelSize.y);
     // viewport toolbar END
 
+    drawGizmo();
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -183,16 +184,16 @@ void SceneManager::drawGizmo()
 {
     if (!_selectedTransform) return;
 
-
     // Make sure to call inside ImGui frame:
     ImGuizmo::BeginFrame();
 
     // Get viewport size
-    ImVec2 windowPos(0, 0);// = ImGui::GetWindowPos();
-
-    auto windowSize = _camera->getWindowSize();
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    auto windowSize = ImGui::GetWindowSize(); //_camera->getWindowSize();
 
     // Setup ImGuizmo rect
+    //ImGuizmo::SetDrawlist(); // bu olmadan gizmo gozukmuyor
+    ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
     ImGuizmo::SetRect(windowPos.x, windowPos.y, windowSize.x, windowSize.y);
 
 
@@ -216,7 +217,23 @@ void SceneManager::drawGizmo()
     if (ImGuizmo::IsUsing()) {
         _selectedTransform->setPosition(glm::vec3(modelMatrix[3]));
     }
+
 }
+
+
+//void UIManager::beginFrame() {
+//    ImGui_ImplOpenGL3_NewFrame();
+//    ImGui_ImplGlfw_NewFrame();
+//    ImGui::NewFrame();
+//
+//
+//    // dock directly to main window
+//    ImGuiID dockspace_id = ImGui::DockSpaceOverViewport();
+//}
+//void UIManager::endFrame() {
+//    ImGui::Render();
+//    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//}
 
 
 // LIGHTS 
