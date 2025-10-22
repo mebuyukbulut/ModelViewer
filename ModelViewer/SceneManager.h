@@ -57,7 +57,7 @@ public:
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rt.depthRbo);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            printf("RenderTarget incomplete!\n");
+            LOG_ERROR("RenderTarget incomplete!");
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }

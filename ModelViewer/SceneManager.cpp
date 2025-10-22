@@ -7,6 +7,15 @@
 #include <imgui_internal.h>
 #include "UIManager.h"
 
+
+enum class ImguizmoState
+{
+    Translate,
+    Rotate,
+    Scale
+};
+ImguizmoState _GizmoState;
+
 void SceneManager::drawUI()
 {
     ImGui::Begin("Scene");
@@ -165,13 +174,25 @@ void SceneManager::drawUI()
         | ImGuiWindowFlags_NoScrollbar
         | ImGuiWindowFlags_NoSavedSettings
         ;
+
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::Begin("TOOLBAR", NULL, window_flags);
-    ImGui::PopStyleVar();
 
-    ImGui::Button("Toolbar goes here", ImVec2(0, 37));
+    //_GizmoState
+    if(ImGui::Button("T", ImVec2(0, 37))) // translate 
+        _GizmoState = ImguizmoState::Translate; 
+    ImGui::SameLine();
+    if (ImGui::Button("R", ImVec2(0, 37))) // rotate
+        _GizmoState = ImguizmoState::Rotate; 
+    ImGui::SameLine();
+    if (ImGui::Button("S", ImVec2(0, 37))) // scale
+        _GizmoState = ImguizmoState::Scale; 
+    //ImGui::Button("Toolbar goes here", ImVec2(0, 37));
 
     ImGui::End();
+    ImGui::PopStyleVar();
+
+
     ResizeRenderTarget(panelSize.x, panelSize.y);
     // viewport toolbar END
 
@@ -200,22 +221,62 @@ void SceneManager::drawGizmo()
 
     // Choose operation: translate / rotate / scale
     static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;// | ImGuizmo::ROTATE | ImGuizmo::SCALE;
+    switch (_GizmoState)
+    {
+    case ImguizmoState::Translate:
+        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+        break;
+    case ImguizmoState::Rotate:
+        mCurrentGizmoOperation = ImGuizmo::ROTATE;
+        break;
+    case ImguizmoState::Scale:
+        mCurrentGizmoOperation = ImGuizmo::SCALE;
+        break;
+    default:
+        break;
+    }
 
-    glm::mat4 modelMatrix(1);
+
+
+
+
+    glm::mat4 modelMatrix(1); 
     modelMatrix = glm::translate(glm::mat4(1.0f), _selectedTransform->getPosition());
+    //modelMatrix *= glm::mat4_cast(glm::quat(_selectedTransform->getRotation())); // if rotation stored as quat
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedTransform->getRotation().x), glm::vec3(1, 0, 0));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedTransform->getRotation().y), glm::vec3(0, 1, 0));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedTransform->getRotation().z), glm::vec3(0, 0, 1));
+    modelMatrix = glm::scale(modelMatrix, _selectedTransform->getScale());
+
 
     ImGuizmo::Manipulate(
         glm::value_ptr(_camera->getViewMatrix()),
         glm::value_ptr(_camera->getProjectionMatrix()),
         mCurrentGizmoOperation,
-        ImGuizmo::LOCAL,
+        ImGuizmo::WORLD,
         glm::value_ptr(modelMatrix)
     );
+
+    float translation[3], rotation[3], scale[3];
+    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(modelMatrix), translation, rotation, scale);
 
     
     // If modified, write back into your glm::mat4
     if (ImGuizmo::IsUsing()) {
-        _selectedTransform->setPosition(glm::vec3(modelMatrix[3]));
+        switch (_GizmoState)
+        {
+        case ImguizmoState::Translate:
+            _selectedTransform->setPosition(glm::make_vec3(translation));
+            break;
+        case ImguizmoState::Rotate:
+            _selectedTransform->setRotation(glm::make_vec3(rotation)); // convert to radians if needed
+            break;
+        case ImguizmoState::Scale:
+            _selectedTransform->setScale(glm::make_vec3(scale));
+            break;
+        default:
+            break;
+        }
     }
 
 }
