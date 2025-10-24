@@ -269,11 +269,21 @@ void main(){
     vec3 result = pLights;// * material.color;
     //vec3 result = (pLights + ambient) * material.color;
 
+
     //// HDR ? 
     //result = result / (result + vec3(1.0));
     //result = pow(result, vec3(1.0/2.2)); 
 
-    FragColor = vec4(result, 1.0);    
+    //// Gamma ? 
+    //float gamma = 2.2;
+    //result.rgb = pow(result.rgb, vec3(1.0/gamma));
+
+
+    FragColor = vec4(result,1.0);
+
+    //FragColor = vec4(result, 1.0);    
+    
+    
     //float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
     //FragColor = vec4(vec3(depth), 1.0);
 }	

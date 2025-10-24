@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Particle System">
       <UniqueIdentifier>{7582991d-43b5-4681-a086-961e92143a1c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders">
+      <UniqueIdentifier>{7b9f6c78-629b-4d38-86b1-7b10e19064c0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -178,17 +181,47 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\lambertian.frag" />
-    <None Include="shaders\lambertian.vert" />
-    <None Include="shaders\normal.frag" />
-    <None Include="shaders\normal.vert" />
-    <None Include="shaders\blinn-phong.frag" />
-    <None Include="shaders\blinn-phong.vert" />
-    <None Include="shaders\basic_lighting.frag" />
-    <None Include="shaders\basic_lighting.vert" />
-    <None Include="shaders\particle_point.frag" />
-    <None Include="shaders\particle_point.vert" />
-    <None Include="shaders\PBR0.frag" />
-    <None Include="shaders\PBR0.vert" />
+    <None Include="shaders\basic_lighting.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\basic_lighting.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\blinn-phong.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\blinn-phong.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lambertian.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\lambertian.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\normal.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\normal.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\particle_point.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\particle_point.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\PBR0.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\PBR0.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\bg_grad.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\bg_grad.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

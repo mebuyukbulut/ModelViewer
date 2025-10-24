@@ -188,6 +188,8 @@
   <ItemGroup>
     <None Include="shaders\basic_lighting.frag" />
     <None Include="shaders\basic_lighting.vert" />
+    <None Include="shaders\bg_grad.frag" />
+    <None Include="shaders\bg_grad.vert" />
     <None Include="shaders\blinn-phong.frag" />
     <None Include="shaders\blinn-phong.vert" />
     <None Include="shaders\lambertian.frag" />

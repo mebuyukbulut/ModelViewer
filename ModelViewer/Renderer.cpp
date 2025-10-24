@@ -13,8 +13,11 @@ void Renderer::init() {
 	glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
-    //glEnable(GL_FRAMEBUFFER_SRGB);
+    
 
+    //glDisable(GL_FRAMEBUFFER_SRGB);
+    //GLboolean srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
+    //std::cout << "Framebuffer sRGB: " << (srgbEnabled ? "ENABLED" : "DISABLED") << std::endl;
 
 }
 void Renderer::terminate() {
@@ -24,8 +27,11 @@ void Renderer::terminate() {
 
 void Renderer::beginFrame() {
 	// clear the color buffer
-    //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClearColor(0,0,0, 1.0f);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    //static float a = 0.0; 
+    //a = a > 1.0f ? 0.0f : a + 0.01f;
+    //
+    //glClearColor(a,a,a, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set view and projection matrices
@@ -43,6 +49,17 @@ void Renderer::drawModel(Model* model, const glm::mat4& transform) {
 	_shader->setMat4("model", transform);
 
     model->draw(*_shader);
+}
+
+void Renderer::drawBackground()
+{
+
+    glDisable(GL_DEPTH_TEST);
+    _shaderManager.getShader("bg").use();
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+    glEnable(GL_DEPTH_TEST);
+
+    _shader->use();
 }
 
 

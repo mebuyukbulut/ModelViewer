@@ -104,15 +104,15 @@ public:
         
         CreateRenderTarget(_rt, 300, 300);
 
-        //Transform* transform = new Transform;
-        //Entity* entity = new Entity;
-        //_materialMng.reset(new MaterialManager(shader));
-        //entity->model.reset(new Model(_materialMng.get()));
-        //entity->model->loadFromFile("models\\monkey.obj");
-        //entity->_renderer = renderer;
-        //transform->setEntity(entity);
-        //transform->name = "myobject"; 
-        //_transforms.emplace_back(transform);
+        Transform* transform = new Transform;
+        Entity* entity = new Entity;
+        _materialMng.reset(new MaterialManager(shader));
+        entity->model.reset(new Model(_materialMng.get()));
+        entity->model->loadFromFile("models\\monkey.obj");
+        entity->_renderer = renderer;
+        transform->setEntity(entity);
+        transform->name = "myobject"; 
+        _transforms.emplace_back(transform);
 
         //Transform* t2 = new Transform;
         //t2->name = "my new object";
@@ -124,8 +124,9 @@ public:
         // FBO’ya çiz
         glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
         glViewport(0, 0, _rt.width, _rt.height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        //glClearColor(1, 1, 1, 0.1);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        _renderer->drawBackground();
 
         for (auto& transform : _transforms) {
             if(transform.get()->getEntity()->model)

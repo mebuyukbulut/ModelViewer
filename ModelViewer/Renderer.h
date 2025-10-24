@@ -19,6 +19,7 @@ private:
 
 	ShaderManager _shaderManager;
 	Shader* _shader{};
+	Shader* _bgShader{};
 	Shader* _lightShader{};
 	Shader* _selectShader{};
 
@@ -32,6 +33,7 @@ public:
 	void endFrame();
 
 	void drawModel(Model* model, const glm::mat4& transform);
+	void drawBackground();
 
 	void setCamera(std::shared_ptr<Camera> camera);
 	void setShader(const std::string name, ShaderType shaderType);
