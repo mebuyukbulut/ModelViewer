@@ -16,6 +16,38 @@ enum class ImguizmoState
 };
 ImguizmoState _GizmoState;
 
+void SceneManager::loadScene(std::string path) {
+    LOG_TRACE("Load Scene");
+
+    //YAML::Node root = YAML::LoadFile(path);
+
+    //for (const auto& lightNode : root["Lights"]) {
+    //    auto light = LightFactory::create(lightNode);
+
+    //    if (light.get()) {
+
+    //        LOG_TRACE("Load light");
+    //        addLight(std::move(light));
+    //    }
+    //}
+
+    addCube();
+
+    YAML::Node rootTest = YAML::LoadFile("save0.yaml");
+    for (const auto& transformNode : rootTest) {
+        auto transform = TransformFactory::create(transformNode, _materialMng.get());
+
+        if (transform.get()) {
+
+            LOG_TRACE("Load transform...");
+            _transforms.emplace_back(std::move(transform));
+            //addLight(std::move(transform));
+        }
+    }
+
+
+}
+
 void SceneManager::drawUI()
 {
     ImGui::Begin("Scene");
@@ -411,3 +443,39 @@ void SceneManager::configShader(Shader& shader)
 
     shader.setInt("numLights", counter);
 }
+
+
+void SceneManager::addCube() {
+    ////MeshFactory mf; 
+    ////auto cubeMesh = mf.create(DefaultShapes::Cube);
+
+    //Transform* transform = new Transform;
+    //Entity* entity = new Entity;
+
+    //entity->model.reset(new Model(_materialMng.get()));
+    //entity->model->loadDefault();
+    ////entity->model->addMesh(cubeMesh);
+    //entity->_renderer = _renderer;
+    //transform->setEntity(entity);
+    //transform->name = "my cube object";
+    //_transforms.emplace_back(transform);
+
+
+
+
+    Transform* transform = new Transform;
+    transform->setEntity(new Entity);
+    transform->name = "my cube object";
+    transform->setPosition(glm::vec3(0,0,0));
+    transform->setRotation(glm::vec3(0,0,0));
+    transform->setScale(glm::vec3(1,1,1));
+
+
+    Model* model = new Model(_materialMng.get());
+    model->loadDefault();
+    transform->getEntity()->model.reset(model);
+    LOG_TRACE("add Cube");
+
+    _transforms.emplace_back(transform);
+}
+

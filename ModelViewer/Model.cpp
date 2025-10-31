@@ -45,7 +45,7 @@ bool Model::loadModel(std::string const& path)
 {
     _path = path; 
 
-    // read file via ASSIMP
+    // read file via ASSIMP 
     Assimp::Importer importer;
     //std::string modelPathStr = std::string(path.begin(), path.end());
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -231,6 +231,11 @@ void Model::loadDefault()
     Mesh mesh;
     mesh.loadDefault();
     meshes.push_back(mesh);
+
+    // if model loading not create a material use default one 
+    if (_materials.empty()) {
+        _materials.push_back(_materialManager->getDefaultMaterial());
+    }
 }
 
 bool Model::loadFromFile(const std::string& filename) {

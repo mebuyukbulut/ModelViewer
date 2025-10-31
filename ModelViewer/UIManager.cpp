@@ -220,6 +220,10 @@ void UIManager::mainMenu(){
                 Event e{ EventType::AddDirectionalLight };
                 dispatcher.dispatch(e);
             }
+            if (ImGui::MenuItem("Add Cube")) {
+                Event e{ EventType::AddCube };
+                dispatcher.dispatch(e);
+            }
             ImGui::EndMenu();
         }
 

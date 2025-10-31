@@ -8,7 +8,7 @@
 
 void Renderer::init() {
 	_shaderManager.init(); // load all shaders
-	setShader("basic", ShaderType::Main); // set default shader
+	//setShader("basic", ShaderType::Main); // set default shader
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
@@ -45,7 +45,7 @@ void Renderer::endFrame() {
 }
 
 void Renderer::drawModel(Model* model, const glm::mat4& transform) { 
-    //_shader.use();
+    _shader->use();
 	_shader->setMat4("model", transform);
 
     model->draw(*_shader);
@@ -53,13 +53,14 @@ void Renderer::drawModel(Model* model, const glm::mat4& transform) {
 
 void Renderer::drawBackground()
 {
-
     glDisable(GL_DEPTH_TEST);
-    _shaderManager.getShader("bg").use();
+    glBindVertexArray(2);
+    _bgShader->use();
+    //_shaderManager.getShader("bg").use();
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
     glEnable(GL_DEPTH_TEST);
 
-    _shader->use();
+    //_shader->use();
 }
 
 
@@ -73,6 +74,9 @@ void Renderer::setShader(const std::string name, ShaderType shaderType) {
     {
     case Renderer::ShaderType::Main:
         _shader = shader;
+        break;
+    case Renderer::ShaderType::Background:
+        _bgShader = shader;
         break;
     case Renderer::ShaderType::Light:
         _lightShader = shader;

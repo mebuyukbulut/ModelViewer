@@ -98,34 +98,38 @@ public:
         dispatcher.subscribe(EventType::AddDirectionalLight, [&](const Event& e) {
             addLight(LightType::Directional);
             });
+        dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
+            addCube();
+            });
 
         _materialMng.reset(new MaterialManager(shader));
-
         
         CreateRenderTarget(_rt, 300, 300);
 
-        Transform* transform = new Transform;
-        Entity* entity = new Entity;
-        _materialMng.reset(new MaterialManager(shader));
-        entity->model.reset(new Model(_materialMng.get()));
-        entity->model->loadFromFile("models\\monkey.obj");
-        entity->_renderer = renderer;
-        transform->setEntity(entity);
-        transform->name = "myobject"; 
-        _transforms.emplace_back(transform);
+        //Transform* transform = new Transform;
+        //Entity* entity = new Entity;
+        ////_materialMng.reset(new MaterialManager(shader));
+        //entity->model.reset(new Model(_materialMng.get()));
+        //entity->model->loadFromFile("models\\monkey.obj");
+        //entity->_renderer = renderer;
+        //transform->setEntity(entity);
+        //transform->name = "myobject"; 
+        //_transforms.emplace_back(transform);
 
         //Transform* t2 = new Transform;
         //t2->name = "my new object";
         //t2->setEntity(entity);
         //_transforms.emplace_back(t2);
+
+
 	}
 
     void draw() {
         // FBO’ya çiz
         glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
         glViewport(0, 0, _rt.width, _rt.height);
-        //glClearColor(1, 1, 1, 0.1);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClearColor(1, 0, 0, 1); // error check
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         _renderer->drawBackground();
 
         for (auto& transform : _transforms) {
@@ -141,34 +145,7 @@ public:
         return _selectedTransform;
     }
 
-    void loadScene(std::string path) {
-        LOG_TRACE("Load Scene");
-
-        //YAML::Node root = YAML::LoadFile(path);
-
-        //for (const auto& lightNode : root["Lights"]) {
-        //    auto light = LightFactory::create(lightNode);
-
-        //    if (light.get()) {
-
-        //        LOG_TRACE("Load light");
-        //        addLight(std::move(light));
-        //    }
-        //}
-
-
-        YAML::Node rootTest = YAML::LoadFile("save0.yaml");
-        for (const auto& transformNode : rootTest) {
-            auto transform = TransformFactory::create(transformNode, _materialMng.get());
-
-            if (transform.get()) {
-                
-                LOG_TRACE("Load transform...");
-                _transforms.emplace_back(std::move(transform));
-                //addLight(std::move(transform));
-            }
-        }
-    }
+    void loadScene(std::string path);
     void saveScene() {
         LOG_TRACE("Save Scene");
         YAML::Node node;
@@ -192,5 +169,8 @@ public:
     void addLight(LightType lightType);
     void addLight(std::unique_ptr<Light> light);
     void configShader(Shader& shader);
+
+    // SHAPES
+    void addCube();
 };
 

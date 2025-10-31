@@ -12,8 +12,10 @@ public:
 
 	enum class ShaderType{
 		Main,
+		Background,
 		Light,
-		Selection
+		Selection,
+
 	};
 private:
 

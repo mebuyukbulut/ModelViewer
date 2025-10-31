@@ -1,8 +1,10 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <vector>
+#include <memory>
 #include <string>
 #include "Shader.h"
+
 
 struct Vertex
 {
@@ -30,9 +32,23 @@ public:
 	void loadFromFile(const char* filename);
 	void loadDefault();
 	void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	void draw(Shader& shader);
 	void terminate();
 	//void update(float deltaTime);
 
 };
+// Use factory for model and mesh and create primitive objects 
 
+enum class DefaultShapes
+{
+	Cube,
+	Sphere,
+	Cylinder
+};
+
+
+class MeshFactory {
+public:
+	Mesh create(DefaultShapes shape);
+};

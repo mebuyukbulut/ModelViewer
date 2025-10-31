@@ -35,6 +35,12 @@ public:
     void terminate();
     void loadDefault();
     bool loadFromFile(const std::string& filename);
+    void addMesh(Mesh mesh) {
+        meshes.push_back(mesh);
+        if (_materials.empty()) {
+            _materials.push_back(_materialManager->getDefaultMaterial());
+        }
+    }
     std::string getPath() { return _path; }
 
 
