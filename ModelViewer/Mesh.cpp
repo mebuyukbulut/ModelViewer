@@ -3,10 +3,6 @@
 #include <iostream>
 
 
-#define _USE_MATH_DEFINES
-#include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
-
-typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
 
 void Mesh::setupMesh()
@@ -42,133 +38,6 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
-void Mesh::loadFromFile(const char* filename)
-{
-}
-
-void Mesh::loadDefault()
-{
-    //// set up vertex data (and buffer(s)) and configure vertex attributes
-    //// ------------------------------------------------------------------
-    //_vertices = {
-    //    Vertex{glm::vec3( 0.5f,  0.5f, 0.0f)},  // top right
-    //    Vertex{glm::vec3( 0.5f, -0.5f, 0.0f)},  // bottom right
-    //    Vertex{glm::vec3(-0.5f, -0.5f, 0.0f)},  // bottom left
-    //    Vertex{glm::vec3(-0.5f,  0.5f, 0.0f)}   // top left 
-    //};
-    //_indices = {  // note that we start from 0!
-    //    0, 1, 3,  // first Triangle
-    //    1, 2, 3   // second Triangle
-    //};
-
-
-
-
-    MyMesh mesh;
-    MyMesh::VertexHandle vhandle[8];
-    std::vector<MyMesh::VertexHandle>  face_vhandles;
-
-    switch (DefaultShapes::Cube)
-    {
-    case DefaultShapes::Cube:
-        vhandle[0] = mesh.add_vertex(MyMesh::Point(-1, -1, 1));
-        vhandle[1] = mesh.add_vertex(MyMesh::Point(1, -1, 1));
-        vhandle[2] = mesh.add_vertex(MyMesh::Point(1, 1, 1));
-        vhandle[3] = mesh.add_vertex(MyMesh::Point(-1, 1, 1));
-        vhandle[4] = mesh.add_vertex(MyMesh::Point(-1, -1, -1));
-        vhandle[5] = mesh.add_vertex(MyMesh::Point(1, -1, -1));
-        vhandle[6] = mesh.add_vertex(MyMesh::Point(1, 1, -1));
-        vhandle[7] = mesh.add_vertex(MyMesh::Point(-1, 1, -1));
-
-        // generate (quadrilateral) faces
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[0]);
-        face_vhandles.push_back(vhandle[1]);
-        face_vhandles.push_back(vhandle[2]);
-        face_vhandles.push_back(vhandle[3]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[7]);
-        face_vhandles.push_back(vhandle[6]);
-        face_vhandles.push_back(vhandle[5]);
-        face_vhandles.push_back(vhandle[4]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[1]);
-        face_vhandles.push_back(vhandle[0]);
-        face_vhandles.push_back(vhandle[4]);
-        face_vhandles.push_back(vhandle[5]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[2]);
-        face_vhandles.push_back(vhandle[1]);
-        face_vhandles.push_back(vhandle[5]);
-        face_vhandles.push_back(vhandle[6]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[3]);
-        face_vhandles.push_back(vhandle[2]);
-        face_vhandles.push_back(vhandle[6]);
-        face_vhandles.push_back(vhandle[7]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[0]);
-        face_vhandles.push_back(vhandle[3]);
-        face_vhandles.push_back(vhandle[7]);
-        face_vhandles.push_back(vhandle[4]);
-        mesh.add_face(face_vhandles);
-        break;
-    case DefaultShapes::Sphere:
-        break;
-    case DefaultShapes::Cylinder:
-        break;
-    default:
-        break;
-    }
-
-
-    mesh.request_vertex_normals();
-    mesh.request_face_normals();
-    mesh.update_normals();
-
-    mesh.triangulate();
-
-    //std::vector<Vertex> vertices;
-    //std::vector<unsigned int> indices;
-
-    // 🔹 Vertex data 
-    for (auto v_it = mesh.vertices_begin(); v_it != mesh.vertices_end(); ++v_it) {
-        auto p = mesh.point(*v_it);
-        auto n = mesh.normal(*v_it);
-        //auto t = mesh.texcoord2D(*v_it); // ??? 
-
-        // position (x, y, z) - normal (x, y, z) - texture coodinates (s, t)
-        _vertices.push_back(Vertex{ {p[0],p[1],p[2]}, {n[0],n[1],n[2]}, {0,0} });
-    }
-
-    for (auto f_it = mesh.faces_begin(); f_it != mesh.faces_end(); ++f_it)
-    {
-        std::vector<unsigned int> face_indices;
-        for (auto fv_it = mesh.fv_iter(*f_it); fv_it.is_valid(); ++fv_it)
-            face_indices.push_back((*fv_it).idx());
-
-        if (face_indices.size() == 3) {
-            _indices.push_back(face_indices[0]);
-            _indices.push_back(face_indices[1]);
-            _indices.push_back(face_indices[2]);
-        }
-    }
-
-
-
-
-    setupMesh();
-}
 
 void Mesh::init(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
@@ -231,110 +100,175 @@ void Mesh::terminate(){
 
 
 
+
+OMesh MeshFactory::createCube()
+{
+    OMesh mesh;
+    OMesh::VertexHandle vhandle[8];
+    std::vector<OMesh::VertexHandle> face_vhandles;
+
+    vhandle[0] = mesh.add_vertex(OMesh::Point(-1, -1, 1));
+    vhandle[1] = mesh.add_vertex(OMesh::Point(1, -1, 1));
+    vhandle[2] = mesh.add_vertex(OMesh::Point(1, 1, 1));
+    vhandle[3] = mesh.add_vertex(OMesh::Point(-1, 1, 1));
+    vhandle[4] = mesh.add_vertex(OMesh::Point(-1, -1, -1));
+    vhandle[5] = mesh.add_vertex(OMesh::Point(1, -1, -1));
+    vhandle[6] = mesh.add_vertex(OMesh::Point(1, 1, -1));
+    vhandle[7] = mesh.add_vertex(OMesh::Point(-1, 1, -1));
+
+    // Quad yüzler (6 yüz)
+    std::vector<std::array<int, 4>> quads = {
+        {0,1,2,3}, // front
+        {7,6,5,4}, // back
+        {1,0,4,5}, // bottom
+        {2,1,5,6}, // right
+        {3,2,6,7}, // top
+        {0,3,7,4}  // left
+    };
+
+    for (auto& q : quads) {
+        face_vhandles.clear();
+        for (int i = 0; i < 4; ++i)
+            face_vhandles.push_back(vhandle[q[i]]);
+        mesh.add_face(face_vhandles);
+    }
+    return mesh;
+}
+OMesh MeshFactory::createCone()
+{
+    OMesh mesh;
+    std::vector <OMesh::VertexHandle> vhandle;
+
+    // parametrelerimiz 
+    int resolution = 32; // number of edges 
+    float radius = 1; 
+    float height = 2; 
+
+
+    // vertexleri oluşturuyoruz 
+    std::vector<Vertex> base_vertices;
+    for (int i{}; i < resolution; i++) {
+        float ratio = static_cast<float>(i) / (resolution);
+        float angle = ratio * (M_PI * 2.0);
+        float x = std::cos(angle) * radius;
+        float z = std::sin(angle) * radius;
+        vhandle.push_back(mesh.add_vertex(OMesh::Point(x, 0, z)));
+    }
+    int centerIndex = vhandle.size();
+    vhandle.push_back(mesh.add_vertex(OMesh::Point(0, 0, 0))); // center of cone floor
+    int tipIndex = vhandle.size();
+    vhandle.push_back(mesh.add_vertex(OMesh::Point(0, height, 0))); // tip of cone 
+
+
+    // Yüzeylerin vertex indexlerini belirliyoruz:
+    std::vector<std::vector<int>> faces;    
+
+    for (int i{}; i < resolution-1; i++) {
+        faces.push_back({i, i + 1, centerIndex }); // flor
+        faces.push_back({i + 1, i, tipIndex }); // sidewall
+    }
+    // Son trisleri ekliyoruz:
+    faces.push_back({resolution - 1, 0, centerIndex });
+    faces.push_back({0, resolution - 1, tipIndex });
+
+
+    // Belirlediğimiz indexlerdeki vertexlerden face oluşturup mesh e ekliyoruz:
+    std::vector<OMesh::VertexHandle> face_vhandles;
+    for (std::vector<int>& face : faces) {
+        face_vhandles.clear();
+        for (int& vertexIndex : face)
+            face_vhandles.push_back(vhandle[vertexIndex]);
+        mesh.add_face(face_vhandles);
+    }
+    return mesh;
+}
+
+OMesh MeshFactory::createCylinder()
+{
+    return OMesh();
+}
+
+OMesh MeshFactory::createPlane()
+{
+    return OMesh();
+}
+
 Mesh MeshFactory::create(DefaultShapes shape)
 {
-    MyMesh mesh;
-    MyMesh::VertexHandle vhandle[8];
-    std::vector<MyMesh::VertexHandle>  face_vhandles;
+    OMesh mesh;
 
+    // 🔹 Geometrik şekil seçimi
     switch (shape)
     {
     case DefaultShapes::Cube:
-        vhandle[0] = mesh.add_vertex(MyMesh::Point(-1, -1, 1));
-        vhandle[1] = mesh.add_vertex(MyMesh::Point(1, -1, 1));
-        vhandle[2] = mesh.add_vertex(MyMesh::Point(1, 1, 1));
-        vhandle[3] = mesh.add_vertex(MyMesh::Point(-1, 1, 1));
-        vhandle[4] = mesh.add_vertex(MyMesh::Point(-1, -1, -1));
-        vhandle[5] = mesh.add_vertex(MyMesh::Point(1, -1, -1));
-        vhandle[6] = mesh.add_vertex(MyMesh::Point(1, 1, -1));
-        vhandle[7] = mesh.add_vertex(MyMesh::Point(-1, 1, -1));
-
-        // generate (quadrilateral) faces
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[0]);
-        face_vhandles.push_back(vhandle[1]);
-        face_vhandles.push_back(vhandle[2]);
-        face_vhandles.push_back(vhandle[3]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[7]);
-        face_vhandles.push_back(vhandle[6]);
-        face_vhandles.push_back(vhandle[5]);
-        face_vhandles.push_back(vhandle[4]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[1]);
-        face_vhandles.push_back(vhandle[0]);
-        face_vhandles.push_back(vhandle[4]);
-        face_vhandles.push_back(vhandle[5]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[2]);
-        face_vhandles.push_back(vhandle[1]);
-        face_vhandles.push_back(vhandle[5]);
-        face_vhandles.push_back(vhandle[6]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[3]);
-        face_vhandles.push_back(vhandle[2]);
-        face_vhandles.push_back(vhandle[6]);
-        face_vhandles.push_back(vhandle[7]);
-        mesh.add_face(face_vhandles);
-
-        face_vhandles.clear();
-        face_vhandles.push_back(vhandle[0]);
-        face_vhandles.push_back(vhandle[3]);
-        face_vhandles.push_back(vhandle[7]);
-        face_vhandles.push_back(vhandle[4]);
-        mesh.add_face(face_vhandles);
+        mesh = createCube();
         break;
-    case DefaultShapes::Sphere:
+    case DefaultShapes::Cone:
+        mesh = createCone();
         break;
+
     case DefaultShapes::Cylinder:
+        mesh = createCylinder();
         break;
+
     default:
         break;
     }
 
 
-    mesh.request_vertex_normals();
-    mesh.request_face_normals();
-    mesh.update_normals();
 
-    mesh.triangulate();
+
+
+    // 🔹 Normalleri hesapla
+    mesh.request_face_normals();
+    mesh.update_face_normals();
+    //mesh.triangulate(); // OpenGL için üçgenlere ayır
+
+
+
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    // 🔹 Vertex data 
-    for (auto v_it = mesh.vertices_begin(); v_it != mesh.vertices_end(); ++v_it) {
-        auto p = mesh.point(*v_it);
-        auto n = mesh.normal(*v_it);
-        //auto t = mesh.texcoord2D(*v_it); // ??? 
 
-        // position (x, y, z) - normal (x, y, z) - texture coodinates (s, t)
-        vertices.push_back(Vertex{ {p[0],p[1],p[2]}, {n[0],n[1],n[2]}, {0,0} });
-    }
-
+    // 🔹 Flat shading: her yüzey için ayrı vertex oluştur
     for (auto f_it = mesh.faces_begin(); f_it != mesh.faces_end(); ++f_it)
     {
-        std::vector<unsigned int> face_indices;
-        for (auto fv_it = mesh.fv_iter(*f_it); fv_it.is_valid(); ++fv_it)
-            face_indices.push_back((*fv_it).idx());
+        OpenMesh::Vec3f faceNormal = mesh.normal(*f_it);
+        std::vector<unsigned int> local_indices;
 
-        if (face_indices.size() == 3) {
-            indices.push_back(face_indices[0]);
-            indices.push_back(face_indices[1]);
-            indices.push_back(face_indices[2]);
+        for (auto fv_it = mesh.fv_iter(*f_it); fv_it.is_valid(); ++fv_it)
+        {
+            auto p = mesh.point(*fv_it);
+
+            unsigned int index = static_cast<unsigned int>(vertices.size());
+            vertices.push_back(Vertex{
+                glm::vec3(p[0], p[1], p[2]),
+                glm::vec3(faceNormal[0], faceNormal[1], faceNormal[2]),
+                glm::vec2(0.0f, 0.0f)
+                });
+
+            local_indices.push_back(index);
+        }
+
+        // yüz üçgen mi?
+        if (local_indices.size() == 3) {
+            indices.push_back(local_indices[0]);
+            indices.push_back(local_indices[1]);
+            indices.push_back(local_indices[2]);
+        }
+        // quad ise triangulate et
+        else if (local_indices.size() == 4) {
+            indices.push_back(local_indices[0]);
+            indices.push_back(local_indices[1]);
+            indices.push_back(local_indices[2]);
+            indices.push_back(local_indices[0]);
+            indices.push_back(local_indices[2]);
+            indices.push_back(local_indices[3]);
         }
     }
 
-
-    Mesh m;
+    Mesh m; 
     m.init(vertices, indices);
-    return m; 
+    return m;
 }

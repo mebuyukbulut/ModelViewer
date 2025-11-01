@@ -33,7 +33,7 @@ class Model : public IInspectable
 public:
     void draw(Shader& shader);
     void terminate();
-    void loadDefault();
+    void loadDefault(DefaultShapes shape = DefaultShapes::Cube);
     bool loadFromFile(const std::string& filename);
     void addMesh(Mesh mesh) {
         meshes.push_back(mesh);

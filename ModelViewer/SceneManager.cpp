@@ -31,7 +31,6 @@ void SceneManager::loadScene(std::string path) {
     //    }
     //}
 
-    addCube();
 
     YAML::Node rootTest = YAML::LoadFile("save0.yaml");
     for (const auto& transformNode : rootTest) {
@@ -445,7 +444,7 @@ void SceneManager::configShader(Shader& shader)
 }
 
 
-void SceneManager::addCube() {
+void SceneManager::addCube(DefaultShapes shape) {
     ////MeshFactory mf; 
     ////auto cubeMesh = mf.create(DefaultShapes::Cube);
 
@@ -472,7 +471,7 @@ void SceneManager::addCube() {
 
 
     Model* model = new Model(_materialMng.get());
-    model->loadDefault();
+    model->loadDefault(shape);
     transform->getEntity()->model.reset(model);
     LOG_TRACE("add Cube");
 

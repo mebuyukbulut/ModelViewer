@@ -224,12 +224,11 @@ void Model::terminate() {
     }
 }
 
-void Model::loadDefault()
+void Model::loadDefault(DefaultShapes shape)
 {
     // Load model from file
     // For simplicity, we will just load a default mesh here
-    Mesh mesh;
-    mesh.loadDefault();
+    Mesh mesh = MeshFactory::create(shape);
     meshes.push_back(mesh);
 
     // if model loading not create a material use default one 

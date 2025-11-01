@@ -224,6 +224,10 @@ void UIManager::mainMenu(){
                 Event e{ EventType::AddCube };
                 dispatcher.dispatch(e);
             }
+            if (ImGui::MenuItem("Add Cone")) {
+                Event e{ EventType::AddCone };
+                dispatcher.dispatch(e);
+            }
             ImGui::EndMenu();
         }
 

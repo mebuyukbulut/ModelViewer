@@ -99,7 +99,10 @@ public:
             addLight(LightType::Directional);
             });
         dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
-            addCube();
+            addCube(DefaultShapes::Cube);
+            });
+        dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
+            addCube(DefaultShapes::Cone);
             });
 
         _materialMng.reset(new MaterialManager(shader));
@@ -171,6 +174,6 @@ public:
     void configShader(Shader& shader);
 
     // SHAPES
-    void addCube();
+    void addCube(DefaultShapes shape);
 };
 

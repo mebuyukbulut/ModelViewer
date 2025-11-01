@@ -16,6 +16,7 @@ enum class EventType {
     AddDirectionalLight,
     AddSpotLight,
     AddCube,
+    AddCone,
 };
 
 struct EventData {
