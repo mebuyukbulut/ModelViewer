@@ -150,6 +150,8 @@ public:
             if(transform.get()->getEntity()->model)
                 transform->draw(_renderer);
         }
+        _renderer->drawGrid();
+        _renderer->getShader().use();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }

@@ -14,6 +14,7 @@ public:
 	enum class ShaderType{
 		Main,
 		Background,
+		Grid,
 		Light,
 		Selection,
 

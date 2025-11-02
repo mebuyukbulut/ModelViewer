@@ -223,5 +223,11 @@
     <None Include="shaders\bg_grad.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="shaders\gridShader.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\gridShader.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -12,8 +12,10 @@ void Renderer::init() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
-    
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
+
+
+    // Initialize background
     _bgMesh = new Mesh();
     std::vector<Vertex> bgVertices{
         {{-1,-1, 0}, {0,0,0}, {0,0}},
@@ -23,6 +25,16 @@ void Renderer::init() {
     std::vector<unsigned int> bgIndices{ 0, 1, 2 };
     _bgMesh->init(bgVertices, bgIndices);
 
+    // Initialize grid 
+    _gridMesh = new Mesh();
+    std::vector<Vertex> gridVertices{
+        {{ -10, 0, -10}, {0,0,0}, {0,0}}, // a 0
+        {{ -10, 0,  10}, {0,0,0}, {0,0}}, // b 1    d-c
+        {{  10, 0,  10}, {0,0,0}, {0,0}}, // c 2    a-b
+        {{  10, 0, -10}, {0,0,0}, {0,0}}, // d 3
+    };
+    std::vector<unsigned int> gridIndices{ 0, 1, 2, 0, 2, 3 };
+    _gridMesh->init(gridVertices, gridIndices);
 
     //glDisable(GL_FRAMEBUFFER_SRGB);
     //GLboolean srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
@@ -43,11 +55,22 @@ void Renderer::beginFrame() {
     //glClearColor(a,a,a, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glm::mat4 viewMatrix = _camera->getViewMatrix();
+    glm::mat4 projMatrix = _camera->getProjectionMatrix();
+
 	// set view and projection matrices
-    _shader->setMat4("view", _camera->getViewMatrix());
-    _shader->setMat4("projection", _camera->getProjectionMatrix());
+    _shader->use();
+    _shader->setMat4("view", viewMatrix);
+    _shader->setMat4("projection", projMatrix);
     _shader->setMat4("model", glm::mat4(1.0f));
     _shader->setVec3("viewPos", _camera->getPosition());
+
+    _gridShader->use();
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
+    _gridShader->setMat4("view", viewMatrix);
+    _gridShader->setMat4("projection", projMatrix);
+
+
 }
 void Renderer::endFrame() {
     
@@ -63,7 +86,6 @@ void Renderer::drawModel(Model* model, const glm::mat4& transform) {
 void Renderer::drawBackground()
 {
     glDisable(GL_DEPTH_TEST);
-    //glBindVertexArray(2);
     _bgShader->use();
     _bgMesh->draw(*_bgShader);
     //_shaderManager.getShader("bg").use();
@@ -75,6 +97,11 @@ void Renderer::drawBackground()
 
 void Renderer::drawGrid()
 {
+    //glDepthMask(GL_FALSE);
+    _gridShader->use();
+    _gridMesh->draw(*_gridShader);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+    //glDepthMask(GL_TRUE);
 }
 
 
@@ -91,6 +118,9 @@ void Renderer::setShader(const std::string name, ShaderType shaderType) {
         break;
     case Renderer::ShaderType::Background:
         _bgShader = shader;
+        break;
+    case Renderer::ShaderType::Grid:
+        _gridShader = shader;
         break;
     case Renderer::ShaderType::Light:
         _lightShader = shader;

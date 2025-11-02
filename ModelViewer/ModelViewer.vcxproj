@@ -192,6 +192,8 @@
     <None Include="shaders\bg_grad.vert" />
     <None Include="shaders\blinn-phong.frag" />
     <None Include="shaders\blinn-phong.vert" />
+    <None Include="shaders\gridShader.frag" />
+    <None Include="shaders\gridShader.vert" />
     <None Include="shaders\lambertian.frag" />
     <None Include="shaders\lambertian.vert" />
     <None Include="shaders\normal.frag" />
