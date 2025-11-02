@@ -14,6 +14,15 @@ void Renderer::init() {
     //glCullFace(GL_FRONT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
     
+    _bgMesh = new Mesh();
+    std::vector<Vertex> bgVertices{
+        {{-1,-1, 0}, {0,0,0}, {0,0}},
+        {{ 3,-1, 0}, {0,0,0}, {2,0}},
+        {{-1, 3, 0}, {0,0,0}, {0,2}},
+    };
+    std::vector<unsigned int> bgIndices{ 0, 1, 2 };
+    _bgMesh->init(bgVertices, bgIndices);
+
 
     //glDisable(GL_FRAMEBUFFER_SRGB);
     //GLboolean srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
@@ -54,13 +63,18 @@ void Renderer::drawModel(Model* model, const glm::mat4& transform) {
 void Renderer::drawBackground()
 {
     glDisable(GL_DEPTH_TEST);
-    glBindVertexArray(2);
+    //glBindVertexArray(2);
     _bgShader->use();
+    _bgMesh->draw(*_bgShader);
     //_shaderManager.getShader("bg").use();
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
     glEnable(GL_DEPTH_TEST);
 
     //_shader->use();
+}
+
+void Renderer::drawGrid()
+{
 }
 
 

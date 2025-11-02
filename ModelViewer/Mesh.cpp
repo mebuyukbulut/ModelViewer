@@ -182,15 +182,156 @@ OMesh MeshFactory::createCone()
     }
     return mesh;
 }
-
 OMesh MeshFactory::createCylinder()
 {
-    return OMesh();
-}
+    OMesh mesh;
+    std::vector <OMesh::VertexHandle> vhandle;
 
+    // parametrelerimiz 
+    int resolution = 32; // number of edges 
+    float radius = 1;
+    float height = 2;
+
+    // vertexleri oluşturuyoruz 
+    std::vector<Vertex> base_vertices;
+    for (int i{}; i < resolution; i++) {
+        float ratio = static_cast<float>(i) / (resolution);
+        float angle = ratio * (M_PI * 2.0);
+        float x = std::cos(angle) * radius;
+        float z = std::sin(angle) * radius;
+        vhandle.push_back(mesh.add_vertex(OMesh::Point(x, height / 2, z))); // top 
+        vhandle.push_back(mesh.add_vertex(OMesh::Point(x, -height / 2, z))); // bottom
+    }
+
+    int centerIndexTop = vhandle.size();
+    vhandle.push_back(mesh.add_vertex(OMesh::Point(0, height / 2, 0))); // center of cylinder ceil/top
+    int centerIndexBottom = vhandle.size();
+    vhandle.push_back(mesh.add_vertex(OMesh::Point(0, -height / 2, 0))); // center of cylinder floor/bottom
+
+
+
+    // Yüzeylerin vertex indexlerini belirliyoruz:
+    std::vector<std::vector<int>> faces;
+
+    // iff resolution = 4 ->
+    // 0 2 4 6 // top
+    // 1 3 5 7 // bottom
+    int lastTopIndex = resolution * 2 - 2;
+    int lastBottomIndex = resolution * 2 - 1;
+    for (int i{}, j{1}; i < lastTopIndex; i += 2, j+=2) {
+        faces.push_back({ i + 2, i, centerIndexTop }); // top
+        faces.push_back({ j, j + 2, centerIndexBottom }); // bottom
+
+        faces.push_back({ i, i+2, j+2, j }); // sidewall
+    }
+    // Son trisleri ekliyoruz:
+    faces.push_back({ 0, lastTopIndex,  centerIndexTop });
+    faces.push_back({ lastBottomIndex, 1, centerIndexBottom });
+    faces.push_back({ 0, 1, lastBottomIndex, lastTopIndex });
+
+
+
+    // Belirlediğimiz indexlerdeki vertexlerden face oluşturup mesh e ekliyoruz:
+    std::vector<OMesh::VertexHandle> face_vhandles;
+    for (std::vector<int>& face : faces) {
+        face_vhandles.clear();
+        for (int& vertexIndex : face)
+            face_vhandles.push_back(vhandle[vertexIndex]);
+        mesh.add_face(face_vhandles);
+    }
+    return mesh;
+}
 OMesh MeshFactory::createPlane()
 {
-    return OMesh();
+    OMesh mesh;
+    std::vector <OMesh::VertexHandle> vhandle;
+
+    // parametrelerimiz 
+    int edgeLength = 2; // 2x2 quad 
+
+
+
+    // vertexleri oluşturuyoruz 
+    std::vector<Vertex> base_vertices;
+
+    // x
+    // |
+    // y - z
+    // 
+    // a - b
+    // |   |
+    // c - d
+
+    float halfLength = edgeLength / 2.f;
+    vhandle.push_back(mesh.add_vertex(OMesh::Point( halfLength, 0, -halfLength))); // a 0
+    vhandle.push_back(mesh.add_vertex(OMesh::Point( halfLength, 0,  halfLength))); // b 1
+    vhandle.push_back(mesh.add_vertex(OMesh::Point(-halfLength, 0, -halfLength))); // c 2
+    vhandle.push_back(mesh.add_vertex(OMesh::Point(-halfLength, 0,  halfLength))); // d 3
+
+    // Yüzeylerin vertex indexlerini belirliyoruz:
+    std::vector<std::vector<int>> faces;
+    faces.push_back({ 0, 2, 3, 1 });
+    //faces.push_back({ 0, 1, 2 });
+    //faces.push_back({ 2, 1, 3 });
+
+
+    // Belirlediğimiz indexlerdeki vertexlerden face oluşturup mesh e ekliyoruz:
+    std::vector<OMesh::VertexHandle> face_vhandles;
+    for (std::vector<int>& face : faces) {
+        face_vhandles.clear();
+        for (int& vertexIndex : face)
+            face_vhandles.push_back(vhandle[vertexIndex]);
+        mesh.add_face(face_vhandles);
+    }
+    return mesh;
+}
+OMesh MeshFactory::createTorus()
+{
+    OMesh mesh;
+    std::vector <OMesh::VertexHandle> vhandle;
+
+    // parametrelerimiz 
+    int radial_resolution = 16;  // küçük dairenin kenar sayısı
+    int tubular_resolution = 32; // büyük dairenin kenar sayısı 
+    float radius = 1;
+    float thickness = 0.3; 
+    float height = 2;
+
+    // vertexleri oluşturuyoruz 
+    for (size_t i = 0; i < radial_resolution; i++) {
+        for (size_t j = 0; j < tubular_resolution; j++) {
+            float u = (float)j / tubular_resolution * M_PI * 2.0;
+            float v = (float)i / radial_resolution * M_PI * 2.0;
+            float x = (radius + thickness * std::cos(v)) * std::cos(u);
+            float z = (radius + thickness * std::cos(v)) * std::sin(u);
+            float y = thickness * std::sin(v); 
+            
+            vhandle.push_back(mesh.add_vertex(OMesh::Point(x, y, z)));
+        }
+    }
+
+
+    // add quad faces
+    std::vector<OMesh::VertexHandle> face_vhandles;
+    for (int i = 0; i < radial_resolution; i++) {
+        int i_next = (i + 1) % radial_resolution;
+        for (int j = 0; j < tubular_resolution; j++) {
+            int j_next = (j + 1) % tubular_resolution;
+            int i0 = i * tubular_resolution + j;
+            int i1 = i * tubular_resolution + j_next;
+            int i2 = i_next * tubular_resolution + j_next;
+            int i3 = i_next * tubular_resolution + j;
+
+            face_vhandles.clear();
+            face_vhandles.push_back(vhandle[i0]);
+            face_vhandles.push_back(vhandle[i3]); 
+            face_vhandles.push_back(vhandle[i2]);
+            face_vhandles.push_back(vhandle[i1]);
+            mesh.add_face(face_vhandles);
+        }
+    }
+
+    return mesh;
 }
 
 Mesh MeshFactory::create(DefaultShapes shape)
@@ -206,9 +347,14 @@ Mesh MeshFactory::create(DefaultShapes shape)
     case DefaultShapes::Cone:
         mesh = createCone();
         break;
-
     case DefaultShapes::Cylinder:
         mesh = createCylinder();
+        break;
+    case DefaultShapes::Plane:
+        mesh = createPlane();
+        break;
+    case DefaultShapes::Torus:
+        mesh = createTorus();
         break;
 
     default:
@@ -250,6 +396,12 @@ Mesh MeshFactory::create(DefaultShapes shape)
 
             local_indices.push_back(index);
         }
+
+        // CCW
+        //  3●-----●2
+        //  |    / |
+        //  |  /   |
+        //  0●-----●1
 
         // yüz üçgen mi?
         if (local_indices.size() == 3) {

@@ -98,11 +98,22 @@ public:
         dispatcher.subscribe(EventType::AddDirectionalLight, [&](const Event& e) {
             addLight(LightType::Directional);
             });
+
+
         dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
             addCube(DefaultShapes::Cube);
             });
         dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
             addCube(DefaultShapes::Cone);
+            });
+        dispatcher.subscribe(EventType::AddCylinder, [&](const Event& e) {
+            addCube(DefaultShapes::Cylinder);
+            });
+        dispatcher.subscribe(EventType::AddPlane, [&](const Event& e) {
+            addCube(DefaultShapes::Plane);
+            });
+        dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
+            addCube(DefaultShapes::Torus);
             });
 
         _materialMng.reset(new MaterialManager(shader));

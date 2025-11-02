@@ -5,6 +5,7 @@
 
 class Camera;
 class Shader;
+class Mesh; 
 
 class Renderer
 {
@@ -22,10 +23,14 @@ private:
 	ShaderManager _shaderManager;
 	Shader* _shader{};
 	Shader* _bgShader{};
+	Shader* _gridShader{};
 	Shader* _lightShader{};
 	Shader* _selectShader{};
 
 	std::shared_ptr<Camera> _camera;
+
+	Mesh* _bgMesh{};
+	Mesh* _gridMesh{};
 public:
 
 	void init();
@@ -36,6 +41,7 @@ public:
 
 	void drawModel(Model* model, const glm::mat4& transform);
 	void drawBackground();
+	void drawGrid();
 
 	void setCamera(std::shared_ptr<Camera> camera);
 	void setShader(const std::string name, ShaderType shaderType);

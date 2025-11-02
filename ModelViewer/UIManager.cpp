@@ -208,26 +208,47 @@ void UIManager::mainMenu(){
         
 
         if (ImGui::BeginMenu("Add")) {
-            if (ImGui::MenuItem("Add Point Light")) {
-                Event e{ EventType::AddPointLight };
-                dispatcher.dispatch(e);
+            if (ImGui::BeginMenu("Add Light")) {
+                if (ImGui::MenuItem("Add Point Light")) {
+                    Event e{ EventType::AddPointLight };
+                    dispatcher.dispatch(e);
+                }
+                if (ImGui::MenuItem("Add Spot Light")) {
+                    Event e{ EventType::AddSpotLight };
+                    dispatcher.dispatch(e);
+                }
+                if (ImGui::MenuItem("Add Direction Light")) {
+                    Event e{ EventType::AddDirectionalLight };
+                    dispatcher.dispatch(e);
+                }
+                ImGui::EndMenu();
             }
-            if (ImGui::MenuItem("Add Spot Light")) {
-                Event e{ EventType::AddSpotLight };
-                dispatcher.dispatch(e);
+
+            if (ImGui::BeginMenu("Add Shape")) {
+                if (ImGui::MenuItem("Add Cube")) {
+                    Event e{ EventType::AddCube };
+                    dispatcher.dispatch(e);
+                }
+                if (ImGui::MenuItem("Add Cone")) {
+                    Event e{ EventType::AddCone };
+                    dispatcher.dispatch(e);
+                }
+                if (ImGui::MenuItem("Add Cylinder")) {
+                    Event e{ EventType::AddCylinder };
+                    dispatcher.dispatch(e);
+                }
+                if (ImGui::MenuItem("Add Plane")) {
+                    Event e{ EventType::AddPlane };
+                    dispatcher.dispatch(e);
+                }
+                if (ImGui::MenuItem("Add Torus")) {
+                    Event e{ EventType::AddTorus };
+                    dispatcher.dispatch(e);
+                }
+                ImGui::EndMenu();
+
             }
-            if (ImGui::MenuItem("Add Direction Light")) {
-                Event e{ EventType::AddDirectionalLight };
-                dispatcher.dispatch(e);
-            }
-            if (ImGui::MenuItem("Add Cube")) {
-                Event e{ EventType::AddCube };
-                dispatcher.dispatch(e);
-            }
-            if (ImGui::MenuItem("Add Cone")) {
-                Event e{ EventType::AddCone };
-                dispatcher.dispatch(e);
-            }
+
             ImGui::EndMenu();
         }
 
@@ -256,6 +277,8 @@ void UIManager::creditsPanel(){
     if (ImGui::Begin("Credits")) {
 		ImGui::Text("Model Viewer by Muhammet Esat BUYUKBULUT");
 		ImGui::Text("@2025");
+
+        //openmesh ekle 
     }
     ImGui::End();
 }

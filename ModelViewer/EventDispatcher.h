@@ -12,11 +12,16 @@ enum class EventType {
     ShaderSelected,
     EngineExit,
     ModelOpened,
+
     AddPointLight,
     AddDirectionalLight,
     AddSpotLight,
+
     AddCube,
     AddCone,
+    AddCylinder,
+    AddPlane,
+    AddTorus,
 };
 
 struct EventData {
