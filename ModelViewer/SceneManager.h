@@ -101,19 +101,23 @@ public:
 
 
         dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
-            addCube(DefaultShapes::Cube);
+            addShape(DefaultShapes::Cube);
             });
         dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
-            addCube(DefaultShapes::Cone);
+            addShape(DefaultShapes::Cone);
             });
         dispatcher.subscribe(EventType::AddCylinder, [&](const Event& e) {
-            addCube(DefaultShapes::Cylinder);
+            addShape(DefaultShapes::Cylinder);
             });
         dispatcher.subscribe(EventType::AddPlane, [&](const Event& e) {
-            addCube(DefaultShapes::Plane);
+            addShape(DefaultShapes::Plane);
             });
         dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
-            addCube(DefaultShapes::Torus);
+            addShape(DefaultShapes::Torus);
+            });
+
+        dispatcher.subscribe(EventType::Delete, [&](const Event& e) {
+            deleteSelected();
             });
 
         _materialMng.reset(new MaterialManager(shader));
@@ -187,6 +191,7 @@ public:
     void configShader(Shader& shader);
 
     // SHAPES
-    void addCube(DefaultShapes shape);
+    void addShape(DefaultShapes shape); 
+    void deleteSelected();
 };
 

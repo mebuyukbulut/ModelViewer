@@ -444,7 +444,7 @@ void SceneManager::configShader(Shader& shader)
 }
 
 
-void SceneManager::addCube(DefaultShapes shape) {
+void SceneManager::addShape(DefaultShapes shape) {
     ////MeshFactory mf; 
     ////auto cubeMesh = mf.create(DefaultShapes::Cube);
 
@@ -476,5 +476,22 @@ void SceneManager::addCube(DefaultShapes shape) {
     LOG_TRACE("add Cube");
 
     _transforms.emplace_back(transform);
+}
+
+void SceneManager::deleteSelected()
+{
+    if (!_selectedTransform) return;
+
+    _selectedTransform->terminate();
+
+    _transforms.remove_if([this](const std::shared_ptr<Transform>& t) {
+        return t.get() == _selectedTransform;
+        });
+
+    _selectedTransforms.remove_if([this](Transform* t) {
+        return t == _selectedTransform;
+        });
+
+    _selectedTransform = nullptr;
 }
 

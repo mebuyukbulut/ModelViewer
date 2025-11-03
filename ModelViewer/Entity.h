@@ -13,7 +13,7 @@
 class Transform : public IInspectable{
 	std::list<std::unique_ptr<Transform>> children;
 	Transform* parent{};
-	class Entity* _entity{};
+	class Entity* _entity{}; // Maybe we should use unique_ptr instead of ptr 
 	bool _isSelected{ false };
 	bool _isDirty{ true };
 
@@ -55,6 +55,7 @@ public:
 		_isSelected = false;
 	}
 	
+	void terminate();
 	// draw gizmo ? 
 
 	// Inherited via IInspectable
@@ -73,6 +74,11 @@ public:
 	std::unique_ptr <Model> model{};
 	std::unique_ptr <Light> light{};
 	//std::vector<MaterialHandle> materials{};
+
+	void terminate() {
+		if (model)
+			model.get()->terminate();
+	}
 
 	// Inherited via IInspectable
 	void drawUI() override;

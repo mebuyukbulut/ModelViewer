@@ -73,7 +73,7 @@ void Engine::initUI()
 {
     _UI.init(_window, _camera);
 	//_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
-
+    
     dispatcher.subscribe(EventType::ShaderSelected, [&](const Event& e) {
         _renderer.setShader(e.data.text,Renderer::ShaderType::Main);
         });
@@ -195,9 +195,14 @@ void  Engine::processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    
+
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
         _camera->resetFrame();
+
+    if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS){
+        Event e{ EventType::Delete, EventData{} };
+        dispatcher.dispatch(e);
+    }
 
 }
 

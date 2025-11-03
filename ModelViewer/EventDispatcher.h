@@ -22,6 +22,8 @@ enum class EventType {
     AddCylinder,
     AddPlane,
     AddTorus,
+
+    Delete,
 };
 
 struct EventData {

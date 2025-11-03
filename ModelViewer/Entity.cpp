@@ -134,7 +134,13 @@ void Transform::draw(Renderer* renderer)
     for (auto& i : children)
     	i->draw(renderer);
 }
-
+void Transform::terminate() {
+    if (_entity)
+    {
+        _entity->terminate();
+        delete _entity;
+    }
+}
 void Transform::drawUI()
 {
     ImGui::SeparatorText("Transform");
