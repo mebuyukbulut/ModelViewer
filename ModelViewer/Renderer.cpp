@@ -100,7 +100,9 @@ void Renderer::drawGrid()
     //glDepthMask(GL_FALSE);
     _gridShader->use();
     _gridMesh->draw(*_gridShader);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+    glDisable(GL_CULL_FACE);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glEnable(GL_CULL_FACE);
     //glDepthMask(GL_TRUE);
 }
 

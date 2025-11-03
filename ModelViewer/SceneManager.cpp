@@ -1,4 +1,4 @@
-#include "SceneManager.h"
+﻿#include "SceneManager.h"
 #include <imgui.h>
 #include <ImGuizmo.h>
 #include "Camera.h"
@@ -234,6 +234,46 @@ void SceneManager::drawUI()
 }
 void SceneManager::drawGizmo()
 {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuizmo::BeginFrame();
+    ImGuizmo::SetDrawlist();
+
+
+    // Viewport boyutu
+    float windowWidth = ImGui::GetWindowSize().x;
+    float windowHeight = ImGui::GetWindowSize().y;
+
+    // Küçük bir alan ayır (örneğin 128x128 px)
+    float gizmoSize = 100.0f;
+    ImVec2 gizmoPos = ImVec2(windowWidth-gizmoSize-1, 80); // sağ üst köşe
+
+    
+
+    // Kamera matrislerini kullan
+    const float* view = glm::value_ptr(_camera->getViewMatrix());
+    const float* projection = glm::value_ptr(_camera->getProjectionMatrix());
+
+
+    // ImGuizmo’nun çizim bölgesini ayarla
+    ImGuizmo::SetRect(gizmoPos.x, gizmoPos.y, gizmoSize, gizmoSize);
+    ImGuizmo::DrawCubes(view, projection, nullptr, 0);
+
+    // veya sadece eksen gösterimi istersen:
+    ImGuizmo::ViewManipulate(
+        (float*)view,
+        10.0f,                // manipülasyon boyutu
+        gizmoPos,
+        ImVec2(gizmoSize, gizmoSize),
+        0x79000000            // opsiyonel arka plan rengi
+    );
+
+
+
+
+
+
+
+
     if (!_selectedTransform) return;
 
     // Make sure to call inside ImGui frame:
@@ -309,6 +349,7 @@ void SceneManager::drawGizmo()
             break;
         }
     }
+
 
 }
 
