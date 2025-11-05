@@ -24,7 +24,7 @@ struct RenderTarget {
 
 class SceneManager : public IInspectable
 {
-    Scene scene; 
+    Scene scene;
 
 	std::list<std::shared_ptr<Transform>> _transforms{};
     std::list <Transform*> _selectedTransforms{};
@@ -35,6 +35,8 @@ class SceneManager : public IInspectable
     class UIManager* _UI{};
     std::unique_ptr<MaterialManager> _materialMng{};
     RenderTarget _rt{};
+
+    bool isScenePopupOpen = false;
 public:
     void CreateRenderTarget(RenderTarget& rt, int width, int height) {
         rt.width = width;
@@ -83,64 +85,7 @@ public:
     }
 
 
-	void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
-        _renderer = renderer; 
-        _camera = camera; 
-        _UI = UI;
-
-
-        dispatcher.subscribe(EventType::AddPointLight, [&](const Event& e) {
-            addLight(LightType::Point);
-            });
-        dispatcher.subscribe(EventType::AddSpotLight, [&](const Event& e) {
-            addLight(LightType::Spot);
-            });
-        dispatcher.subscribe(EventType::AddDirectionalLight, [&](const Event& e) {
-            addLight(LightType::Directional);
-            });
-
-
-        dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
-            addShape(DefaultShapes::Cube);
-            });
-        dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
-            addShape(DefaultShapes::Cone);
-            });
-        dispatcher.subscribe(EventType::AddCylinder, [&](const Event& e) {
-            addShape(DefaultShapes::Cylinder);
-            });
-        dispatcher.subscribe(EventType::AddPlane, [&](const Event& e) {
-            addShape(DefaultShapes::Plane);
-            });
-        dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
-            addShape(DefaultShapes::Torus);
-            });
-
-        dispatcher.subscribe(EventType::Delete, [&](const Event& e) {
-            deleteSelected();
-            });
-
-        _materialMng.reset(new MaterialManager(shader));
-        
-        CreateRenderTarget(_rt, 300, 300);
-
-        //Transform* transform = new Transform;
-        //Entity* entity = new Entity;
-        ////_materialMng.reset(new MaterialManager(shader));
-        //entity->model.reset(new Model(_materialMng.get()));
-        //entity->model->loadFromFile("models\\monkey.obj");
-        //entity->_renderer = renderer;
-        //transform->setEntity(entity);
-        //transform->name = "myobject"; 
-        //_transforms.emplace_back(transform);
-
-        //Transform* t2 = new Transform;
-        //t2->name = "my new object";
-        //t2->setEntity(entity);
-        //_transforms.emplace_back(t2);
-
-
-	}
+    void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
 
     void draw() {
         // FBO’ya çiz

@@ -16,6 +16,69 @@ enum class ImguizmoState
 };
 ImguizmoState _GizmoState;
 
+void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
+    _renderer = renderer;
+    _camera = camera;
+    _UI = UI;
+
+
+    dispatcher.subscribe(EventType::AddPointLight, [&](const Event& e) {
+        addLight(LightType::Point);
+        });
+    dispatcher.subscribe(EventType::AddSpotLight, [&](const Event& e) {
+        addLight(LightType::Spot);
+        });
+    dispatcher.subscribe(EventType::AddDirectionalLight, [&](const Event& e) {
+        addLight(LightType::Directional);
+        });
+
+
+    dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
+        addShape(DefaultShapes::Cube);
+        });
+    dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
+        addShape(DefaultShapes::Cone);
+        });
+    dispatcher.subscribe(EventType::AddCylinder, [&](const Event& e) {
+        addShape(DefaultShapes::Cylinder);
+        });
+    dispatcher.subscribe(EventType::AddPlane, [&](const Event& e) {
+        addShape(DefaultShapes::Plane);
+        });
+    dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
+        addShape(DefaultShapes::Torus);
+        });
+
+    dispatcher.subscribe(EventType::Delete, [&](const Event& e) {
+        deleteSelected();
+        });
+
+    dispatcher.subscribe(EventType::ScenePopup, [&](const Event& e) {
+        isScenePopupOpen = true;
+        });
+
+    _materialMng.reset(new MaterialManager(shader));
+
+    CreateRenderTarget(_rt, 300, 300);
+
+    //Transform* transform = new Transform;
+    //Entity* entity = new Entity;
+    ////_materialMng.reset(new MaterialManager(shader));
+    //entity->model.reset(new Model(_materialMng.get()));
+    //entity->model->loadFromFile("models\\monkey.obj");
+    //entity->_renderer = renderer;
+    //transform->setEntity(entity);
+    //transform->name = "myobject"; 
+    //_transforms.emplace_back(transform);
+
+    //Transform* t2 = new Transform;
+    //t2->name = "my new object";
+    //t2->setEntity(entity);
+    //_transforms.emplace_back(t2);
+
+}
+
+
 void SceneManager::loadScene(std::string path) {
     LOG_TRACE("Load Scene");
 
@@ -150,15 +213,70 @@ void SceneManager::drawUI()
 
 
 
-
-
-
-
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Viewport");// &viewport->get_active()); //ImGuiWindowFlags_NoTitleBar| ImGuiWindowFlags_UnsavedDocument
     _UI->setHoverOnUI(ImGui::IsWindowHovered());
     //viewport->set_hovered(ImGui::IsWindowHovered());
     ////std::cout << ImGui::IsWindowHovered() << std::endl;
+    
+
+    //ImGui::OpenPopupOnItemClick("SceneContextMenu", ImGuiPopupFlags_None);
+    
+    if (isScenePopupOpen) {
+        isScenePopupOpen = false;
+        ImGui::OpenPopup("SceneContextMenu");
+    }
+
+    if (ImGui::BeginPopupContextWindow("SceneContextMenu",2)) // sağ tıkla pencere boşluğuna tıklanırsa
+    {
+        if (ImGui::BeginMenu("Add Light")) {
+            if (ImGui::MenuItem("Add Point Light")) {
+                Event e{ EventType::AddPointLight };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Spot Light")) {
+                Event e{ EventType::AddSpotLight };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Direction Light")) {
+                Event e{ EventType::AddDirectionalLight };
+                dispatcher.dispatch(e);
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Add Shape")) {
+            if (ImGui::MenuItem("Add Cube")) {
+                Event e{ EventType::AddCube };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Cone")) {
+                Event e{ EventType::AddCone };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Cylinder")) {
+                Event e{ EventType::AddCylinder };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Plane")) {
+                Event e{ EventType::AddPlane };
+                dispatcher.dispatch(e);
+            }
+            if (ImGui::MenuItem("Add Torus")) {
+                Event e{ EventType::AddTorus };
+                dispatcher.dispatch(e);
+            }
+            ImGui::EndMenu();
+
+        }
+
+
+        ImGui::Separator();
+
+        ImGui::EndPopup();
+    }
+
+
 
     auto t_size = ImGui::GetContentRegionAvail();//ImGui::GetWindowSize();
     glm::ivec2 window_size{ t_size.x, t_size.y };
@@ -256,9 +374,10 @@ void SceneManager::drawGizmo()
 
     // ImGuizmo’nun çizim bölgesini ayarla
     ImGuizmo::SetRect(gizmoPos.x, gizmoPos.y, gizmoSize, gizmoSize);
-    ImGuizmo::DrawCubes(view, projection, nullptr, 0);
+    //ImGuizmo::DrawCubes(view, projection, nullptr, 0);
 
-    // veya sadece eksen gösterimi istersen:
+    //float a = view[0];
+
     ImGuizmo::ViewManipulate(
         (float*)view,
         10.0f,                // manipülasyon boyutu
@@ -266,8 +385,9 @@ void SceneManager::drawGizmo()
         ImVec2(gizmoSize, gizmoSize),
         0x79000000            // opsiyonel arka plan rengi
     );
-
-
+    //float b = view[0];
+    //if(a!= b)
+    //    std::cout << "a: " << a << "\tb: "<<b << std::endl;
 
 
 

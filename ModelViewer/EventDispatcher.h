@@ -24,6 +24,8 @@ enum class EventType {
     AddTorus,
 
     Delete,
+
+    ScenePopup
 };
 
 struct EventData {

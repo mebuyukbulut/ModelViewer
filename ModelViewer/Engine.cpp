@@ -199,10 +199,19 @@ void  Engine::processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
         _camera->resetFrame();
 
-    if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS){
+    if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
         Event e{ EventType::Delete, EventData{} };
         dispatcher.dispatch(e);
     }
+
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        Event e{ EventType::ScenePopup, EventData{} };
+        dispatcher.dispatch(e);
+    }
+
+
+
 
 }
 
