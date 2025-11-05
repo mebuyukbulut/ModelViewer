@@ -56,8 +56,6 @@ enum class DefaultShapes
 	Sphere,
 	Plane, // Quad
 	Torus,
-
-
 };
 
 

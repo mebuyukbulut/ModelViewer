@@ -63,7 +63,6 @@ public:
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-
     void ResizeRenderTarget(int newWidth, int newHeight)
     {
         if (newWidth == _rt.width && newHeight == _rt.height)
@@ -127,7 +126,6 @@ public:
 
     // Inherited via IInspectable
     void drawUI() override;
-
     void drawGizmo();
 
     // LIGHTS
@@ -137,6 +135,10 @@ public:
 
     // SHAPES
     void addShape(DefaultShapes shape); 
+    
     void deleteSelected();
+    std::string getUniqueName(std::string name);
+    bool isUniqueName(std::string name);
+
 };
 

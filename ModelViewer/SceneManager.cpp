@@ -605,27 +605,28 @@ void SceneManager::configShader(Shader& shader)
 }
 
 
-void SceneManager::addShape(DefaultShapes shape) {
-    ////MeshFactory mf; 
-    ////auto cubeMesh = mf.create(DefaultShapes::Cube);
+void SceneManager::addShape(DefaultShapes shape)
+{
 
-    //Transform* transform = new Transform;
-    //Entity* entity = new Entity;
-
-    //entity->model.reset(new Model(_materialMng.get()));
-    //entity->model->loadDefault();
-    ////entity->model->addMesh(cubeMesh);
-    //entity->_renderer = _renderer;
-    //transform->setEntity(entity);
-    //transform->name = "my cube object";
-    //_transforms.emplace_back(transform);
-
-
-
+    // Cube,
+    // Cylinder,
+    // Cone,
+    // Sphere,
+    // Plane, 
+    // Torus,
+    std::map<DefaultShapes, std::string> shapedToString {
+        { DefaultShapes::Cube, "Cube" },
+        { DefaultShapes::Cylinder, "Cylinder" },
+        { DefaultShapes::Cone, "Cone" },
+        { DefaultShapes::Plane, "Quad" },
+        { DefaultShapes::Torus, "Torus" },
+    };
 
     Transform* transform = new Transform;
     transform->setEntity(new Entity);
-    transform->name = "my cube object";
+    transform->name = getUniqueName(shapedToString[shape]);
+    LOG_TRACE(shapedToString[shape]);
+
     transform->setPosition(glm::vec3(0,0,0));
     transform->setRotation(glm::vec3(0,0,0));
     transform->setScale(glm::vec3(1,1,1));
@@ -634,7 +635,6 @@ void SceneManager::addShape(DefaultShapes shape) {
     Model* model = new Model(_materialMng.get());
     model->loadDefault(shape);
     transform->getEntity()->model.reset(model);
-    LOG_TRACE("add Cube");
 
     _transforms.emplace_back(transform);
 }
@@ -654,5 +654,22 @@ void SceneManager::deleteSelected()
         });
 
     _selectedTransform = nullptr;
+}
+
+std::string SceneManager::getUniqueName(std::string name)
+{
+    int i{};
+    std::string uniq_name = name; 
+    while (!isUniqueName(uniq_name))    
+        uniq_name = name + std::to_string(i++);
+    
+    return uniq_name;
+}
+
+bool SceneManager::isUniqueName(std::string name)
+{
+    for (auto transform : _transforms)
+        if (transform->name == name) return false;
+    return true;
 }
 
