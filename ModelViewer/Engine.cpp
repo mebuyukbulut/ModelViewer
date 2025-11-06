@@ -146,7 +146,7 @@ void Engine::mainLoop()
 
         time.update();
         double deltaTime = time.deltaTime();
-
+        _mouse.update(deltaTime);
         //ps.update(deltaTime);
         //ps.draw();
         

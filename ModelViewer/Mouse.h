@@ -14,11 +14,15 @@ class Mouse
 	bool _mouseRightPress = false;
 	bool _firstMouse = true;
 
+	float _timeThresholdPress = 0.2; // second 
+	float _mouseLeftTime = 0;
+
 	float _rotSens = .4f; // rotation sensitivity
 	float _moveSens = 0.01f; // move sensitivity
 
 public:
 	void init(GLFWwindow* window, UIManager* UI);
+	void update(float deltaTime);
 
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 	static void mouse_cursor_callback(GLFWwindow* window, double xposIn, double yposIn);
