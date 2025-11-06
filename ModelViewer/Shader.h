@@ -5,6 +5,7 @@
 
 class Shader
 {
+
 	unsigned int _shaderProgram;
 	std::unordered_map<std::string, unsigned int> _uniforms;
 
@@ -13,6 +14,13 @@ class Shader
 	unsigned int getUniformLocation(const std::string& name);
 
 public:
+	enum class Type
+	{
+		Background,
+		Selection,
+		Foreground,
+	}_type = Type::Foreground;
+
 	void init(std::string vertexShaderSource, std::string fragmentShaderSource);
 	void use(); 
 	void terminate(); 

@@ -118,6 +118,7 @@ void Engine::init(){
     _renderer.setShader("PBR0", Renderer::ShaderType::Main);
     _renderer.setShader("bg", Renderer::ShaderType::Background);
     _renderer.setShader("grid", Renderer::ShaderType::Grid);
+    _renderer.setShader("selection", Renderer::ShaderType::Selection);
     //_renderer.enableWireframe();
 
     SM.init(&_renderer, _camera.get(),&(_renderer.getShader()),&_UI);

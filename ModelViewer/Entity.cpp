@@ -48,6 +48,13 @@ glm::mat4 Transform::getGlobalMatrix() {
     return _isDirty ? update(), _globalModelMatrix : _globalModelMatrix;
 }
 
+int GLOBAL_ID_COUNTER = 1;
+Transform::Transform()
+{
+    ID = GLOBAL_ID_COUNTER++;
+    GLOBAL_ID_COUNTER+=30;
+}
+
 glm::vec3 Transform::getPosition() { return _position; }
 glm::vec3 Transform::getRotation() { return _rotation; }
 glm::vec3 Transform::getScale() { return _scale; }
@@ -132,8 +139,19 @@ void Transform::draw(Renderer* renderer)
     renderer->drawModel(_entity->model.get(), getGlobalMatrix());
 
     for (auto& i : children)
-    	i->draw(renderer);
+        i->draw(renderer);
 }
+void Transform::drawAsColor(Renderer* renderer)
+{
+    renderer->drawModelAsColor(_entity->model.get(), getGlobalMatrix(), ID);
+
+    for (auto& i : children)
+        i->drawAsColor(renderer);
+}
+
+
+
+
 void Transform::terminate() {
     if (_entity)
     {

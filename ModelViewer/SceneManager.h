@@ -3,7 +3,7 @@
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <fstream>
-
+#include <imgui.h>
 
 #include "Entity.h"
 #include "Renderer.h"
@@ -37,6 +37,10 @@ class SceneManager : public IInspectable
     RenderTarget _rt{};
 
     bool isScenePopupOpen = false;
+    bool isSelect = false; 
+    glm::vec2 mousePos{};
+    ImVec2 viewportPos;
+    ImVec2 viewportPanelSize;
 public:
     void CreateRenderTarget(RenderTarget& rt, int width, int height) {
         rt.width = width;
@@ -90,12 +94,36 @@ public:
         // FBO’ya çiz
         glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
         glViewport(0, 0, _rt.width, _rt.height);
-        glClearColor(1, 0, 0, 1); // error check
+        //glClearColor(1, 0, 0, 1); // error check
+        
+        if (isSelect) {
+            glClearColor(0, 0, 0, 1); 
+            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+            for (auto& transform : _transforms) {
+                if (transform.get()->getEntity()->model)
+                    transform->drawAsColor(_renderer);
+            }
+            glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
+            glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
+            glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
+            mPos = mPos - panelPos;
+            mPos.y = panelSize.y - mPos.y;
+            uint32_t selectedID = _renderer->getSelection(mPos);
+            //LOG_TRACE(std::to_string(_renderer->getSelection(mPos)));
+            //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
+            if(selectedID!=0)
+                for (auto t : _transforms) {
+                    if (t->ID == selectedID)
+                        _selectedTransform = t.get();
+                }
+            isSelect = false; 
+        }
+
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         _renderer->drawBackground();
 
         for (auto& transform : _transforms) {
-            if(transform.get()->getEntity()->model)
+            if (transform.get()->getEntity()->model)
                 transform->draw(_renderer);
         }
         _renderer->drawGrid();

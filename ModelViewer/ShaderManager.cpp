@@ -8,6 +8,7 @@ void ShaderManager::init(){
 		std::string vertexShaderSource = FileUtils::readFile(shaderInfo.vertexPath);
 		std::string fragmentShaderSource = FileUtils::readFile(shaderInfo.fragmentPath);
 		newShader.init(vertexShaderSource, fragmentShaderSource);
+		newShader._type = shaderInfo.type;
 		shaders[shaderInfo.name] = newShader;
 	}
 

@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "FileUtils.h"
 #include "Camera.h"
+#include "Logger.h"
 
 void Renderer::init() {
 	_shaderManager.init(); // load all shaders
@@ -14,6 +15,7 @@ void Renderer::init() {
     //glCullFace(GL_FRONT);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
 
+    
 
     // Initialize background
     _bgMesh = new Mesh();
@@ -65,6 +67,12 @@ void Renderer::beginFrame() {
     _shader->setMat4("model", glm::mat4(1.0f));
     _shader->setVec3("viewPos", _camera->getPosition());
 
+    _selectionShader->use();
+    _selectionShader->setMat4("view", viewMatrix);
+    _selectionShader->setMat4("projection", projMatrix);
+
+
+
     _gridShader->use();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
     _gridShader->setMat4("view", viewMatrix);
@@ -76,11 +84,19 @@ void Renderer::endFrame() {
     
 }
 
-void Renderer::drawModel(Model* model, const glm::mat4& transform) { 
+void Renderer::drawModel(Model* model, const glm::mat4& transform) {
     _shader->use();
 	_shader->setMat4("model", transform);
-
     model->draw(*_shader);
+}
+
+void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID)
+{
+    _selectionShader->use();
+    _selectionShader->setMat4("model", transform);
+    _selectionShader->setInt("objectID", ID);
+
+    model->draw(*_selectionShader);
 }
 
 void Renderer::drawBackground()
@@ -106,6 +122,16 @@ void Renderer::drawGrid()
     //glDepthMask(GL_TRUE);
 }
 
+uint32_t Renderer::getSelection(glm::vec2 mousePos)
+{
+    unsigned char data[4];
+    glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    uint32_t pickedID = data[0] + (data[1] << 8) + (data[2] << 16);
+    //LOG_TRACE(std::to_string(pickedID));
+
+    return pickedID;
+}
+
 
 void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
 void Renderer::setShader(const std::string name, ShaderType shaderType) {
@@ -128,15 +154,11 @@ void Renderer::setShader(const std::string name, ShaderType shaderType) {
         _lightShader = shader;
         break;
     case Renderer::ShaderType::Selection:
-        _selectShader = shader;
+        _selectionShader = shader;
         break;
     default:
         break;
     }
-
-    //_shader->setVec3("lightPos", glm::vec3(3.0f, 3.0f, 0.0f));
-    //_shader->setFloat("lightIntensity", 30.0f);
-    //_shader->setFloat("albedo", 0.18f);
 }
 
 void Renderer::enableWireframe() {

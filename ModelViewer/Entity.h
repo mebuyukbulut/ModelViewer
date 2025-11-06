@@ -29,7 +29,11 @@ class Transform : public IInspectable{
 	glm::mat4 getLocalMatrix();
 
 public: 
+	uint32_t ID;
 	std::string name{};
+
+	Transform();
+
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
 	glm::vec3 getScale();
@@ -44,7 +48,9 @@ public:
 	void addChild(std::unique_ptr<Transform> child); 
 	void setEntity(Entity* entity);
 	Entity* getEntity(); 
+
 	void draw(class Renderer* renderer);
+	void drawAsColor(class Renderer* renderer);
 
 	bool isSelected() { return _isSelected; }
 	void select() {

@@ -21,8 +21,15 @@ void Mouse::init(GLFWwindow* window, UIManager* UI)
 
 void Mouse::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !_UI->isHoverOnUI())
+    
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !_UI->isHoverOnUI()) {
         _this->_mouseLeftPress = true;
+
+        Event e{ EventType::Select };
+        ImVec2 mousePos = ImGui::GetMousePos();
+        e.data.vec = glm::vec3(mousePos.x, mousePos.y, 0);
+        dispatcher.dispatch(e);
+    }
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
         _this->_mouseLeftPress = false;
         _this->_firstMouse = true;

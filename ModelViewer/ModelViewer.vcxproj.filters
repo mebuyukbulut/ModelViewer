@@ -229,5 +229,11 @@
     <None Include="shaders\gridShader.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="shaders\selection.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\selection.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

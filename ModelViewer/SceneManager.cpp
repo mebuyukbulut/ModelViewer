@@ -52,6 +52,10 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     dispatcher.subscribe(EventType::Delete, [&](const Event& e) {
         deleteSelected();
         });
+    dispatcher.subscribe(EventType::Select, [&](const Event& e) {
+        mousePos = glm::vec2(e.data.vec.x, e.data.vec.y);
+        isSelect = true;
+        });
 
     dispatcher.subscribe(EventType::ScenePopup, [&](const Event& e) {
         isScenePopupOpen = true;
@@ -300,10 +304,10 @@ void SceneManager::drawUI()
     //);
 
     ImVec2 panelSize = ImGui::GetContentRegionAvail();
+    viewportPanelSize = panelSize;
+    viewportPos = ImGui::GetCursorScreenPos(); 
     ImGui::Image((ImTextureID)(intptr_t)_rt.colorTex,
         panelSize, ImVec2(0, 1), ImVec2(1, 0));
-
-
 
     // viewport toolbar BEGIN
     // https://gist.github.com/rmitton/f80cbb028fca4495ab1859a155db4cd8

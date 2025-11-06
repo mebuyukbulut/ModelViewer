@@ -24,6 +24,7 @@ enum class EventType {
     AddTorus,
 
     Delete,
+    Select, 
 
     ScenePopup
 };

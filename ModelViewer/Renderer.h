@@ -26,7 +26,7 @@ private:
 	Shader* _bgShader{};
 	Shader* _gridShader{};
 	Shader* _lightShader{};
-	Shader* _selectShader{};
+	Shader* _selectionShader{};
 
 	std::shared_ptr<Camera> _camera;
 
@@ -41,8 +41,11 @@ public:
 	void endFrame();
 
 	void drawModel(Model* model, const glm::mat4& transform);
+	void drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID);
+	
 	void drawBackground();
 	void drawGrid();
+	uint32_t getSelection(glm::vec2 mousePos);
 
 	void setCamera(std::shared_ptr<Camera> camera);
 	void setShader(const std::string name, ShaderType shaderType);
