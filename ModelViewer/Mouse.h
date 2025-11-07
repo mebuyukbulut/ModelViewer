@@ -15,7 +15,7 @@ class Mouse
 	bool _firstMouse = true;
 
 	float _timeThresholdPress = 0.2; // second 
-	float _mouseLeftTime = 0;
+	float _mouseLeftTime = 0; 
 
 	float _rotSens = .4f; // rotation sensitivity
 	float _moveSens = 0.01f; // move sensitivity

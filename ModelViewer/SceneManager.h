@@ -111,11 +111,14 @@ public:
             uint32_t selectedID = _renderer->getSelection(mPos);
             //LOG_TRACE(std::to_string(_renderer->getSelection(mPos)));
             //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
-            if(selectedID!=0)
+            if (selectedID != 0)
                 for (auto t : _transforms) {
                     if (t->ID == selectedID)
                         _selectedTransform = t.get();
                 }
+            else; // Deselect
+                //_selectedTransform = nullptr;
+            
             isSelect = false; 
         }
 
