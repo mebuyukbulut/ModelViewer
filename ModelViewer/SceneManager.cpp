@@ -1,10 +1,23 @@
 ﻿#include "SceneManager.h"
+
+#include <iostream>
+#include <fstream>
+
 #include <imgui.h>
 #include <ImGuizmo.h>
-#include "Camera.h"
-#include <glm/gtc/type_ptr.hpp>
-#include "LightManager.h"
 #include <imgui_internal.h>
+#include <glm/gtc/type_ptr.hpp>
+#include <yaml-cpp/yaml.h>
+
+#include "Camera.h"
+//#include "Entity.h"
+#include "EventDispatcher.h"
+#include "Inspectable.h"
+#include "LightManager.h"
+//#include "Material.h"
+#include "Renderer.h"
+//#include "Scene.h"
+#include "Shader.h"
 #include "UIManager.h"
 
 
@@ -15,6 +28,52 @@ enum class ImguizmoState
     Scale
 };
 ImguizmoState _GizmoState;
+
+void SceneManager::CreateRenderTarget(RenderTarget& rt, int width, int height) 
+{
+    rt.width = width;
+    rt.height = height;
+
+    glGenTextures(1, &rt.colorTex);
+    glBindTexture(GL_TEXTURE_2D, rt.colorTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenRenderbuffers(1, &rt.depthRbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rt.depthRbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
+    glGenFramebuffers(1, &rt.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, rt.fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt.colorTex, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rt.depthRbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        LOG_ERROR("RenderTarget incomplete!");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+void SceneManager::ResizeRenderTarget(int newWidth, int newHeight)
+{
+    if (newWidth == _rt.width && newHeight == _rt.height)
+        return; // boyut değişmemiş
+
+    _rt.width = newWidth;
+    _rt.height = newHeight;
+
+    if (_rt.width && _rt.height)
+        _camera->setWindowSize(_rt.width, _rt.height);
+
+    // Eski GPU kaynaklarını serbest bırak
+    glDeleteFramebuffers(1, &_rt.fbo);
+    glDeleteTextures(1, &_rt.colorTex);
+    glDeleteRenderbuffers(1, &_rt.depthRbo);
+
+    // Yeni boyutla tekrar oluştur
+    CreateRenderTarget(_rt, newWidth, newHeight);
+}
 
 void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
     _renderer = renderer;
@@ -81,7 +140,50 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     //_transforms.emplace_back(t2);
 
 }
+void SceneManager::draw() {
+    // FBO’ya çiz
+    glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
+    glViewport(0, 0, _rt.width, _rt.height);
+    //glClearColor(1, 0, 0, 1); // error check
 
+    if (isSelect) {
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        for (auto& transform : _transforms) {
+            if (transform.get()->getEntity()->model)
+                transform->drawAsColor(_renderer);
+        }
+        glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
+        glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
+        glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
+        mPos = mPos - panelPos;
+        mPos.y = panelSize.y - mPos.y;
+        uint32_t selectedID = _renderer->getSelection(mPos);
+        //LOG_TRACE(std::to_string(_renderer->getSelection(mPos)));
+        //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
+        if (selectedID != 0)
+            for (auto t : _transforms) {
+                if (t->ID == selectedID)
+                    _selectedTransform = t.get();
+            }
+        else; // Deselect
+        //_selectedTransform = nullptr;
+
+        isSelect = false;
+    }
+
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    _renderer->drawBackground();
+
+    for (auto& transform : _transforms) {
+        if (transform.get()->getEntity()->model)
+            transform->draw(_renderer);
+    }
+    _renderer->drawGrid();
+    _renderer->getShader().use();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
 void SceneManager::loadScene(std::string path) {
     LOG_TRACE("Load Scene");
@@ -113,6 +215,20 @@ void SceneManager::loadScene(std::string path) {
 
 
 }
+void SceneManager::saveScene() {
+    LOG_TRACE("Save Scene");
+    YAML::Node node;
+    for (auto transform : _transforms) {
+        node.push_back(transform->serialize());
+        //Light* light = transform->getEntity()->light.get();
+        //if(light)
+        //    node["Lights"].push_back(light->serialize());
+    }
+    std::string path = "save0.yaml";
+    std::ofstream fout(path);
+    fout << node;
+}
+
 
 void SceneManager::drawUI()
 {
@@ -304,8 +420,9 @@ void SceneManager::drawUI()
     //);
 
     ImVec2 panelSize = ImGui::GetContentRegionAvail();
-    viewportPanelSize = panelSize;
-    viewportPos = ImGui::GetCursorScreenPos(); 
+    viewportPanelSize = glm::vec2(panelSize.x, panelSize.y);
+    ImVec2 cursorScreenPos = ImGui::GetCursorScreenPos(); 
+    viewportPos = glm::vec2(cursorScreenPos.x, cursorScreenPos.y);
     ImGui::Image((ImTextureID)(intptr_t)_rt.colorTex,
         panelSize, ImVec2(0, 1), ImVec2(1, 0));
 
