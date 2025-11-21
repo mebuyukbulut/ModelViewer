@@ -32,6 +32,7 @@ private:
 
 	Mesh* _bgMesh{};
 	Mesh* _gridMesh{};
+	unsigned int cubemapTexture;
 public:
 
 	void init();

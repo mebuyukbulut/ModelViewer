@@ -55,6 +55,7 @@ struct EmitterInfo : public IInspectable{
     void drawUI();
 };
 
+
 class ParticleSystem : public IInspectable
 {
     std::vector<Particle> _particles{};

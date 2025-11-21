@@ -7,6 +7,40 @@
 #include "Camera.h"
 #include "Logger.h"
 
+
+unsigned int loadCubemap(std::vector<std::string> faces)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
+}
+
+
 void Renderer::init() {
 	_shaderManager.init(); // load all shaders
 	//setShader("basic", ShaderType::Main); // set default shader
@@ -17,15 +51,33 @@ void Renderer::init() {
 
     
 
-    // Initialize background
-    _bgMesh = new Mesh();
-    std::vector<Vertex> bgVertices{
-        {{-1,-1, 0}, {0,0,0}, {0,0}},
-        {{ 3,-1, 0}, {0,0,0}, {2,0}},
-        {{-1, 3, 0}, {0,0,0}, {0,2}},
+    // Initialize skybox
+    std::vector<std::string> faces
+    {
+        "data/skybox/right.jpg",
+        "data/skybox/left.jpg",
+        "data/skybox/top.jpg",
+        "data/skybox/bottom.jpg",
+        "data/skybox/front.jpg",
+        "data/skybox/back.jpg"
     };
-    std::vector<unsigned int> bgIndices{ 0, 1, 2 };
-    _bgMesh->init(bgVertices, bgIndices);
+    cubemapTexture = loadCubemap(faces);
+    Mesh tmp = MeshFactory::create(DefaultShapes::Cube);
+    _bgMesh = new Mesh(tmp);
+    
+
+    // Initialize background
+    //_bgMesh = new Mesh();
+    //std::vector<Vertex> bgVertices{
+    //    {{-1,-1, 0}, {0,0,0}, {0,0}},
+    //    {{ 3,-1, 0}, {0,0,0}, {2,0}},
+    //    {{-1, 3, 0}, {0,0,0}, {0,2}},
+    //};
+    //std::vector<unsigned int> bgIndices{ 0, 1, 2 };
+    //_bgMesh.init(bgVertices, bgIndices);
+
+
+
 
     // Initialize grid 
     _gridMesh = new Mesh();
@@ -71,6 +123,11 @@ void Renderer::beginFrame() {
     _selectionShader->setMat4("view", viewMatrix);
     _selectionShader->setMat4("projection", projMatrix);
 
+    // skybox için
+    _bgShader->use(); 
+    glm::mat4 viewSkybox = glm::mat4(glm::mat3(viewMatrix));
+    _bgShader->setMat4("view", viewSkybox);
+    _bgShader->setMat4("projection", projMatrix);
 
 
     _gridShader->use();
@@ -101,14 +158,30 @@ void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32
 
 void Renderer::drawBackground()
 {
-    glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_DEPTH_TEST);
+    //_bgShader->use();
+
+    //_bgMesh->draw(*_bgShader);
+    ////_shaderManager.getShader("bg").use();
+    //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+    //glEnable(GL_DEPTH_TEST);
+    ////_shader->use();
+
+
+
+    glDepthMask(GL_FALSE);
+    glCullFace(GL_FRONT);
+
     _bgShader->use();
     _bgMesh->draw(*_bgShader);
-    //_shaderManager.getShader("bg").use();
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
-    glEnable(GL_DEPTH_TEST);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
-    //_shader->use();
+    glCullFace(GL_BACK);
+    glDepthMask(GL_TRUE);
+
+
+
+
 }
 
 void Renderer::drawGrid()

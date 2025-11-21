@@ -24,6 +24,7 @@ class ShaderManager
 		{"basic", "shaders/basic_lighting.vert", "shaders/basic_lighting.frag", Shader::Type::Foreground},
 		{"PBR0", "shaders/PBR0.vert", "shaders/PBR0.frag", Shader::Type::Foreground},
 		{"bg", "shaders/bg_grad.vert", "shaders/bg_grad.frag", Shader::Type::Background},
+		{"skybox", "shaders/skybox.vert", "shaders/skybox.frag", Shader::Type::Background},
 		{"grid", "shaders/gridShader.vert", "shaders/gridShader.frag", Shader::Type::Foreground}, // ? 
 		{"selection", "shaders/selection.vert", "shaders/selection.frag", Shader::Type::Selection}, 
 		

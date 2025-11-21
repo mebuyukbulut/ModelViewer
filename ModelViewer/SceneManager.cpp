@@ -146,6 +146,8 @@ void SceneManager::draw() {
     glViewport(0, 0, _rt.width, _rt.height);
     //glClearColor(1, 0, 0, 1); // error check
 
+
+    // mouse click ile ekranda öge yakalama
     if (isSelect) {
         glClearColor(0, 0, 0, 1);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -172,8 +174,16 @@ void SceneManager::draw() {
         isSelect = false;
     }
 
+    
+    
+    
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     _renderer->drawBackground();
+
+
+
+
+
 
     for (auto& transform : _transforms) {
         if (transform.get()->getEntity()->model)
