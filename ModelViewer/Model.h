@@ -13,22 +13,24 @@
 #include <stb_image.h>
 #include "Inspectable.h"
 
+class Texture;
+
 class Model : public IInspectable
 {
     MaterialManager* _materialManager{};
     //TextureManager* _textureManager{};
 
     std::vector<MaterialHandle> _materials{};
-    std::vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    std::vector<Texture*> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	std::vector<Mesh> meshes;
 	std::string _directory;
     std::string _path{};
 
-    unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = 1);
+    //unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = 1);
     bool loadModel(std::string const& path);
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-    std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+    std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 
 public:
     void draw(Shader& shader);

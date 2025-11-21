@@ -18,17 +18,11 @@ struct Vertex
 	glm::vec2 texCoords;
 };
 
-struct Texture {
-	unsigned int id;
-	std::string type;
-	std::string path;
-};
-
 class Mesh
 {
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
-	std::vector<Texture> _textures;
+	//std::vector<Texture> _textures;
 
 	unsigned int _vao, _vbo, _ebo;
 	void setupMesh();
@@ -36,7 +30,7 @@ public:
 
 	//void loadFromFile(const char* filename);
 	//void loadDefault();
-	void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	//void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	void draw(Shader& shader);
 	void terminate();

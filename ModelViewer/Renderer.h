@@ -6,6 +6,7 @@
 class Camera;
 class Shader;
 class Mesh; 
+class Texture; 
 
 class Renderer
 {
@@ -32,7 +33,7 @@ private:
 
 	Mesh* _bgMesh{};
 	Mesh* _gridMesh{};
-	unsigned int cubemapTexture;
+	Texture* cubemapTexture;
 public:
 
 	void init();
