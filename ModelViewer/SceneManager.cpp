@@ -20,6 +20,8 @@
 #include "Shader.h"
 #include "UIManager.h"
 
+#include "Logger.h"
+
 
 enum class ImguizmoState
 {
@@ -120,7 +122,43 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         isScenePopupOpen = true;
         });
 
+
     _materialMng.reset(new MaterialManager(shader));
+
+    dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
+        std::string modelPath = e.data.text;
+
+        if (modelPath.empty())
+            return;
+
+        Model *model = new Model(_materialMng.get());
+        if (model->loadFromFile(modelPath)) {
+            //_models.push_back(model);
+            //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
+            LOG_INFO("Success to load model: " + modelPath);
+        }
+        else {
+            LOG_ERROR("Failed to load model: " + modelPath);
+        }
+
+        //The position of the last character that matches.
+        //If no matches are found, the function returns string::npos.
+        //
+        //size_t is an unsigned integral type(the same as member type string::size_type).
+        
+        unsigned int slashIndex = modelPath.find_last_of('\\');
+        unsigned int pointIndex = modelPath.find_last_of('.');
+        std::string directory = modelPath.substr(0, slashIndex);
+        std::string modelName = modelPath.substr(slashIndex+1, pointIndex-slashIndex -1);
+
+        Transform* transform = new Transform;
+        transform->setEntity(new Entity);
+        transform->getEntity()->model.reset(model);
+        transform->name = getUniqueName(modelName);
+        _transforms.emplace_back(transform);  
+        LOG_TRACE(modelName);
+        });
+
 
     CreateRenderTarget(_rt, 300, 300);
 

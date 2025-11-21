@@ -16,7 +16,7 @@
 #define LOG_TRACE(msg)    Logger::get().log(LogLevel::Trace, msg)
 #define LOG_DEBUG(msg)    Logger::get().log(LogLevel::Debug, msg)
 #define LOG_INFO(msg)     Logger::get().log(LogLevel::Info, msg)
-#define LOG_WARNING(msg)     Logger::get().log(LogLevel::Warning, msg)
+#define LOG_WARNING(msg)  Logger::get().log(LogLevel::Warning, msg)
 #define LOG_ERROR(msg)    Logger::get().log(LogLevel::Error, msg)
 #define LOG_CRITICAL(msg) Logger::get().log(LogLevel::Critical, msg)
 

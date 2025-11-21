@@ -81,26 +81,7 @@ void Engine::initUI()
         SM.saveScene();
         glfwSetWindowShouldClose(_window, true);
         });
-    dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
-        std::string modelPath = e.data.text;
 
-        if (modelPath.empty())
-            return;
-
-        //for (Model& i : _models)
-        //    i.terminate();
-        //_models.clear();
-
-        //Model model;
-        //if (model.loadFromFile(modelPath)) {
-        //    _models.push_back(model);
-        //    //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
-        //    std::cout << "Success to load model: " << modelPath << std::endl;
-        //}
-        //else {
-        //    std::cout << "Failed to load model: " << modelPath << std::endl;
-        //}
-        });
 
     _UI.ps = &ps;
 }
