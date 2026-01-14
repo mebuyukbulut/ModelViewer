@@ -105,6 +105,9 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Halfedge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -185,6 +188,9 @@
     <ClInclude Include="Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Halfedge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\basic_lighting.frag">
@@ -245,6 +251,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="shaders\skybox.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\hdr2cubemap.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\hdr2cubemap.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

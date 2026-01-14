@@ -25,6 +25,7 @@ class ShaderManager
 		{"PBR0", "shaders/PBR0.vert", "shaders/PBR0.frag", Shader::Type::Foreground},
 		{"bg", "shaders/bg_grad.vert", "shaders/bg_grad.frag", Shader::Type::Background},
 		{"skybox", "shaders/skybox.vert", "shaders/skybox.frag", Shader::Type::Background},
+		{"hdr2cubemap", "shaders/hdr2cubemap.vert", "shaders/hdr2cubemap.frag", Shader::Type::Background}, // ?
 		{"grid", "shaders/gridShader.vert", "shaders/gridShader.frag", Shader::Type::Foreground}, // ? 
 		{"selection", "shaders/selection.vert", "shaders/selection.frag", Shader::Type::Selection}, 
 		

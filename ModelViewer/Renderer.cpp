@@ -20,32 +20,32 @@ void Renderer::init() {
 
     
 
-    // Initialize skybox
-    std::vector<std::string> faces
-    {
-        "data/skybox/right.jpg",
-        "data/skybox/left.jpg",
-        "data/skybox/top.jpg",
-        "data/skybox/bottom.jpg",
-        "data/skybox/front.jpg",
-        "data/skybox/back.jpg"
-    };
-    cubemapTexture = TextureFactory::loadCubeMap(faces);
+    //// Initialize skybox
+    //std::vector<std::string> faces
+    //{
+    //    "data/skybox/right.jpg",
+    //    "data/skybox/left.jpg",
+    //    "data/skybox/top.jpg",
+    //    "data/skybox/bottom.jpg",
+    //    "data/skybox/front.jpg",
+    //    "data/skybox/back.jpg"
+    //};
+    //cubemapTexture = TextureFactory::loadCubeMap(faces);
+    ////cubemapTexture = TextureFactory::loadHDR("data/HDRs/citrus_orchard_road_puresky_1k.hdr", &_shaderManager.getShader("hdr2cubemap"));
 
-
-    Mesh tmp = MeshFactory::create(DefaultShapes::Cube);
-    _bgMesh = new Mesh(tmp);
+    // Mesh tmp = MeshFactory::create(DefaultShapes::Cube);
+    // _bgMesh = new Mesh(tmp);
     
 
     // Initialize background
-    //_bgMesh = new Mesh();
-    //std::vector<Vertex> bgVertices{
-    //    {{-1,-1, 0}, {0,0,0}, {0,0}},
-    //    {{ 3,-1, 0}, {0,0,0}, {2,0}},
-    //    {{-1, 3, 0}, {0,0,0}, {0,2}},
-    //};
-    //std::vector<unsigned int> bgIndices{ 0, 1, 2 };
-    //_bgMesh.init(bgVertices, bgIndices);
+    _bgMesh = new Mesh();
+    std::vector<Vertex> bgVertices{
+        {{-1,-1, 0}, {0,0,0}, {0,0}},
+        {{ 3,-1, 0}, {0,0,0}, {2,0}},
+        {{-1, 3, 0}, {0,0,0}, {0,2}},
+    };
+    std::vector<unsigned int> bgIndices{ 0, 1, 2 };
+    _bgMesh->init(bgVertices, bgIndices);
 
 
 
@@ -129,27 +129,26 @@ void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32
 
 void Renderer::drawBackground()
 {
-    //glDisable(GL_DEPTH_TEST);
-    //_bgShader->use();
-
-    //_bgMesh->draw(*_bgShader);
-    ////_shaderManager.getShader("bg").use();
-    //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
-    //glEnable(GL_DEPTH_TEST);
-    ////_shader->use();
-
-
-
-    glDepthMask(GL_FALSE);
-    glCullFace(GL_FRONT);
-
+    glDisable(GL_DEPTH_TEST);
     _bgShader->use();
+
     _bgMesh->draw(*_bgShader);
-    cubemapTexture->use();
+    //_shaderManager.getShader("bg").use();
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+    glEnable(GL_DEPTH_TEST);
+    //_shader->use();
 
 
-    glCullFace(GL_BACK);
-    glDepthMask(GL_TRUE);
+
+    //glDepthMask(GL_FALSE);
+    //glCullFace(GL_FRONT);
+    //
+    //_bgShader->use();
+    //_bgMesh->draw(*_bgShader);
+    //cubemapTexture->use();
+    //
+    //glCullFace(GL_BACK);
+    //glDepthMask(GL_TRUE);
 
 
 

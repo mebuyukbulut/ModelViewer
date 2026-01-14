@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+class Transform;
+
 class Camera
 {
 protected:
@@ -24,6 +26,7 @@ protected:
 
 public:
 	virtual void init(glm::vec2 windowSize);
+	virtual void init(Transform* transform);
 
 	
 	glm::mat4 getProjectionMatrix();
@@ -37,7 +40,7 @@ public:
 	virtual void rotate(glm::vec3 angle);
 	virtual void zoom(float amount);
 
-	virtual void resetFrame();
+	virtual void resetFrame(Transform* transform = nullptr);
 };
 
 class OrbitCamera : public Camera{
@@ -78,7 +81,7 @@ public:
 	void zoom(float amount) override {
 		_radius = glm::max(0.1f, _radius + amount);
 	}
-	virtual void resetFrame() override{
-		init(_windowSize);
-	}
+	//virtual void resetFrame(Transform* transform = nullptr) override{
+	//	init(_windowSize);
+	//}
 };

@@ -97,8 +97,8 @@ void Engine::init(){
     _renderer.init();
 	_renderer.setCamera(_camera);
     _renderer.setShader("PBR0", Renderer::ShaderType::Main);
-    //_renderer.setShader("bg", Renderer::ShaderType::Background);
-    _renderer.setShader("skybox", Renderer::ShaderType::Background);
+    _renderer.setShader("bg", Renderer::ShaderType::Background);
+    //_renderer.setShader("skybox", Renderer::ShaderType::Background);
     _renderer.setShader("grid", Renderer::ShaderType::Grid);
     _renderer.setShader("selection", Renderer::ShaderType::Selection);
     //_renderer.enableWireframe();
@@ -180,7 +180,7 @@ void  Engine::processInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-        _camera->resetFrame();
+        _camera->resetFrame(SM.getSelectedTransform());
 
     if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
         Event e{ EventType::Delete, EventData{} };

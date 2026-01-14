@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -141,6 +141,7 @@
     <ClCompile Include="FileUtils.cpp" />
     <ClCompile Include="ColorProvider.cpp" />
     <ClCompile Include="Force.cpp" />
+    <ClCompile Include="Halfedge.cpp" />
     <ClCompile Include="Inspectable.cpp" />
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="ColorProvider.h" />
     <ClInclude Include="Force.h" />
+    <ClInclude Include="Halfedge.h" />
     <ClInclude Include="Inspectable.h" />
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="Logger.h" />
@@ -196,6 +198,8 @@
     <None Include="shaders\blinn-phong.vert" />
     <None Include="shaders\gridShader.frag" />
     <None Include="shaders\gridShader.vert" />
+    <None Include="shaders\hdr2cubemap.frag" />
+    <None Include="shaders\hdr2cubemap.vert" />
     <None Include="shaders\lambertian.frag" />
     <None Include="shaders\lambertian.vert" />
     <None Include="shaders\normal.frag" />

@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+class Shader;
+
 class Texture {
 public:
 	Texture();
@@ -17,5 +19,6 @@ class TextureFactory {
 public:
 	static Texture* load(const char* path, const std::string& directory, bool gamma);
 	static Texture* loadCubeMap(std::vector<std::string> faces);
+	static Texture* loadHDR(std::string path, Shader* shader);
 };
 

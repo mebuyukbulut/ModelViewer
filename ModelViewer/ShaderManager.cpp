@@ -1,5 +1,6 @@
 #include "ShaderManager.h"
 #include "FileUtils.h"
+#include "Logger.h"
 
 void ShaderManager::init(){
 
@@ -21,5 +22,7 @@ void ShaderManager::terminate(){
 }
 
 Shader& ShaderManager::getShader(const std::string& name){
+	if(!shaders.contains(name))
+		LOG_CRITICAL("SHADER DOES NOT EXITS: "+name);
 	return shaders[name];
 }
