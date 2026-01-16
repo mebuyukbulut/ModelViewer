@@ -11,11 +11,11 @@
 #include <assimp/postprocess.h>
 
 #include <stb_image.h>
-#include "Inspectable.h"
+#include "Component.h"
 
 class Texture;
 
-class Model : public IInspectable
+class Model : public Component
 {
     MaterialManager* _materialManager{};
     //TextureManager* _textureManager{};
@@ -48,7 +48,7 @@ public:
 
     Model(MaterialManager* materialManager) : _materialManager{ materialManager } {}
 
-    // Inherited via IInspectable
-    void drawUI() override;
+	void onInspect() override;
+    //void drawUI() override;
 };
 

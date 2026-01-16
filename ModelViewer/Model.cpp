@@ -202,7 +202,7 @@ bool Model::loadFromFile(const std::string& filename) {
     return loadModel(filename);
 }
 
-void Model::drawUI()
+void Model::onInspect()
 {
 
     if (_materials.empty()) return;

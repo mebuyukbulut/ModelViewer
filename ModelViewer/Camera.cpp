@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Entity.h"
+#include "Transform.h"
 
 void Camera::init(glm::vec2 windowSize)
 {

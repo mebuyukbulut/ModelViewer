@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "Shader.h"
-#include "Inspectable.h"
+#include "Component.h"
 #include "Logger.h"
 
 class Camera; 
@@ -17,7 +17,7 @@ enum class LightType {
     Point,
     Spot
 };
-class Light : public IInspectable {
+class Light : public Component {
 public:
     std::string name{};
     glm::vec3 position{};
@@ -35,7 +35,7 @@ public:
     }
     virtual void configShader(Shader& shader, std::string prefix);
     virtual YAML::Node serialize() { return YAML::Node(); }
-    virtual void drawUI() override;
+    virtual void onInspect() override;
 
     virtual ~Light() = default;
 };
@@ -51,7 +51,7 @@ public:
     }
     void configShader(Shader& shader, std::string prefix) override;
     YAML::Node serialize() override;
-    void drawUI() override;
+    void onInspect() override;
 };
 class SpotLight : public Light {
 public:
@@ -70,7 +70,7 @@ public:
     }
     void configShader(Shader& shader, std::string prefix) override;
     YAML::Node serialize() override;
-    void drawUI() override;
+    void onInspect() override;
 
     void setDirection(glm::vec3 rotation);
 };
@@ -85,7 +85,7 @@ public:
     }
     void configShader(Shader& shader, std::string prefix) override;
     YAML::Node serialize() override;
-    void drawUI() override;
+    void onInspect() override;
 
 };
 

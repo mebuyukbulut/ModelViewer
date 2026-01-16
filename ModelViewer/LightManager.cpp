@@ -53,6 +53,7 @@ void Light::configShader(Shader& shader, std::string prefix) {
     shader.setFloat(prefix + "intensity", intensity);
     shader.setInt(prefix + "type", type);
 }
+
 void PointLight::configShader(Shader& shader, std::string prefix)
 {
     Light::configShader(shader, prefix);
@@ -106,7 +107,7 @@ YAML::Node DirectionalLight::serialize()
 }
 
 
-void Light::drawUI()
+void Light::onInspect()
 {
     //ImGui::DragFloat3("Position", &position[0], 0.1f);
     ImGui::ColorEdit3("Color", &color[0]);
@@ -120,14 +121,14 @@ void Light::drawUI()
 
     ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 100.0f);
 }
-void PointLight::drawUI()
+void PointLight::onInspect()
 {
-    Light::drawUI();
+    Light::onInspect();
     ImGui::DragFloat("Attenuation", &attenuation, 0.1f, 0.1f, FLT_MAX);
 }
-void SpotLight::drawUI()
+void SpotLight::onInspect()
 {
-    Light::drawUI();
+    Light::onInspect();
     ImGui::DragFloat3("Direction", &direction[0], 0.1f);
     ImGui::DragFloat("Cutoff", &cutoff, 1.0f, 0.0f, 90.0f);
     ImGui::DragFloat("Attenuation", &attenuation, 0.1f, 0.1f, FLT_MAX);
@@ -149,9 +150,9 @@ void SpotLight::setDirection(glm::vec3 rotation)
     direction = rotationMatrix * glm::vec4(0,1,0,1);
 
 }
-void DirectionalLight::drawUI()
+void DirectionalLight::onInspect()
 {
-    Light::drawUI();
+    Light::onInspect();
     ImGui::DragFloat3("Direction", &direction[0], 0.1f);
 }
 

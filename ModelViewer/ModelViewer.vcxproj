@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Chronometer.cpp" />
+    <ClCompile Include="Component.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="EmitterShape.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -150,6 +151,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -158,11 +160,13 @@
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Time.cpp" />
+    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Chronometer.h" />
+    <ClInclude Include="Component.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="EmitterShape.h" />
     <ClInclude Include="Engine.h" />
@@ -179,6 +183,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
@@ -187,6 +192,7 @@
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Time.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="UIManager.h" />
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,7 @@
 
 #include "Camera.h"
 //#include "Entity.h"
+#include "Transform.h"
 #include "EventDispatcher.h"
 #include "Inspectable.h"
 #include "LightManager.h"
@@ -151,11 +152,19 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         std::string directory = modelPath.substr(0, slashIndex);
         std::string modelName = modelPath.substr(slashIndex+1, pointIndex-slashIndex -1);
 
-        Transform* transform = new Transform;
-        transform->setEntity(new Entity);
-        transform->getEntity()->model.reset(model);
-        transform->name = getUniqueName(modelName);
-        _transforms.emplace_back(transform);  
+		// Yeni 
+        Entity* entity = new Entity;
+		entity->addComponent(std::unique_ptr<Model>(model));
+		entity->name = getUniqueName(modelName);
+		_entities.emplace_back(entity);
+
+        //// Eski
+        //Transform* transform = new Transform;
+        //transform->setEntity(new Entity);
+        //transform->getEntity()->model.reset(model);
+        //transform->name = getUniqueName(modelName);
+        //_transforms.emplace_back(transform);  
+
         LOG_TRACE(modelName);
         });
 
@@ -185,32 +194,32 @@ void SceneManager::draw() {
     //glClearColor(1, 0, 0, 1); // error check
 
 
-    // mouse click ile ekranda öge yakalama
-    if (isSelect) {
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        for (auto& transform : _transforms) {
-            if (transform.get()->getEntity()->model)
-                transform->drawAsColor(_renderer);
-        }
-        glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
-        glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
-        glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
-        mPos = mPos - panelPos;
-        mPos.y = panelSize.y - mPos.y;
-        uint32_t selectedID = _renderer->getSelection(mPos);
-        //LOG_TRACE(std::to_string(_renderer->getSelection(mPos)));
-        //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
-        if (selectedID != 0)
-            for (auto t : _transforms) {
-                if (t->ID == selectedID)
-                    _selectedTransform = t.get();
-            }
-        else; // Deselect
-        //_selectedTransform = nullptr;
+    //// mouse click ile ekranda öge yakalama
+    //if (isSelect) {
+    //    glClearColor(0, 0, 0, 1);
+    //    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    //    for (auto& transform : _transforms) {
+    //        if (transform.get()->getEntity()->model)
+    //            transform->drawAsColor(_renderer);
+    //    }
+    //    glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
+    //    glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
+    //    glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
+    //    mPos = mPos - panelPos;
+    //    mPos.y = panelSize.y - mPos.y;
+    //    uint32_t selectedID = _renderer->getSelection(mPos);
+    //    //LOG_TRACE(std::to_string(_renderer->getSelection(mPos)));
+    //    //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
+    //    if (selectedID != 0)
+    //        for (auto t : _transforms) {
+    //            if (t->ID == selectedID)
+    //                _selectedTransform = t.get();
+    //        }
+    //    else; // Deselect
+    //    //_selectedTransform = nullptr;
 
-        isSelect = false;
-    }
+    //    isSelect = false;
+    //}
 
     
     
@@ -223,9 +232,9 @@ void SceneManager::draw() {
 
 
 
-    for (auto& transform : _transforms) {
-        if (transform.get()->getEntity()->model)
-            transform->draw(_renderer);
+    for (const auto& entity : _entities) {
+        if (entity->getComponent<Model>())
+            entity->transform->draw(_renderer); // TO-DO: draw fonksiyonunu entitye mi taşımalı? 
     }
     _renderer->drawGrid();
     _renderer->getShader().use();
@@ -234,51 +243,51 @@ void SceneManager::draw() {
 }
 
 void SceneManager::loadScene(std::string path) {
-    LOG_TRACE("Load Scene");
+    LOG_ERROR("TO-DO: Load Scene");
 
-    //YAML::Node root = YAML::LoadFile(path);
-
-    //for (const auto& lightNode : root["Lights"]) {
-    //    auto light = LightFactory::create(lightNode);
-
-    //    if (light.get()) {
-
-    //        LOG_TRACE("Load light");
-    //        addLight(std::move(light));
+    ////YAML::Node root = YAML::LoadFile(path);
+    //
+    ////for (const auto& lightNode : root["Lights"]) {
+    ////    auto light = LightFactory::create(lightNode);
+    //
+    ////    if (light.get()) {
+    //
+    ////        LOG_TRACE("Load light");
+    ////        addLight(std::move(light));
+    ////    }
+    ////}
+    //
+    //
+    //YAML::Node rootTest = YAML::LoadFile("save0.yaml");
+    //for (const auto& transformNode : rootTest) {
+    //    auto transform = TransformFactory::create(transformNode, _materialMng.get());
+    //
+    //    if (transform.get()) {
+    //
+    //        LOG_TRACE("Load transform...");
+    //        _transforms.emplace_back(std::move(transform));
+    //        //addLight(std::move(transform));
     //    }
     //}
 
 
-    YAML::Node rootTest = YAML::LoadFile("save0.yaml");
-    for (const auto& transformNode : rootTest) {
-        auto transform = TransformFactory::create(transformNode, _materialMng.get());
-
-        if (transform.get()) {
-
-            LOG_TRACE("Load transform...");
-            _transforms.emplace_back(std::move(transform));
-            //addLight(std::move(transform));
-        }
-    }
-
-
 }
 void SceneManager::saveScene() {
-    LOG_TRACE("Save Scene");
-    YAML::Node node;
-    for (auto transform : _transforms) {
-        node.push_back(transform->serialize());
-        //Light* light = transform->getEntity()->light.get();
-        //if(light)
-        //    node["Lights"].push_back(light->serialize());
-    }
-    std::string path = "save0.yaml";
-    std::ofstream fout(path);
-    fout << node;
+    LOG_ERROR("TO-DO: Save Scene");
+    //YAML::Node node;
+    //for (const auto& entity : _entities) {
+    //    node.push_back(entity->serialize());
+    //    //Light* light = transform->getEntity()->light.get();
+    //    //if(light)
+    //    //    node["Lights"].push_back(light->serialize());
+    //}
+    //std::string path = "save0.yaml";
+    //std::ofstream fout(path);
+    //fout << node;
 }
 
 
-void SceneManager::drawUI()
+void SceneManager::onInspect()
 {
     ImGui::Begin("Scene");
     ImGuiTreeNodeFlags flag = 
@@ -304,35 +313,37 @@ void SceneManager::drawUI()
 
         // gray background
         ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(55, 55, 55, 255));
-        for (auto&& i : _transforms) {
+        for (auto&& i : _entities) {
             bool lastSelected = false;
-            if (i.get() == getSelectedTransform()) {
+            if (i.get() == getSelectedEntity()) {
                 lastSelected = true;
                 // red foreground
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255));
                 //// gray background
                 //ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(65, 65, 65, 255));
             }
-            ImGui::TreeNodeEx(i->name.c_str(), i->isSelected() ? selectedFlag : flag2); 
+            //ImGui::TreeNodeEx(i->name.c_str(), i->isSelected() ? selectedFlag : flag2); 
+            ImGui::TreeNodeEx(i->name.c_str(), flag2); 
+
             if (lastSelected)
                 ImGui::PopStyleColor(1);
 
             if (ImGui::IsItemClicked())
             {
-                // One item select 
-                for (auto&& i : _selectedTransforms)
-                    i->deselect();
-                _selectedTransforms.clear();
+                //// One item select 
+                //for (auto&& i : _selectedEntities)
+                //    i->deselect();
+                _selectedEntities.clear();
 
                 // TO-DO multiple item select
 
-                _selectedTransforms.push_back(i.get());
-                _selectedTransform = i.get();
+                _selectedEntities.push_back(i.get());
+                _selectedEntity = i.get();
 
-                _selectedTransforms.sort();
-                _selectedTransforms.unique();
+                _selectedEntities.sort();
+                _selectedEntities.unique();
                 //std::cout << _selectedTransforms.size() << std::endl; 
-                i->select();
+                //i->select();
             }
             ImGui::TreePop();
         }
@@ -352,28 +363,29 @@ void SceneManager::drawUI()
     }
 
 
-    // bos alana tiklamayi yakala:
-    if (ImGui::IsWindowFocused() &&
-        ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) &&
-        ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
-        !ImGui::IsAnyItemHovered()
-        )
-    {
-        std::for_each(_selectedTransforms.begin(), _selectedTransforms.end(), [](auto&& t) { t->deselect(); });
-        _selectedTransforms.clear();
-        _selectedTransform = nullptr; 
-        //deselectAll();
-        
-    }
+    //// bos alana tiklamayi yakala:
+    //if (ImGui::IsWindowFocused() &&
+    //    ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) &&
+    //    ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+    //    !ImGui::IsAnyItemHovered()
+    //    )
+    //{
+    //    std::for_each(_selectedTransforms.begin(), _selectedTransforms.end(), [](auto&& t) { t->deselect(); });
+    //    _selectedTransforms.clear();
+    //    _selectedTransform = nullptr; 
+    //    //deselectAll();
+    //    
+    //}
 
 
     ImGui::End();
 
 
     ImGui::Begin("Properties");
-	if (auto t = getSelectedTransform())
-		t->drawUI();
-
+	//if (auto t = getSelectedTransform())
+	//	t->drawUI();
+    if(_selectedEntity)
+		_selectedEntity->onInspect();
 
     ImGui::End();
 
@@ -563,7 +575,7 @@ void SceneManager::drawGizmo()
 
 
 
-    if (!_selectedTransform) return;
+    if (!_selectedEntity) return;
 
     // Make sure to call inside ImGui frame:
     ImGuizmo::BeginFrame();
@@ -601,12 +613,15 @@ void SceneManager::drawGizmo()
 
 
     glm::mat4 modelMatrix(1); 
-    modelMatrix = glm::translate(glm::mat4(1.0f), _selectedTransform->getPosition());
+    modelMatrix = glm::translate(glm::mat4(1.0f), _selectedEntity->transform->getPosition());
     //modelMatrix *= glm::mat4_cast(glm::quat(_selectedTransform->getRotation())); // if rotation stored as quat
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedTransform->getRotation().x), glm::vec3(1, 0, 0));
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedTransform->getRotation().y), glm::vec3(0, 1, 0));
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedTransform->getRotation().z), glm::vec3(0, 0, 1));
-    modelMatrix = glm::scale(modelMatrix, _selectedTransform->getScale());
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedEntity->transform->getRotation().x), glm::vec3(1, 0, 0));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedEntity->transform->getRotation().y), glm::vec3(0, 1, 0));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(_selectedEntity->transform->getRotation().z), glm::vec3(0, 0, 1));
+    modelMatrix = glm::scale(modelMatrix, _selectedEntity->transform->getScale());
+
+
+
 
 
     ImGuizmo::Manipulate(
@@ -626,13 +641,13 @@ void SceneManager::drawGizmo()
         switch (_GizmoState)
         {
         case ImguizmoState::Translate:
-            _selectedTransform->setPosition(glm::make_vec3(translation));
+            _selectedEntity->transform->setPosition(glm::make_vec3(translation));
             break;
         case ImguizmoState::Rotate:
-            _selectedTransform->setRotation(glm::make_vec3(rotation)); // convert to radians if needed
+            _selectedEntity->transform->setRotation(glm::make_vec3(rotation)); // convert to radians if needed
             break;
         case ImguizmoState::Scale:
-            _selectedTransform->setScale(glm::make_vec3(scale));
+            _selectedEntity->transform->setScale(glm::make_vec3(scale));
             break;
         default:
             break;
@@ -672,13 +687,11 @@ void SceneManager::addLight(LightType lightType)
     default:
         break;
     }
-    Transform* t = new Transform; 
-    Entity* en = new Entity;
-    en->light = std::move(newLight);
-    t->setEntity(en);
-    t->name = lightName;
-    _transforms.emplace_back(t);
 
+	Entity* entity = new Entity;
+    entity->addComponent(std::move(newLight));
+	entity->name = lightName;
+	_entities.emplace_back(entity);
 
     lightCount++;
 
@@ -688,24 +701,19 @@ void SceneManager::addLight(std::unique_ptr<Light> light)
 {
 
     //std::unique_ptr<Light> newLight;
-    Transform* t = new Transform;
-    t->name = light->name;
-    Entity* en = new Entity;
-    en->light = std::move(light);
-    t->setEntity(en);
-    _transforms.emplace_back(t);
-
+    Entity* entity = new Entity;
+    entity->name = light->name;
+	entity->addComponent(std::move(light));
+	_entities.emplace_back(entity);
 
     lightCount++;
-
 }
 
 void SceneManager::configShader(Shader& shader)
 {
     int counter = 0; 
-    for (auto t : _transforms) {
-        if (Light* light = t.get()->getEntity()->light.get()) {
-
+    for (const auto& entity : _entities) {
+        if (Light* light = entity->getComponent<Light>()) {
             std::string prefix = "_lights[" + std::to_string(counter++) + "].";
             light->configShader(shader, prefix);
         }
@@ -725,38 +733,38 @@ void SceneManager::addShape(DefaultShapes shape)
         { DefaultShapes::Torus, "Torus" },
     };
 
-    Transform* transform = new Transform;
-    transform->setEntity(new Entity);
-    transform->name = getUniqueName(shapedToString[shape]);
+	Entity* entity = new Entity;
+	std::string name = shapedToString[shape];
+    entity->transform->name = name;
+    entity->name = name;
     LOG_TRACE(shapedToString[shape]);
 
-    transform->setPosition(glm::vec3(0,0,0));
-    transform->setRotation(glm::vec3(0,0,0));
-    transform->setScale(glm::vec3(1,1,1));
+    entity->transform->setPosition(glm::vec3(0,0,0));
+    entity->transform->setRotation(glm::vec3(0,0,0));
+    entity->transform->setScale(glm::vec3(1,1,1));
 
-
-    Model* model = new Model(_materialMng.get());
+	auto model = std::make_unique<Model>(_materialMng.get());
     model->loadDefault(shape);
-    transform->getEntity()->model.reset(model);
+	entity->addComponent(std::move(model));
 
-    _transforms.emplace_back(transform);
+    _entities.emplace_back(entity);
 }
 
 void SceneManager::deleteSelected()
 {
-    if (!_selectedTransform) return;
+    if (!_selectedEntity) return;
 
-    _selectedTransform->terminate();
+    //_selectedEntity->terminate();
 
-    _transforms.remove_if([this](const std::shared_ptr<Transform>& t) {
-        return t.get() == _selectedTransform;
+    _entities.remove_if([this](const std::unique_ptr<Entity>& t) {
+        return t.get() == _selectedEntity;
         });
 
-    _selectedTransforms.remove_if([this](Transform* t) {
-        return t == _selectedTransform;
+    _selectedEntities.remove_if([this](Entity* t) {
+        return t == _selectedEntity;
         });
 
-    _selectedTransform = nullptr;
+    _selectedEntity = nullptr;
 }
 
 std::string SceneManager::getUniqueName(std::string name)
@@ -771,8 +779,9 @@ std::string SceneManager::getUniqueName(std::string name)
 
 bool SceneManager::isUniqueName(std::string name)
 {
-    for (auto transform : _transforms)
-        if (transform->name == name) return false;
+    for (const auto& entity : _entities)
+        if(entity->name == name) return false;
+
     return true;
 }
 

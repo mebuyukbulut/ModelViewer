@@ -81,7 +81,7 @@ void UIManager::draw(SceneManager* sm ) {
 
     //viewport_window();
     if (sm) {
-        sm->drawUI();
+        sm->onInspect();
         //sm->drawGizmo();
     }
 

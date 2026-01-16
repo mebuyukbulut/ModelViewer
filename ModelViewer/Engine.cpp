@@ -180,7 +180,7 @@ void  Engine::processInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-        _camera->resetFrame(SM.getSelectedTransform());
+        _camera->resetFrame(SM.getSelectedEntity()->transform.get());
 
     if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
         Event e{ EventType::Delete, EventData{} };

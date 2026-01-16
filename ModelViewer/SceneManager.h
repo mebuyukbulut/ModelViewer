@@ -5,6 +5,7 @@
 
 #include "Scene.h"
 #include "Entity.h"
+#include "Transform.h"
 #include "Material.h"
 
 class Renderer;
@@ -16,13 +17,13 @@ struct RenderTarget {
     int width, height;
 };
 
-class SceneManager : public IInspectable
+class SceneManager : public Object
 {
     Scene scene;
 
-	std::list<std::shared_ptr<Transform>> _transforms{};
-    std::list <Transform*> _selectedTransforms{};
-    Transform* _selectedTransform{};
+	std::list<std::unique_ptr<Entity>> _entities{};
+    std::list <Entity*> _selectedEntities{};
+    Entity* _selectedEntity{};
 
     Renderer* _renderer{};
     class Camera* _camera{};
@@ -43,16 +44,16 @@ public:
     void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
     void draw();
     
-    Transform* getSelectedTransform() {
+    Entity* getSelectedEntity() {
         //if (_selectedTransforms.empty()) return nullptr; 
-        return _selectedTransform;
+        return _selectedEntity;
     }
 
     void loadScene(std::string path);
     void saveScene();
 
-    // Inherited via IInspectable
-    void drawUI() override;
+
+	void onInspect() override;
     void drawGizmo();
 
     // LIGHTS
