@@ -121,17 +121,6 @@ void Transform::addChild(Transform* child)
     children.push_back(child);
 }
 
-//void Transform::drawAsColor(Renderer* renderer)
-//{
-//    renderer->drawModelAsColor(owner->getComponent<Model>(), getGlobalMatrix(), UUID);
-//
-//    for (auto& i : children)
-//        i->drawAsColor(renderer);
-//}
-
-
-
-
 void Transform::onInspect()
 {
     ImGui::SeparatorText("Transform");

@@ -44,7 +44,8 @@ public:
     void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
     void draw();
     void drawRecursive(Entity* entity);
-    
+    void drawAsColorRecursive(Entity* entity);
+
     Entity* getSelectedEntity() {
         //if (_selectedTransforms.empty()) return nullptr; 
         return _selectedEntity;

@@ -194,32 +194,36 @@ void SceneManager::draw() {
     //glClearColor(1, 0, 0, 1); // error check
 
 
-    //// mouse click ile ekranda öge yakalama
-    //if (isSelect) {
-    //    glClearColor(0, 0, 0, 1);
-    //    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    //    for (auto& transform : _transforms) {
-    //        if (transform.get()->getEntity()->model)
-    //            transform->drawAsColor(_renderer);
-    //    }
-    //    glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
-    //    glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
-    //    glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
-    //    mPos = mPos - panelPos;
-    //    mPos.y = panelSize.y - mPos.y;
-    //    uint32_t selectedID = _renderer->getSelection(mPos);
-    //    //LOG_TRACE(std::to_string(_renderer->getSelection(mPos)));
-    //    //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
-    //    if (selectedID != 0)
-    //        for (auto t : _transforms) {
-    //            if (t->ID == selectedID)
-    //                _selectedTransform = t.get();
-    //        }
-    //    else; // Deselect
-    //    //_selectedTransform = nullptr;
+    // mouse click ile ekranda öge yakalama
+    if (isSelect) {
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        
 
-    //    isSelect = false;
-    //}
+        for (const auto& entity : _entities) {
+            if (entity->transform->isRoot() && entity->getComponent<Model>())
+                drawAsColorRecursive(entity.get());
+        }
+
+        glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
+        glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
+        glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
+        mPos = mPos - panelPos;
+        mPos.y = panelSize.y - mPos.y;
+        uint32_t selectedID = _renderer->getSelection(mPos);
+        LOG_TRACE("selection UUID: " + std::to_string(_renderer->getSelection(mPos)));
+        //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
+
+        if (selectedID != 0)
+            for (const auto& entity : _entities) {
+                if (entity->transform->UUID == selectedID)
+                    _selectedEntity = entity.get();
+            }
+        else; // Deselect
+        //_selectedTransform = nullptr;
+
+        isSelect = false;
+    }
 
     
     
@@ -229,13 +233,11 @@ void SceneManager::draw() {
 
 
 
-
-
-
     for (const auto& entity : _entities) {
         if (entity->transform->isRoot() && entity->getComponent<Model>())
-            drawRecursive(entity.get()); // TO-DO: draw fonksiyonunu entitye mi taşımalı? 
+            drawRecursive(entity.get()); 
     }
+
     _renderer->drawGrid();
     _renderer->getShader().use();
 
@@ -250,6 +252,20 @@ void SceneManager::drawRecursive(Entity* entity)
     for (Transform* i : entity->transform->getChildren())
         drawRecursive(i->owner);
 }
+
+void SceneManager::drawAsColorRecursive(Entity* entity)
+{
+    _renderer->drawModelAsColor(entity->getComponent<Model>(), entity->transform->getGlobalMatrix(), entity->transform->UUID);
+
+    for (Transform* i : entity->transform->getChildren())
+        drawAsColorRecursive(i->owner);
+}
+
+
+
+
+
+
 
 void SceneManager::loadScene(std::string path) {
     LOG_ERROR("TO-DO: Load Scene");
