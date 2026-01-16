@@ -7,10 +7,9 @@
 #include "Material.h"
 
 class Transform : public Component {
-	std::list<std::unique_ptr<Transform>> children;
+	std::vector<Transform*> children;
 	Transform* parent{};
-	// class Entity* _entity{}; // Maybe we should use unique_ptr instead of ptr 
-	bool _isSelected{ false };
+
 	bool _isDirty{ true };
 
 	glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
@@ -25,11 +24,6 @@ class Transform : public Component {
 	glm::mat4 getLocalMatrix();
 
 public:
-	
-	//uint32_t ID;
-	//std::string name{};
-
-	//Transform();
 
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
@@ -42,27 +36,16 @@ public:
 
 	glm::mat4 getGlobalMatrix();
 
-	void addChild(std::unique_ptr<Transform> child);
-	//void setEntity(Entity* entity);
-	Entity* getEntity();
+	void addChild(Transform* child);
+	//void removeChild(Transform* child);
+	std::vector<Transform*>& getChildren() { return children; }
 
-	void draw(class Renderer* renderer);
-	void drawAsColor(class Renderer* renderer);
-
-	bool isSelected() { return _isSelected; }
-	void select() {
-		_isSelected = true;
-
-	}
-	void deselect() {
-		_isSelected = false;
-	}
-
-	void terminate();
-	// draw gizmo ? 
+	//void draw(class Renderer* renderer);
+	//void drawAsColor(class Renderer* renderer);
 
 	void onInspect() override;
 
+	bool isRoot() { return parent == nullptr; }
 };
 
 

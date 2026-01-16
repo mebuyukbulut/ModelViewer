@@ -20,7 +20,6 @@ void Transform::update()
 
     for (auto&& child : children)
         child->update();
-
 }
 
 glm::mat4 Transform::getLocalMatrix()
@@ -44,18 +43,13 @@ glm::mat4 Transform::getLocalMatrix()
         glm::scale(glm::mat4(1.0f), _scale);
 
 }
+
 // it will works parents -> children
 // bu if we call child before parent it will not work properly 
 glm::mat4 Transform::getGlobalMatrix() {
     return _isDirty ? update(), _globalModelMatrix : _globalModelMatrix;
 }
 
-//int GLOBAL_ID_COUNTER = 1;
-//Transform::Transform()
-//{
-//    ID = GLOBAL_ID_COUNTER++;
-//    GLOBAL_ID_COUNTER += 30;
-//}
 
 glm::vec3 Transform::getPosition() { return _position; }
 glm::vec3 Transform::getRotation() { return _rotation; }
@@ -120,47 +114,24 @@ YAML::Node Transform::serialize() {
     return node;
 }
 
-void Transform::addChild(std::unique_ptr<Transform> child)
+
+void Transform::addChild(Transform* child)
 {
     child->parent = this;
-    children.emplace_back(std::move(child));
+    children.push_back(child);
 }
 
-//void Transform::setEntity(Entity* entity) {
-//    _entity = entity;
-//    _entity->transform = this;
+//void Transform::drawAsColor(Renderer* renderer)
+//{
+//    renderer->drawModelAsColor(owner->getComponent<Model>(), getGlobalMatrix(), UUID);
+//
+//    for (auto& i : children)
+//        i->drawAsColor(renderer);
 //}
 
-Entity* Transform::getEntity()
-{
-    return owner;
-}
-
-void Transform::draw(Renderer* renderer)
-{
-    renderer->drawModel(owner->getComponent<Model>(), getGlobalMatrix());
-
-    for (auto& i : children)
-        i->draw(renderer);
-}
-void Transform::drawAsColor(Renderer* renderer)
-{
-    renderer->drawModelAsColor(owner->getComponent<Model>(), getGlobalMatrix(), UUID);
-
-    for (auto& i : children)
-        i->drawAsColor(renderer);
-}
 
 
 
-
-void Transform::terminate() {
-    if (owner)
-    {
-        //_entity->terminate();
-        delete owner;
-    }
-}
 void Transform::onInspect()
 {
     ImGui::SeparatorText("Transform");

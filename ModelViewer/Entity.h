@@ -31,7 +31,6 @@ public:
 	T* getComponent();
 
 
-
 	void onInspect() override;
 
 private:

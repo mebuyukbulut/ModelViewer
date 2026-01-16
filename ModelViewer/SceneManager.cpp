@@ -233,13 +233,22 @@ void SceneManager::draw() {
 
 
     for (const auto& entity : _entities) {
-        if (entity->getComponent<Model>())
-            entity->transform->draw(_renderer); // TO-DO: draw fonksiyonunu entitye mi taşımalı? 
+        if (entity->transform->isRoot() && entity->getComponent<Model>())
+            drawRecursive(entity.get()); // TO-DO: draw fonksiyonunu entitye mi taşımalı? 
     }
     _renderer->drawGrid();
     _renderer->getShader().use();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+// draw light? 
+void SceneManager::drawRecursive(Entity* entity)
+{
+    _renderer->drawModel(entity->getComponent<Model>(), entity->transform->getGlobalMatrix());
+
+    for (Transform* i : entity->transform->getChildren())
+        drawRecursive(i->owner);
 }
 
 void SceneManager::loadScene(std::string path) {
@@ -766,6 +775,8 @@ void SceneManager::deleteSelected()
 
     _selectedEntity = nullptr;
 }
+
+
 
 std::string SceneManager::getUniqueName(std::string name)
 {

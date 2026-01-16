@@ -14,7 +14,10 @@ Entity::~Entity() {
 
 void Entity::addComponent(std::unique_ptr<Component> component)
 {
-	components.emplace_back(std::move(component));
+    if (component) {
+		component->owner = this;
+	    components.emplace_back(std::move(component));
+    }
 }
 
 void Entity::onInspect()
