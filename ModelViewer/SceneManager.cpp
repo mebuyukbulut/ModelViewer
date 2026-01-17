@@ -83,6 +83,9 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     _camera = camera;
     _UI = UI;
 
+	_lightMng = std::make_unique<LightManager>();
+    _materialMng.reset(new MaterialManager(shader));
+    
 
     dispatcher.subscribe(EventType::AddPointLight, [&](const Event& e) {
         addLight(LightType::Point);
@@ -124,7 +127,6 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         });
 
 
-    _materialMng.reset(new MaterialManager(shader));
 
     dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
         std::string modelPath = e.data.text;
@@ -365,10 +367,10 @@ void SceneManager::onInspect()
                 _selectedEntities.push_back(i.get());
                 _selectedEntity = i.get();
 
-                _selectedEntities.sort();
-                _selectedEntities.unique();
-                //std::cout << _selectedTransforms.size() << std::endl; 
-                //i->select();
+                //_selectedEntities.sort();
+                //_selectedEntities.unique();
+                ////std::cout << _selectedTransforms.size() << std::endl; 
+                ////i->select();
             }
             ImGui::TreePop();
         }
@@ -682,7 +684,7 @@ void SceneManager::drawGizmo()
 
 }
 
-
+// buradaki olayı Light Manager a taşıyabiliriz. Daha temiz olur. 
 const int MAX_LIGHTS = 8; 
 int lightCount = 0;
 void SceneManager::addLight(LightType lightType)
@@ -713,10 +715,10 @@ void SceneManager::addLight(LightType lightType)
         break;
     }
 
-	Entity* entity = new Entity;
+	auto entity = std::make_unique<Entity>();
     entity->addComponent(std::move(newLight));
 	entity->name = lightName;
-	_entities.emplace_back(entity);
+	_entities.push_back(std::move(entity));
 
     lightCount++;
 
@@ -726,25 +728,22 @@ void SceneManager::addLight(std::unique_ptr<Light> light)
 {
 
     //std::unique_ptr<Light> newLight;
-    Entity* entity = new Entity;
+    auto entity = std::make_unique< Entity>();
     entity->name = light->name;
 	entity->addComponent(std::move(light));
-	_entities.emplace_back(entity);
+	_entities.push_back(std::move(entity));
 
     lightCount++;
 }
 
-void SceneManager::configShader(Shader& shader)
+void SceneManager::sceneQuery()//(Shader& shader)
 {
-    int counter = 0; 
-    for (const auto& entity : _entities) {
-        if (Light* light = entity->getComponent<Light>()) {
-            std::string prefix = "_lights[" + std::to_string(counter++) + "].";
-            light->configShader(shader, prefix);
-        }
-    }
+	std::vector<Light*> lights;
+    for (const auto& entity : _entities) 
+        if (Light* light = entity->getComponent<Light>()) 
+			lights.push_back(light);
 
-    shader.setInt("numLights", counter);
+    _lightMng->queryLights(lights);
 }
 
 
@@ -758,7 +757,7 @@ void SceneManager::addShape(DefaultShapes shape)
         { DefaultShapes::Torus, "Torus" },
     };
 
-	Entity* entity = new Entity;
+	auto entity = std::make_unique<Entity>();
 	std::string name = shapedToString[shape];
     entity->transform->name = name;
     entity->name = name;
@@ -772,7 +771,7 @@ void SceneManager::addShape(DefaultShapes shape)
     model->loadDefault(shape);
 	entity->addComponent(std::move(model));
 
-    _entities.emplace_back(entity);
+    _entities.push_back(std::move(entity));
 }
 
 void SceneManager::deleteSelected()
@@ -781,13 +780,13 @@ void SceneManager::deleteSelected()
 
     //_selectedEntity->terminate();
 
-    _entities.remove_if([this](const std::unique_ptr<Entity>& t) {
-        return t.get() == _selectedEntity;
-        });
+    //_entities.remove_if([this](const std::unique_ptr<Entity>& t) {
+    //    return t.get() == _selectedEntity;
+    //    });
 
-    _selectedEntities.remove_if([this](Entity* t) {
-        return t == _selectedEntity;
-        });
+    //_selectedEntities.remove_if([this](Entity* t) {
+    //    return t == _selectedEntity;
+    //    });
 
     _selectedEntity = nullptr;
 }

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <memory>
-#include <list>
+#include <vector>
 #include <glm/glm.hpp>
 
 #include "Scene.h"
@@ -21,14 +21,17 @@ class SceneManager : public Object
 {
     Scene scene;
 
-	std::list<std::unique_ptr<Entity>> _entities{};
-    std::list <Entity*> _selectedEntities{};
+	std::vector<std::unique_ptr<Entity>> _entities{};
+    std::vector <Entity*> _selectedEntities{};
     Entity* _selectedEntity{};
 
     Renderer* _renderer{};
     class Camera* _camera{};
     class UIManager* _UI{};
+
+    std::unique_ptr<class LightManager> _lightMng{};
     std::unique_ptr<MaterialManager> _materialMng{};
+
     RenderTarget _rt{};
 
     bool isScenePopupOpen = false;
@@ -37,6 +40,9 @@ class SceneManager : public Object
     glm::vec2 viewportPos; // ImVec2
     glm::vec2 viewportPanelSize; // ImVec2
 public:
+	SceneManager() = default;
+    ~SceneManager() = default; 
+
     void CreateRenderTarget(RenderTarget& rt, int width, int height);
     void ResizeRenderTarget(int newWidth, int newHeight);
 
@@ -61,7 +67,7 @@ public:
     // LIGHTS
     void addLight(LightType lightType);
     void addLight(std::unique_ptr<Light> light);
-    void configShader(Shader& shader);
+    void sceneQuery(); // (Shader& shader);
 
     // SHAPES
     void addShape(DefaultShapes shape); 

@@ -1,22 +1,39 @@
-#version 330 core
+﻿#version 420 core
 
 in vec3 fPos;
 in vec3 fNormal;
 in vec2 fTexCoords;
 out vec4 FragColor;
 
-struct Light {    
-    vec3 position;
-	vec3 color;
-	float intensity;
-    float attenuation;
-    int type; // 0: point, 1: spot, 2: directional
-    vec3 direction; // only for dir and spot
-    float cutoff; // only for spot
-};  
-#define NR_LIGHTS 8  
-uniform Light _lights[NR_LIGHTS];
-uniform int numLights;
+// PBR0.frag veya ilgili shader dosyası
+struct Light {
+    vec4 position;  // xyz + 1 float padding
+    vec4 color;     // rgb + intensity (intensity'yi dördüncü kanal yapabilirsin)
+    vec4 params;    // x: attenuation, y: type, z: cutoff, w: padding
+    vec4 direction; // xyz + 1 float padding
+};
+
+layout (std140, binding = 0) uniform LightBlock {
+    Light lights[8];  // Maksimum ışık sayısı (NR_LIGHTS)
+    int numLights;    // Aktif ışık sayısı
+} ubo_data;
+
+
+
+
+
+//struct Light {    
+//    vec3 position;
+//	vec3 color;
+//	float intensity;
+//    float attenuation;
+//    int type; // 0: point, 1: spot, 2: directional
+//    vec3 direction; // only for dir and spot
+//    float cutoff; // only for spot
+//};  
+//#define NR_LIGHTS 8  
+//uniform Light _lights[NR_LIGHTS];
+//uniform int numLights;
 
 uniform float ambientIntensity;
 uniform vec3 ambientColor;
@@ -103,13 +120,13 @@ vec3 CalcPointLight(Light light){
     float perceptualRoughness = material.roughness;  
     float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
     float reflectance = material.reflectance;
-    float attRad = light.attenuation;
+    float attRad = light.params.x; 
 
     vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
     vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
   
     vec3 n = normalize(fNormal); // Surface normal vector
-    vec3 l = normalize(light.position - fPos ); // Incident light vector
+    vec3 l = normalize(light.position.xyz - fPos ); // Incident light vector
     vec3 v = normalize(viewPos - fPos); // View/Eye vector
     vec3 h = normalize((v+l)/2); // halfway 
     
@@ -132,14 +149,14 @@ vec3 CalcPointLight(Light light){
 
 
     // attenuation
-    float distance    = max(length(light.position - fPos), 0.01);
+    float distance    = max(length(light.position.xyz - fPos), 0.01);
     float distance2    = distance * distance; // squared distance 
     
     float E = 1.0 / (distance2 * PI); // inverse square law and 1/PI
     float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
     E *= pow(clamp(window, 0.0, 1.0), 2.0); 
 
-    return (Fd + Fr) * light.intensity * light.color * NoL * E;
+    return (Fd + Fr) * light.color.w * light.color.xyz * NoL * E;
 } 
 
 vec3 CalcDirectionalLight(Light light){
@@ -154,7 +171,7 @@ vec3 CalcDirectionalLight(Light light){
     vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
   
     vec3 n = normalize(fNormal); // Surface normal vector
-    vec3 l = normalize(light.direction); // Incident light vector
+    vec3 l = normalize(light.direction.xyz); // Incident light vector
     vec3 v = normalize(viewPos - fPos); // View/Eye vector
     vec3 h = normalize((v+l)/2); // halfway 
     
@@ -184,14 +201,14 @@ vec3 CalcDirectionalLight(Light light){
     //float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
     //E *= pow(clamp(window, 0.0, 1.0), 2.0); 
 
-    return (Fd + Fr) * light.intensity * light.color * NoL;// * E;
+    return (Fd + Fr) * light.color.w * light.color.xyz * NoL;// * E;
 } 
 
 
 vec3 CalcSpotLight(Light light){
-    vec3 lightDir = normalize(fPos - light.position);
-    float theta = dot(lightDir, normalize(light.direction));
-    float phi = cos(radians(light.cutoff)); 
+    vec3 lightDir = normalize(fPos - light.position.xyz);
+    float theta = dot(lightDir, normalize(light.direction.xyz));
+    float phi = cos(radians(light.params.z));
 
     if(theta < phi) 
       return vec3(0,0,0); 
@@ -202,13 +219,13 @@ vec3 CalcSpotLight(Light light){
     float perceptualRoughness = material.roughness;  
     float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
     float reflectance = material.reflectance;
-    float attRad = light.attenuation;
+    float attRad = light.params.x;
 
     vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
     vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
   
     vec3 n = normalize(fNormal); // Surface normal vector
-    vec3 l = normalize(light.position - fPos ); // Incident light vector
+    vec3 l = normalize(light.position.xyz - fPos ); // Incident light vector
     vec3 v = normalize(viewPos - fPos); // View/Eye vector
     vec3 h = normalize((v+l)/2); // halfway 
     
@@ -231,7 +248,7 @@ vec3 CalcSpotLight(Light light){
 
 
     // attenuation
-    float distance    = max(length(light.position - fPos), 0.01);
+    float distance    = max(length(light.position.xyz - fPos), 0.01);
     float distance2    = distance * distance; // squared distance 
     
     float E = 1.0 / (distance2 * PI); // inverse square law and 1/PI
@@ -243,7 +260,7 @@ vec3 CalcSpotLight(Light light){
     float angleWindow = 1 - (pow (1 - theta, 4) / pow(1 - phi, 4)); 
     E*= angleWindow; 
 
-    return (Fd + Fr) * light.intensity * light.color * NoL * E;
+    return (Fd + Fr) * light.color.w * light.color.xyz * NoL * E;
 } 
 
 
@@ -268,13 +285,12 @@ void main(){
 	
 
     vec3 pLights = vec3(0.0);
-    for(int i = 0; i < numLights; i++){
-        if(_lights[i].type == 0) 
-            pLights += CalcPointLight(_lights[i]);
-        if(_lights[i].type == 1) 
-            pLights += CalcSpotLight(_lights[i]);
-        if(_lights[i].type == 2) 
-            pLights += CalcDirectionalLight(_lights[i]);
+    for(int i = 0; i < ubo_data.numLights; i++){
+        float lightType = ubo_data.lights[i].params.y;
+
+        if(lightType == 1) pLights += CalcDirectionalLight(ubo_data.lights[i]);
+        if(lightType == 2) pLights += CalcPointLight(ubo_data.lights[i]);
+        if(lightType == 3) pLights += CalcSpotLight(ubo_data.lights[i]);
     }
 
     vec3 result = pLights;// * material.color;

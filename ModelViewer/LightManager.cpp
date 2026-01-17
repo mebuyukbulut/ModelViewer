@@ -10,8 +10,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 #include "Camera.h"
+#include "Entity.h"
+#include "Transform.h"
 
 // I cannot find yet true formula for this conversation  
 // for that reason I use that approximation
@@ -47,92 +48,112 @@ glm::vec3 kelvin2RGB_fast(float kelvin) {
 }
 
 
-void Light::configShader(Shader& shader, std::string prefix) {
-    shader.setVec3(prefix + "position", position);
-    shader.setVec3(prefix + "color", color);
-    shader.setFloat(prefix + "intensity", intensity);
-    shader.setInt(prefix + "type", type);
+void Light::update()
+{
+    blockData.setPosition(owner->transform->getPosition());
+    //isDirty = false; 
 }
 
-void PointLight::configShader(Shader& shader, std::string prefix)
-{
-    Light::configShader(shader, prefix);
-    shader.setFloat(prefix + "attenuation", attenuation);
+Light::Light() {
+    name = "Light Component";
+
+    blockData.setPosition(glm::vec3(0, 0, 0));
+    blockData.setColor(glm::vec3(1, 1, 1));
+    blockData.setIntensity(1);
+    blockData.setType(LightType::None);
 }
-void SpotLight::configShader(Shader& shader, std::string prefix)
-{
-    Light::configShader(shader, prefix);
-    shader.setVec3(prefix + "direction", direction);
-    shader.setFloat(prefix + "cutoff", cutoff);
-    shader.setFloat(prefix + "attenuation", attenuation);
+
+PointLight::PointLight() {
+    name = "Point Light Component";
+
+    blockData.setType(LightType::Point);
+    blockData.setAttenuation(3);
 }
-void DirectionalLight::configShader(Shader& shader, std::string prefix)
-{
-    Light::configShader(shader, prefix);
-    shader.setVec3(prefix + "direction", direction);
+
+SpotLight::SpotLight() {
+    name = "Spot Light";
+
+    blockData.setType(LightType::Spot);
+    blockData.setDirection(glm::vec3(0, -1, 0));
+    blockData.setCutoff(25); 
+    blockData.setAttenuation(3);
+}
+
+DirectionalLight::DirectionalLight() {
+    name = "Directional Light Component";
+
+    blockData.setType(LightType::Directional);    
+    blockData.setDirection(glm::vec3(0, -1, 0));
 }
 
 
-YAML::Node PointLight::serialize()
-{
-    YAML::Node n; 
-    n["type"] = "point";
-    n["attenuation"] = attenuation;
-    n["position"] = position;
-    n["color"] = color;
-    n["intensity"] = intensity;
-    return n;
-}
-YAML::Node SpotLight::serialize()
+YAML::Node Light::serialize()
 {
     YAML::Node n;
-    n["type"] = "spot";
-    n["attenuation"] = attenuation;
-    n["position"] = position;
-    n["color"] = color;
-    n["intensity"] = intensity;
-    n["direction"] = direction;
-    n["cutoff"] = cutoff;
-    return n;
-}
-YAML::Node DirectionalLight::serialize()
-{
-    YAML::Node n;
-    n["type"] = "directional";
-    n["position"] = position;
-    n["color"] = color;
-    n["intensity"] = intensity;
-    n["direction"] = direction;
-    return n;
-}
+    switch (blockData.getType()) // bu switch çok çirkin duruyor. daha estetik olmalı 
+		// ayrıca LightFactory da aynı switch var. orayı da düşün
+    {
+        case LightType::Point:
+        n["type"] = "point";
+		break;
 
+        case LightType::Spot:
+        n["type"] = "spot";
+		break;
+
+		case LightType::Directional:
+        n["type"] = "directional";
+		break;
+
+    default:
+        break;
+    }
+    //n["type"] = "directional";
+    n["position"] = blockData.getPosition();
+    n["color"] = blockData.getColor();
+    n["intensity"] = blockData.getIntensity();
+    n["attenuation"] = blockData.getAttenuation();
+    n["cutoff"] = blockData.getCutoff();
+    n["direction"] = blockData.getDirection();
+
+	// neden kelvini kaydetmiyoruz?
+    return n;
+}
 
 void Light::onInspect()
 {
     //ImGui::DragFloat3("Position", &position[0], 0.1f);
-    ImGui::ColorEdit3("Color", &color[0]);
-    static bool kelvinCB = false;
-    static float kelvin{ 1000.0f };
+    ImGui::ColorEdit3("Color", blockData.getColorPtr());
     ImGui::Checkbox("Use temperature", &kelvinCB);
     if (kelvinCB) {
         ImGui::DragFloat("Kelvin", &kelvin, 10.0f, 1000.0f, 15'000.0f);
-        color = kelvin2RGB_fast(kelvin);
+        blockData.setColor(kelvin2RGB_fast(kelvin));
     }
 
-    ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Intensity", blockData.getIntensityPtr(), 0.1f, 0.0f, 100.0f);
 }
 void PointLight::onInspect()
 {
+    ImGui::SeparatorText("PointLight");
     Light::onInspect();
-    ImGui::DragFloat("Attenuation", &attenuation, 0.1f, 0.1f, FLT_MAX);
+    ImGui::DragFloat("Attenuation", blockData.getAttenuationPtr(), 0.1f, 0.1f, FLT_MAX);
 }
 void SpotLight::onInspect()
 {
+    ImGui::SeparatorText("SpotLight");
     Light::onInspect();
-    ImGui::DragFloat3("Direction", &direction[0], 0.1f);
-    ImGui::DragFloat("Cutoff", &cutoff, 1.0f, 0.0f, 90.0f);
-    ImGui::DragFloat("Attenuation", &attenuation, 0.1f, 0.1f, FLT_MAX);
+    ImGui::DragFloat3("Direction", blockData.getDirectionPtr(), 0.1f);
+    ImGui::DragFloat("Cutoff", blockData.getCutoffPtr(), 1.0f, 0.0f, 90.0f);
+    ImGui::DragFloat("Attenuation", blockData.getAttenuationPtr(), 0.1f, 0.1f, FLT_MAX);
 }
+void DirectionalLight::onInspect()
+{
+    ImGui::SeparatorText("DirectionalLight");
+    Light::onInspect();
+    ImGui::DragFloat3("Direction", blockData.getDirectionPtr(), 0.1f);
+}
+
+
 void SpotLight::setDirection(glm::vec3 rotation)
 {
     const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f),
@@ -147,15 +168,9 @@ void SpotLight::setDirection(glm::vec3 rotation)
     // Y * X * Z
     const glm::mat4 rotationMatrix = transformY * transformX * transformZ;
 
-    direction = rotationMatrix * glm::vec4(0,1,0,1);
+    blockData.setDirection(rotationMatrix * glm::vec4(0, 1, 0, 1));
 
 }
-void DirectionalLight::onInspect()
-{
-    Light::onInspect();
-    ImGui::DragFloat3("Direction", &direction[0], 0.1f);
-}
-
 
 namespace YAML {
     template<>
@@ -188,35 +203,58 @@ std::unique_ptr<Light> LightFactory::create(const YAML::Node& node)
 {
     std::string typeStr = node["type"].as<std::string>();
 
+	GPULight gpulight;
+	gpulight.setPosition(node["position"].as<glm::vec3>());
+	gpulight.setColor(node["color"].as<glm::vec3>());
+    gpulight.setIntensity(node["intensity"].as<float>());    
+	gpulight.setAttenuation(node["attenuation"].as<float>());
+    gpulight.setCutoff(node["cutoff"].as<float>());
+	gpulight.setDirection(node["direction"].as<glm::vec3>());
+
     if (typeStr == "point") {
-        auto light = std::make_unique<PointLight>();
-        light->position = node["position"].as<glm::vec3>();
-        light->color = node["color"].as<glm::vec3>();
-        light->intensity = node["intensity"].as<float>();
-        light->attenuation = node["attenuation"].as<float>();
-        light->type = 0;
-        return light;
+        gpulight.setType(LightType::Point);        
+        return std::make_unique<PointLight>(gpulight);
     }
     else if (typeStr == "spot") {
-        auto light = std::make_unique<SpotLight>();
-        light->position = node["position"].as<glm::vec3>();
-        light->direction = node["direction"].as<glm::vec3>();
-        light->color = node["color"].as<glm::vec3>();
-        light->intensity = node["intensity"].as<float>();
-        light->attenuation = node["attenuation"].as<float>();
-        light->cutoff = node["cutoff"].as<float>();
-        light->type = 1;
-        return light;
+        gpulight.setType(LightType::Spot);
+        return std::make_unique<SpotLight>(gpulight);
     }
     else if (typeStr == "directional") {
-        auto light = std::make_unique<DirectionalLight>();
-        light->position = node["position"].as<glm::vec3>();
-        light->direction = node["direction"].as<glm::vec3>();
-        light->color = node["color"].as<glm::vec3>();
-        light->intensity = node["intensity"].as<float>();
-        light->type = 2;
-        return light;
+        gpulight.setType(LightType::Directional);
+        return std::make_unique<DirectionalLight>(gpulight);
     }
 
     return nullptr;
+}
+
+LightManager::LightManager()
+{
+	LOG_TRACE("LightManager created.");
+
+    glGenBuffers(1, &uboLights);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(GPULightBlock), nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboLights); // 0 numaralı binding point
+
+}
+
+LightManager::~LightManager()
+{
+	glDeleteBuffers(1, &uboLights);
+}
+
+void LightManager::queryLights(const std::vector<Light*> lights)
+{
+    blockData.numLights = lights.size();
+
+    for (size_t i = 0; i < lights.size() && i < 8; i++) {
+        lights[i]->update();
+        blockData.lights[i] = lights[i]->getGPULight();
+	}
+
+    // activeLights verilerini GPULightBlock'a kopyala...
+
+    glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GPULightBlock), &blockData);
+
 }

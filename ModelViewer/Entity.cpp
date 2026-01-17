@@ -1,6 +1,6 @@
 ﻿#include "Entity.h"
 #include "Transform.h"
-
+#include "Logger.h"
 
 Entity::Entity()
 {
@@ -22,7 +22,12 @@ void Entity::addComponent(std::unique_ptr<Component> component)
 
 void Entity::onInspect()
 {
-    //if (light.get()) light->drawUI();
-    //if (model.get()) model->drawUI();
+    if (!transform) {
+		LOG_ERROR("Entity has no transform!");
+        return;
+    }
+    transform->onInspect();
+    for(auto& component : components)
+		component->onInspect();
 }
 

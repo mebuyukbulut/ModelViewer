@@ -21,19 +21,22 @@ bool Scene::load(const std::string& path)
 
 
 
-    // Load Lights
-    if (root["Lights"]) {
-        for (const auto& node : root["Lights"]) {
-            Light light;
-            auto pos = node["position"].as<std::vector<float>>();
-            auto col = node["color"].as<std::vector<float>>();
-            light.position = { pos[0], pos[1], pos[2] };
-            light.color = { col[0], col[1], col[2] };
-            light.intensity = node["intensity"].as<float>();
-            light.type = node["type"].as<int>();
-            lights.push_back(light);
-        }
-    }
+    //// Load Lights
+    //if (root["Lights"]) {
+    //    for (const auto& node : root["Lights"]) {
+    //        Light light;
+    //        auto pos = node["position"].as<std::vector<float>>();
+    //        auto col = node["color"].as<std::vector<float>>();
+    //        light.position = { pos[0], pos[1], pos[2] };
+    //        light.color = { col[0], col[1], col[2] };
+    //        light.intensity = node["intensity"].as<float>();
+    //        light.type = node["type"].as<int>();
+    //        lights.push_back(light);
+    //    }
+    //}
+
+
+
     // base color 
     // metallic
     // roughness
@@ -59,12 +62,12 @@ bool Scene::save(const std::string& path)
     YAML::Node root;
     root["Scene"]["name"] = name;
 
-    for (size_t i = 0; i < lights.size(); i++) {
-        root["Lights"][i]["position"] = std::vector<float>{ lights[i].position.x, lights[i].position.y, lights[i].position.z };
-        root["Lights"][i]["color"] = std::vector<float>{ lights[i].color.x, lights[i].color.y, lights[i].color.z };
-        root["Lights"][i]["intensity"] = lights[i].intensity;
-        root["Lights"][i]["type"] = lights[i].type;
-    }
+    //for (size_t i = 0; i < lights.size(); i++) {
+    //    root["Lights"][i]["position"] = std::vector<float>{ lights[i].position.x, lights[i].position.y, lights[i].position.z };
+    //    root["Lights"][i]["color"] = std::vector<float>{ lights[i].color.x, lights[i].color.y, lights[i].color.z };
+    //    root["Lights"][i]["intensity"] = lights[i].intensity;
+    //    root["Lights"][i]["type"] = lights[i].type;
+    //}
     return false;
 }
 

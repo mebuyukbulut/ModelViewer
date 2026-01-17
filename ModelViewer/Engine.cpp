@@ -133,9 +133,9 @@ void Engine::mainLoop()
         //ps.draw();
         
         SM.draw();
-		SM.configShader(_renderer.getShader());
+        SM.sceneQuery();//(_renderer.getShader());
         
-
+        
 		_UI.draw(&SM);
 
 

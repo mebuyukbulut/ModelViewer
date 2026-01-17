@@ -54,13 +54,7 @@ glm::mat4 Transform::getGlobalMatrix() {
 glm::vec3 Transform::getPosition() { return _position; }
 glm::vec3 Transform::getRotation() { return _rotation; }
 glm::vec3 Transform::getScale() { return _scale; }
-void Transform::setPosition(const glm::vec3& position) {
-    _position = position;
-    _isDirty = true;
-
-    if (Light* light = owner->getComponent<Light>())
-        light->position = _position;
-}
+void Transform::setPosition(const glm::vec3& position) { _position = position; _isDirty = true; }
 void Transform::setRotation(const glm::vec3& rotation) { _rotation = rotation; _isDirty = true; }
 void Transform::setScale(const glm::vec3& scale) { _scale = scale; _isDirty = true; }
 
@@ -129,17 +123,17 @@ void Transform::onInspect()
     bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
     if (p || r || s) _isDirty = true;
 
-    Light* light = owner->getComponent<Light>();
-    if (p && light)
-        light->position = _position;
+    //Light* light = owner->getComponent<Light>();
+    //if (p && light)
+    //    light->position = _position;
 
-    if (r && light) {
-        SpotLight* spotlight = dynamic_cast<SpotLight*>(light);
-        if (spotlight)
-            spotlight->setDirection(_rotation);
-    }
+    //if (r && light) {
+    //    SpotLight* spotlight = dynamic_cast<SpotLight*>(light);
+    //    if (spotlight)
+    //        spotlight->setDirection(_rotation);
+    //}
 
-    owner->onInspect();
+    //owner->onInspect();
 }
 
 
