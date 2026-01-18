@@ -70,6 +70,7 @@ public:
 
     // SHAPES
     void addShape(DefaultShapes shape); 
+    void addMonkey();
     
     void deleteSelected();
     std::string getUniqueName(std::string name);

@@ -22,6 +22,7 @@ enum class EventType {
     AddCylinder,
     AddPlane,
     AddTorus,
+    AddMonkey, 
 
     Delete,
     Select, 

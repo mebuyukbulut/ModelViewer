@@ -245,6 +245,10 @@ void UIManager::mainMenu(){
                     Event e{ EventType::AddTorus };
                     dispatcher.dispatch(e);
                 }
+                if (ImGui::MenuItem("Add Monkey")) {
+                    Event e{ EventType::AddMonkey };
+                    dispatcher.dispatch(e);
+                }
                 ImGui::EndMenu();
 
             }

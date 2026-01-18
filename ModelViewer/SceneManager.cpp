@@ -113,6 +113,9 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
         addShape(DefaultShapes::Torus);
         });
+    dispatcher.subscribe(EventType::AddMonkey, [&](const Event& e) {
+        addMonkey();
+        });
 
     dispatcher.subscribe(EventType::Delete, [&](const Event& e) {
         deleteSelected();
@@ -172,14 +175,6 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
 
     CreateRenderTarget(_rt, 300, 300);
-
-
-    auto entity = std::make_unique<Entity>();
-    entity->name = "My monkey";
-    auto model = std::make_unique<Model>(_materialMng.get());
-    model->loadFromFile("models\\monkey.obj");
-    entity->addComponent(std::move(model));
-    _entities.push_back(std::move(entity));
 
 }
 void SceneManager::draw() {
@@ -726,6 +721,16 @@ void SceneManager::addShape(DefaultShapes shape)
     model->loadDefault(shape);
 	entity->addComponent(std::move(model));
 
+    _entities.push_back(std::move(entity));
+}
+
+void SceneManager::addMonkey()
+{
+    auto entity = std::make_unique<Entity>();
+    entity->name = getUniqueName("Monkey");
+    auto model = std::make_unique<Model>(_materialMng.get());
+    model->loadFromFile("models\\monkey.obj");
+    entity->addComponent(std::move(model));
     _entities.push_back(std::move(entity));
 }
 
