@@ -117,7 +117,7 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         });
     dispatcher.subscribe(EventType::Select, [&](const Event& e) {
         mousePos = glm::vec2(e.data.vec.x, e.data.vec.y);
-        isSelect = true;
+        isViewportSelect = true;
         });
 
     dispatcher.subscribe(EventType::ScenePopup, [&](const Event& e) {
@@ -185,7 +185,7 @@ void SceneManager::draw() {
 
 
     // mouse click ile ekranda öge yakalama
-    if (isSelect) {
+    if (isViewportSelect) {
         glClearColor(0, 0, 0, 1);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         
@@ -206,13 +206,17 @@ void SceneManager::draw() {
 
         if (selectedID != 0)
             for (const auto& entity : _entities) {
-                if (entity->transform->UUID == selectedID)
-                    _selectedEntity = entity.get();
+                
+                if (entity->transform->UUID == selectedID) {
+                    if (!ImGui::GetIO().KeyCtrl)
+                        deselectAll();
+                    select(entity.get());
+                }
             }
-        else; // Deselect
-        //_selectedTransform = nullptr;
+        else
+            deselectAll();
 
-        isSelect = false;
+        isViewportSelect = false;
     }
 
     
@@ -256,6 +260,38 @@ void SceneManager::drawAsColorRecursive(Entity* entity)
 
 
 
+
+bool SceneManager::isSelected(Entity* entity){
+    return std::find(_selectedEntities.begin(), _selectedEntities.end(), entity) != _selectedEntities.end();
+}
+
+bool SceneManager::isLastSelected(Entity* entity){
+    return entity == _selectedEntity;
+}
+
+void SceneManager::select(Entity* entity){
+    if (!isSelected(entity))
+        _selectedEntities.push_back(entity);
+
+    _selectedEntity = entity;
+}
+
+void SceneManager::deselect(Entity* entity)
+{
+    if (!isSelected(entity))
+        return; 
+    _selectedEntities.erase(std::find(_selectedEntities.begin(), _selectedEntities.end(), entity));
+    _selectedEntity = nullptr;
+
+    if (!_selectedEntities.empty())
+        _selectedEntity = _selectedEntities.back();
+
+}
+
+void SceneManager::deselectAll(){
+    _selectedEntities.clear();
+    _selectedEntity = nullptr;
+}
 
 void SceneManager::loadScene(std::string path) {
     LOG_ERROR("TO-DO: Load Scene");
@@ -301,112 +337,104 @@ void SceneManager::saveScene() {
     //fout << node;
 }
 
+/// Call recursively to populate each level of children
+void SceneManager::drawHierarchyTreeRecursive(Entity* entity) {
 
-void SceneManager::onInspect()
-{
-    ImGui::Begin("Scene");
-    ImGuiTreeNodeFlags flag = 
+    ImGuiTreeNodeFlags flag =
         ImGuiTreeNodeFlags_DefaultOpen |
         ImGuiTreeNodeFlags_Bullet |
         ImGuiTreeNodeFlags_Leaf;
-    ImGuiTreeNodeFlags flag2 =  ImGuiTreeNodeFlags_Leaf;
-    ImGuiTreeNodeFlags selectedFlag =  ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected;
+    ImGuiTreeNodeFlags flag2 = ImGuiTreeNodeFlags_Leaf;
+    ImGuiTreeNodeFlags selectedFlag = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected;
     //ImGuiTreeNodeFlags selectedFlag =  ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Framed;
-    if (ImGui::IsItemClicked())
-    {
-        std::cout << " scene window was clicked \n";
-        // Mark rendered node as being clicked
+
+    if (isSelected(entity)) {
+
+        if (isLastSelected(entity)) {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255)); // orange foreground
+            ImGui::TreeNodeEx(entity->name.c_str(), selectedFlag);
+            ImGui::PopStyleColor(1);
+        }
+        else {
+            ImGui::TreeNodeEx(entity->name.c_str(), selectedFlag);
+        }
+
     }
-    if (ImGui::TreeNodeEx("root", flag))
-    {
+    else {
+        ImGui::TreeNodeEx(entity->name.c_str(), flag2);
+    }
+
+    // Seçme işlemi
+    if (ImGui::IsItemClicked()){
+        if (!ImGui::GetIO().KeyCtrl)
+            deselectAll();
+        
+        select(entity);
+    }
+
+    // Recursive çağrı
+    for (Transform* transform : entity->transform->getChildren())
+        drawHierarchyTreeRecursive(transform->owner);
+
+    ImGui::TreePop();
+}
+
+void SceneManager::onInspect()
+{
+    // HIERARCHY PANEL
+
+    ImGuiTreeNodeFlags rootFlag =
+        ImGuiTreeNodeFlags_DefaultOpen |
+        ImGuiTreeNodeFlags_Bullet |
+        ImGuiTreeNodeFlags_Leaf;
+
+    ImGui::Begin("Scene");
+
+    if (ImGui::IsItemClicked())
+        LOG_TRACE("Scene window tab was clicked");
+
+
+    if (ImGui::TreeNodeEx("root", rootFlag)){
         if (ImGui::IsItemClicked())
-        {
-            std::cout << " I am clicked \n"; 
-            // Mark rendered node as being clicked
-        }
-        // Call ImGui::TreeNodeEx() recursively to populate each level of children
-
-        // gray background
-        ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(55, 55, 55, 255));
-        for (auto&& i : _entities) {
-            bool lastSelected = false;
-            if (i.get() == getSelectedEntity()) {
-                lastSelected = true;
-                // red foreground
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255));
-                //// gray background
-                //ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(65, 65, 65, 255));
-            }
-            //ImGui::TreeNodeEx(i->name.c_str(), i->isSelected() ? selectedFlag : flag2); 
-            ImGui::TreeNodeEx(i->name.c_str(), flag2); 
-
-            if (lastSelected)
-                ImGui::PopStyleColor(1);
-
-            if (ImGui::IsItemClicked())
-            {
-                //// One item select 
-                //for (auto&& i : _selectedEntities)
-                //    i->deselect();
-                _selectedEntities.clear();
-
-                // TO-DO multiple item select
-
-                _selectedEntities.push_back(i.get());
-                _selectedEntity = i.get();
-
-                //_selectedEntities.sort();
-                //_selectedEntities.unique();
-                ////std::cout << _selectedTransforms.size() << std::endl; 
-                ////i->select();
-            }
-            ImGui::TreePop();
-        }
+            LOG_TRACE("Scene root was clicked");
+        
+        ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(55, 55, 55, 255)); // gray background
+        
+        for (const auto& i : _entities) 
+            if(i->transform->isRoot())
+                drawHierarchyTreeRecursive(i.get()); // Call recursively to populate each level of children
 
         ImGui::PopStyleColor(1);
-
-
-        ////fmt::format()
-        //ImGui::TreeNodeEx("1bc", flag2); ImGui::TreePop();
-        //if (ImGui::TreeNodeEx("2bc")) { 
-        //    ImGui::TreeNodeEx("0bc", flag2); ImGui::TreePop();
-        //    ImGui::TreeNodeEx("1bc", flag2); ImGui::TreePop();
-        //    ImGui::TreePop();
-        //}
 
         ImGui::TreePop();  // This is required at the end of the if block
     }
 
 
-    //// bos alana tiklamayi yakala:
-    //if (ImGui::IsWindowFocused() &&
-    //    ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) &&
-    //    ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
-    //    !ImGui::IsAnyItemHovered()
-    //    )
-    //{
-    //    std::for_each(_selectedTransforms.begin(), _selectedTransforms.end(), [](auto&& t) { t->deselect(); });
-    //    _selectedTransforms.clear();
-    //    _selectedTransform = nullptr; 
-    //    //deselectAll();
-    //    
-    //}
+    // bos alana tiklamayi yakala:
+    if (ImGui::IsWindowFocused() &&
+        ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) &&
+        ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+        !ImGui::IsAnyItemHovered()
+        )
+    {
+        deselectAll();        
+    }
 
 
     ImGui::End();
 
+
+
+    // PROPERTIES PANEL
 
     ImGui::Begin("Properties");
-	//if (auto t = getSelectedTransform())
-	//	t->drawUI();
     if(_selectedEntity)
 		_selectedEntity->onInspect();
-
     ImGui::End();
 
 
 
-
+    // VIEWPORT PANEL
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Viewport");// &viewport->get_active()); //ImGuiWindowFlags_NoTitleBar| ImGuiWindowFlags_UnsavedDocument

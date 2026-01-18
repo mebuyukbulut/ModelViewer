@@ -35,7 +35,7 @@ class SceneManager : public Object
     RenderTarget _rt{};
 
     bool isScenePopupOpen = false;
-    bool isSelect = false; 
+    bool isViewportSelect = false; 
     glm::vec2 mousePos{};
     glm::vec2 viewportPos; // ImVec2
     glm::vec2 viewportPanelSize; // ImVec2
@@ -58,10 +58,18 @@ public:
         return _selectedEntity;
     }
 
+    bool isSelected(Entity* entity);
+    bool isLastSelected(Entity* entity);
+
+    void select(Entity* entity);
+    void deselect(Entity* entity);
+    void deselectAll();
+
+
     void loadScene(std::string path);
     void saveScene();
 
-
+    void drawHierarchyTreeRecursive(Entity* entity);
 	void onInspect() override;
     void drawGizmo();
 
