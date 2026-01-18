@@ -66,7 +66,6 @@ public:
 
     // LIGHTS
     void addLight(LightType lightType);
-    void addLight(std::unique_ptr<Light> light);
     void sceneQuery(); // (Shader& shader);
 
     // SHAPES

@@ -121,18 +121,23 @@ public:
 
 
 class LightManager {
+	const int MAX_LIGHTS = 8;
     struct GPULightBlock {
         GPULight lights[8];
-        int numLights;
+        int numLights{};
         float padding[3]; // 16 byte'a tamamlamak için
     }blockData;
 
-    GLuint uboLights;
+	GLuint uboLights; // Uniform Buffer Object ID
+
+
 public:   
 	LightManager();  // initialize UBO for lights 
     ~LightManager(); // cleanup UBO
 
 	void queryLights(const std::vector<Light*> lights);
-	//void bindBuffer(Shader& shader);
+
+	std::unique_ptr<Light> createLight(LightType type);
+
 
 };

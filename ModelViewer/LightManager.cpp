@@ -258,3 +258,35 @@ void LightManager::queryLights(const std::vector<Light*> lights)
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GPULightBlock), &blockData);
 
 }
+
+std::unique_ptr<Light> LightManager::createLight(LightType type)
+{
+	int lightCount = blockData.numLights;
+    if (lightCount >= MAX_LIGHTS) {
+		LOG_ERROR("Maximum number of lights reached!");
+		return std::unique_ptr<Light>();
+    }
+
+    std::unique_ptr<Light> newLight;
+    std::string lightName = "";
+    switch (type)
+    {
+    case LightType::Directional:
+        newLight = std::make_unique<DirectionalLight>();
+        lightName = "Directional Light" + std::to_string(lightCount);
+        break;
+    case LightType::Point:
+        newLight = std::make_unique<PointLight>();
+        lightName = "Point Light" + std::to_string(lightCount);
+        break;
+    case LightType::Spot:
+        newLight = std::make_unique<SpotLight>();
+        lightName = "Spot Light" + std::to_string(lightCount);
+        break;
+    default:
+        break;
+    }
+
+
+    return newLight;
+}

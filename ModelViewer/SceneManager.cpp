@@ -173,20 +173,13 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
     CreateRenderTarget(_rt, 300, 300);
 
-    //Transform* transform = new Transform;
-    //Entity* entity = new Entity;
-    ////_materialMng.reset(new MaterialManager(shader));
-    //entity->model.reset(new Model(_materialMng.get()));
-    //entity->model->loadFromFile("models\\monkey.obj");
-    //entity->_renderer = renderer;
-    //transform->setEntity(entity);
-    //transform->name = "myobject"; 
-    //_transforms.emplace_back(transform);
 
-    //Transform* t2 = new Transform;
-    //t2->name = "my new object";
-    //t2->setEntity(entity);
-    //_transforms.emplace_back(t2);
+    auto entity = std::make_unique<Entity>();
+    entity->name = "My monkey";
+    auto model = std::make_unique<Model>(_materialMng.get());
+    model->loadFromFile("models\\monkey.obj");
+    entity->addComponent(std::move(model));
+    _entities.push_back(std::move(entity));
 
 }
 void SceneManager::draw() {
@@ -684,56 +677,18 @@ void SceneManager::drawGizmo()
 
 }
 
-// buradaki olayı Light Manager a taşıyabiliriz. Daha temiz olur. 
-const int MAX_LIGHTS = 8; 
-int lightCount = 0;
+
 void SceneManager::addLight(LightType lightType)
 {
-    //static int lightCounter = 0; // Static counter to keep track of light names
-
-    if (lightCount >= MAX_LIGHTS) {
-        std::cout << "ERROR: Maximum number of lights reached!" << std::endl;
-        return; // Prevent adding more lights if the limit is reached
-    }
-    std::unique_ptr<Light> newLight;
-    std::string lightName = "";
-    switch (lightType)
-    {
-    case LightType::Directional:
-        newLight = std::make_unique<DirectionalLight>();
-        lightName = "Directional Light" + std::to_string(lightCount);
-        break;
-    case LightType::Point:
-        newLight = std::make_unique<PointLight>();
-        lightName = "Point Light" + std::to_string(lightCount);
-        break;
-    case LightType::Spot:
-        newLight = std::make_unique<SpotLight>();
-        lightName = "Spot Light" + std::to_string(lightCount);
-        break;
-    default:
-        break;
-    }
-
+    auto light = _lightMng->createLight(lightType);
+    if (!light) {
+        LOG_ERROR("SceneManager: Failed to create light");
+        return;
+	}
 	auto entity = std::make_unique<Entity>();
-    entity->addComponent(std::move(newLight));
-	entity->name = lightName;
+	entity->name = light->name;
+    entity->addComponent(std::move(light));
 	_entities.push_back(std::move(entity));
-
-    lightCount++;
-
-}
-
-void SceneManager::addLight(std::unique_ptr<Light> light)
-{
-
-    //std::unique_ptr<Light> newLight;
-    auto entity = std::make_unique< Entity>();
-    entity->name = light->name;
-	entity->addComponent(std::move(light));
-	_entities.push_back(std::move(entity));
-
-    lightCount++;
 }
 
 void SceneManager::sceneQuery()//(Shader& shader)
