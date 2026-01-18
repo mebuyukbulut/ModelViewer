@@ -39,6 +39,7 @@ class SceneManager : public Object
     glm::vec2 mousePos{};
     glm::vec2 viewportPos; // ImVec2
     glm::vec2 viewportPanelSize; // ImVec2
+
 public:
 	SceneManager() = default;
     ~SceneManager() = default; 

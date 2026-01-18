@@ -24,13 +24,8 @@
 #include "Logger.h"
 
 
-enum class ImguizmoState
-{
-    Translate,
-    Rotate,
-    Scale
-};
-ImguizmoState _GizmoState;
+ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+
 
 void SceneManager::CreateRenderTarget(RenderTarget& rt, int width, int height) 
 {
@@ -176,6 +171,11 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
     CreateRenderTarget(_rt, 300, 300);
 
+	dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+	_entities[0]->transform->setPosition(glm::vec3(5, 0, 0));
+    dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+	_entities[0]->transform->setParent(_entities[1]->transform.get());
+
 }
 void SceneManager::draw() {
     // FBO’ya çiz
@@ -317,7 +317,7 @@ void SceneManager::onInspect()
         std::cout << " scene window was clicked \n";
         // Mark rendered node as being clicked
     }
-    if (ImGui::TreeNodeEx("scene", flag))
+    if (ImGui::TreeNodeEx("root", flag))
     {
         if (ImGui::IsItemClicked())
         {
@@ -525,13 +525,13 @@ void SceneManager::onInspect()
 
     //_GizmoState
     if(ImGui::Button("T", ImVec2(0, 37))) // translate 
-        _GizmoState = ImguizmoState::Translate; 
+        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
     ImGui::SameLine();
     if (ImGui::Button("R", ImVec2(0, 37))) // rotate
-        _GizmoState = ImguizmoState::Rotate; 
+        mCurrentGizmoOperation = ImGuizmo::ROTATE;
     ImGui::SameLine();
     if (ImGui::Button("S", ImVec2(0, 37))) // scale
-        _GizmoState = ImguizmoState::Scale; 
+        mCurrentGizmoOperation = ImGuizmo::SCALE;
     //ImGui::Button("Toolbar goes here", ImVec2(0, 37));
 
     ImGui::End();
@@ -586,10 +586,6 @@ void SceneManager::drawGizmo()
     //    std::cout << "a: " << a << "\tb: "<<b << std::endl;
 
 
-
-
-
-
     if (!_selectedEntity) return;
 
     // Make sure to call inside ImGui frame:
@@ -605,29 +601,9 @@ void SceneManager::drawGizmo()
     ImGuizmo::SetRect(windowPos.x, windowPos.y, windowSize.x, windowSize.y);
 
 
-
-    // Choose operation: translate / rotate / scale
-    static ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;// | ImGuizmo::ROTATE | ImGuizmo::SCALE;
-    switch (_GizmoState)
-    {
-    case ImguizmoState::Translate:
-        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-        break;
-    case ImguizmoState::Rotate:
-        mCurrentGizmoOperation = ImGuizmo::ROTATE;
-        break;
-    case ImguizmoState::Scale:
-        mCurrentGizmoOperation = ImGuizmo::SCALE;
-        break;
-    default:
-        break;
-    }
-
-
     glm::mat4 modelMatrix = _selectedEntity->transform->getGlobalMatrix();
 
-
-    ImGuizmo::Manipulate(
+    bool gizmoUsed = ImGuizmo::Manipulate(
         glm::value_ptr(_camera->getViewMatrix()),
         glm::value_ptr(_camera->getProjectionMatrix()),
         mCurrentGizmoOperation,
@@ -635,28 +611,8 @@ void SceneManager::drawGizmo()
         glm::value_ptr(modelMatrix)
     );
 
-    float translation[3], rotation[3], scale[3];
-    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(modelMatrix), translation, rotation, scale);
-
-    
-    // If modified, write back into your glm::mat4
-    if (ImGuizmo::IsUsing()) {
-        switch (_GizmoState)
-        {
-        case ImguizmoState::Translate:
-            _selectedEntity->transform->setPosition(glm::make_vec3(translation));
-            break;
-        case ImguizmoState::Rotate:
-            _selectedEntity->transform->setRotation(glm::make_vec3(rotation)); // convert to radians if needed
-            break;
-        case ImguizmoState::Scale:
-            _selectedEntity->transform->setScale(glm::make_vec3(scale));
-            break;
-        default:
-            break;
-        }
-    }
-
+    if (gizmoUsed)
+        _selectedEntity->transform->setLocalMatrix(modelMatrix);
 
 }
 

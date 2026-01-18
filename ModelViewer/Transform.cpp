@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include <format>
 #include "Entity.h"
@@ -24,27 +26,30 @@ void Transform::update()
 
 glm::mat4 Transform::getLocalMatrix()
 {
-    //const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f),
-    //    glm::radians(_eulerRotation.x),
-    //    glm::vec3(1.0f, 0.0f, 0.0f));
-    //const glm::mat4 transformY = glm::rotate(glm::mat4(1.0f),
-    //    glm::radians(_eulerRotation.y),
-    //    glm::vec3(0.0f, 1.0f, 0.0f));
-    //const glm::mat4 transformZ = glm::rotate(glm::mat4(1.0f),
-    //    glm::radians(_eulerRotation.z),
-    //    glm::vec3(0.0f, 0.0f, 1.0f));
-
     // Quaternion'u doğrudan rotasyon matrisine çeviriyoruz
     glm::mat4 rotationMatrix = glm::mat4_cast(_orientation);
-
-    //// Y * X * Z
-    //const glm::mat4 roationMatrix = transformY * transformX * transformZ;
 
     // translation * rotation * scale (also know as TRS matrix)
     return glm::translate(glm::mat4(1.0f), _position) *
         rotationMatrix *
         glm::scale(glm::mat4(1.0f), _scale);
 
+}
+
+void Transform::decomposeMatrix(const glm::mat4& matrix)
+{
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+
+    glm::decompose(matrix, scale, rotation, translation, skew, perspective);
+
+	_position = translation;
+    _orientation = rotation;
+    _eulerRotation = glm::degrees(glm::eulerAngles(rotation));
+    _scale = scale;
 }
 
 // it will works parents -> children
@@ -65,6 +70,25 @@ void Transform::setRotation(const glm::vec3& eulerDegrees) {
     _isDirty = true;
 }
 void Transform::setScale(const glm::vec3& scale) { _scale = scale; _isDirty = true; }
+
+
+/// <summary>
+/// Set local matrix of the transform according to world matrix
+/// </summary>
+/// <param name="worldMatrix"> Global matrix </param>
+void Transform::setLocalMatrix(const glm::mat4& worldMatrix)
+{
+    glm::mat4 invParent(1);
+    if(parent)
+        invParent = glm::inverse(parent->getGlobalMatrix());
+
+    glm::mat4 newLocal = invParent * worldMatrix;
+	_localModelMatrix = newLocal;
+
+
+    decomposeMatrix(newLocal);
+    update();
+}
 
 
 namespace YAML {
@@ -121,6 +145,31 @@ void Transform::addChild(Transform* child)
 {
     child->parent = this;
     children.push_back(child);
+}
+void Transform::removeChild(Transform* child)
+{
+	auto it = std::find(children.begin(), children.end(), child);
+    children.erase(it, it+1);
+    child->parent = nullptr;
+}
+
+void Transform::setParent(Transform* newParent)
+{
+	glm::mat4 worldMatrix = getGlobalMatrix();
+
+    if (parent) 
+        parent->removeChild(this);
+    
+    parent = newParent;
+	parent->addChild(this);
+
+    setLocalMatrix(worldMatrix);
+
+    //glm::mat4 invParent = glm::inverse(parent->getGlobalMatrix());
+    //glm::mat4 newLocal = invParent * worldMatrix;
+
+    //decomposeMatrix(newLocal);
+    //update();
 }
 
 void Transform::onInspect()

@@ -24,7 +24,7 @@ class Transform : public Component {
 
 	void update();
 	glm::mat4 getLocalMatrix();
-
+	void decomposeMatrix(const glm::mat4& matrix);
 public:
 
 	glm::vec3 getPosition();
@@ -34,16 +34,18 @@ public:
 	void setRotation(const glm::vec3& eulerDegrees);
 	void setScale(const glm::vec3& scale);
 
+	void setLocalMatrix(const glm::mat4& worldMatrix);
+
+
 	YAML::Node serialize();
 
 	glm::mat4 getGlobalMatrix();
 
 	void addChild(Transform* child);
-	//void removeChild(Transform* child);
-	std::vector<Transform*>& getChildren() { return children; }
+	void removeChild(Transform* child);
+	void setParent(Transform* newParent);
 
-	//void draw(class Renderer* renderer);
-	//void drawAsColor(class Renderer* renderer);
+	std::vector<Transform*>& getChildren() { return children; }
 
 	void onInspect() override;
 
