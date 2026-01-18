@@ -50,7 +50,8 @@ glm::vec3 kelvin2RGB_fast(float kelvin) {
 
 void Light::update()
 {
-    blockData.setPosition(owner->transform->getPosition());
+    
+    blockData.setPosition(owner->transform->getGlobalPosition());
     //isDirty = false; 
 }
 

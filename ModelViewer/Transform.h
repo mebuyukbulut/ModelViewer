@@ -26,7 +26,7 @@ class Transform : public Component {
 	glm::mat4 getLocalMatrix();
 	void decomposeMatrix(const glm::mat4& matrix);
 public:
-
+	glm::vec3 getGlobalPosition();
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
 	glm::vec3 getScale();

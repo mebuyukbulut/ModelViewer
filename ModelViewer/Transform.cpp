@@ -59,6 +59,18 @@ glm::mat4 Transform::getGlobalMatrix() {
 }
 
 
+glm::vec3 Transform::getGlobalPosition() { 
+
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+
+    glm::decompose(_globalModelMatrix, scale, rotation, translation, skew, perspective);
+	return translation;
+}
+
 glm::vec3 Transform::getPosition() { return _position; }
 glm::vec3 Transform::getRotation() { return _eulerRotation; }
 glm::vec3 Transform::getScale() { return _scale; }
@@ -161,15 +173,10 @@ void Transform::setParent(Transform* newParent)
         parent->removeChild(this);
     
     parent = newParent;
-	parent->addChild(this);
+    if(parent)
+	    parent->addChild(this);
 
     setLocalMatrix(worldMatrix);
-
-    //glm::mat4 invParent = glm::inverse(parent->getGlobalMatrix());
-    //glm::mat4 newLocal = invParent * worldMatrix;
-
-    //decomposeMatrix(newLocal);
-    //update();
 }
 
 void Transform::onInspect()

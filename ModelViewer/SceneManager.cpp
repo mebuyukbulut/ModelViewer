@@ -171,9 +171,9 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
     CreateRenderTarget(_rt, 300, 300);
 
-	dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+	dispatcher.dispatch(Event{ EventType::AddTorus, EventData{} });
 	_entities[0]->transform->setPosition(glm::vec3(5, 0, 0));
-    dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+    dispatcher.dispatch(Event{ EventType::AddTorus, EventData{} });
 	_entities[0]->transform->setParent(_entities[1]->transform.get());
 
 }
@@ -241,7 +241,9 @@ void SceneManager::draw() {
 // draw light? 
 void SceneManager::drawRecursive(Entity* entity)
 {
-    _renderer->drawModel(entity->getComponent<Model>(), entity->transform->getGlobalMatrix());
+    auto model = entity->getComponent<Model>();
+    if(model)
+        _renderer->drawModel(model, entity->transform->getGlobalMatrix());
 
     for (Transform* i : entity->transform->getChildren())
         drawRecursive(i->owner);
@@ -249,7 +251,9 @@ void SceneManager::drawRecursive(Entity* entity)
 
 void SceneManager::drawAsColorRecursive(Entity* entity)
 {
-    _renderer->drawModelAsColor(entity->getComponent<Model>(), entity->transform->getGlobalMatrix(), entity->transform->UUID);
+    auto model = entity->getComponent<Model>();
+    if (model)
+        _renderer->drawModelAsColor(model, entity->transform->getGlobalMatrix(), entity->transform->UUID);
 
     for (Transform* i : entity->transform->getChildren())
         drawAsColorRecursive(i->owner);
@@ -339,30 +343,21 @@ void SceneManager::saveScene() {
 
 /// Call recursively to populate each level of children
 void SceneManager::drawHierarchyTreeRecursive(Entity* entity) {
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+    if (isSelected(entity)) flags |= ImGuiTreeNodeFlags_Selected;
+    if (entity->transform->getChildren().empty()) flags |= ImGuiTreeNodeFlags_Leaf;
 
-    ImGuiTreeNodeFlags flag =
-        ImGuiTreeNodeFlags_DefaultOpen |
-        ImGuiTreeNodeFlags_Bullet |
-        ImGuiTreeNodeFlags_Leaf;
-    ImGuiTreeNodeFlags flag2 = ImGuiTreeNodeFlags_Leaf;
-    ImGuiTreeNodeFlags selectedFlag = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected;
-    //ImGuiTreeNodeFlags selectedFlag =  ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Framed;
+    bool opened = false;
 
-    if (isSelected(entity)) {
-
-        if (isLastSelected(entity)) {
-            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255)); // orange foreground
-            ImGui::TreeNodeEx(entity->name.c_str(), selectedFlag);
-            ImGui::PopStyleColor(1);
-        }
-        else {
-            ImGui::TreeNodeEx(entity->name.c_str(), selectedFlag);
-        }
-
+    if (isLastSelected(entity)) {
+        //ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255)); // orange foreground
+        opened = ImGui::TreeNodeEx(entity->name.c_str(), flags);
+        //ImGui::PopStyleColor(1);
     }
     else {
-        ImGui::TreeNodeEx(entity->name.c_str(), flag2);
+        opened = ImGui::TreeNodeEx(entity->name.c_str(), flags);
     }
+
 
     // Seçme işlemi
     if (ImGui::IsItemClicked()){
@@ -372,11 +367,39 @@ void SceneManager::drawHierarchyTreeRecursive(Entity* entity) {
         select(entity);
     }
 
-    // Recursive çağrı
-    for (Transform* transform : entity->transform->getChildren())
-        drawHierarchyTreeRecursive(transform->owner);
 
-    ImGui::TreePop();
+    // --- BURASI: DRAG SOURCE (Sürüklemeyi Başlat) ---
+    if (ImGui::BeginDragDropSource()) {
+        // Sürüklenen nesnenin pointer'ını paketle (Payload)
+        ImGui::SetDragDropPayload("ENTITY_HIERARCHY_NODE", &entity, sizeof(Entity*));
+
+        // Sürüklerken farenin yanında ne görünsün?
+        ImGui::Text("Moving: %s", entity->name.c_str());
+        ImGui::EndDragDropSource();
+    }
+
+    // --- BURASI: DRAG TARGET (Üzerine Bırakmayı Kabul Et) ---
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HIERARCHY_NODE")) {
+            // Paketi aç (Sürüklenen Entity'yi al)
+            Entity* draggedEntity = *(Entity**)payload->Data;
+
+            // Kendi kendine veya zaten parent'ı olan birine bırakılmadığından emin ol
+            if (draggedEntity != entity) {
+                // MATEMATİKSEL PARENT ATAMA (Zıplamayı engelleyen fonksiyon)
+                draggedEntity->transform->setParent(entity->transform.get());
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    // Recursive çağrı
+    if (opened) {
+        for (Transform* transform : entity->transform->getChildren())
+            drawHierarchyTreeRecursive(transform->owner);
+    
+        ImGui::TreePop();
+    }
 }
 
 void SceneManager::onInspect()
@@ -407,6 +430,16 @@ void SceneManager::onInspect()
         ImGui::PopStyleColor(1);
 
         ImGui::TreePop();  // This is required at the end of the if block
+    }
+
+    // drawHierarchy Tree döngüsünün dışına, Begin/End arasına:
+    ImGui::Dummy(ImGui::GetContentRegionAvail()); // Boş bir alan yarat
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HIERARCHY_NODE")) {
+            Entity* draggedEntity = *(Entity**)payload->Data;
+            draggedEntity->transform->setParent(nullptr); // Bağımsız yap
+        }
+        ImGui::EndDragDropTarget();
     }
 
 
@@ -680,7 +713,8 @@ void SceneManager::addShape(DefaultShapes shape)
     };
 
 	auto entity = std::make_unique<Entity>();
-	std::string name = shapedToString[shape];
+	std::string name = getUniqueName(shapedToString[shape]);
+    
     entity->transform->name = name;
     entity->name = name;
     LOG_TRACE(shapedToString[shape]);
