@@ -1,5 +1,6 @@
-#pragma once
+﻿#pragma once
 #include "Component.h"
+#include <glm/gtc/quaternion.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include "Model.h"
@@ -13,7 +14,8 @@ class Transform : public Component {
 	bool _isDirty{ true };
 
 	glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
-	glm::vec3 _rotation{ 0.0f, 0.0f, 0.0f };
+	glm::quat _orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // Başlangıç (Identity)
+	glm::vec3 _eulerRotation{ 0.0f, 0.0f, 0.0f };
 	glm::vec3 _scale{ 1.0f, 1.0f, 1.0f };
 
 	//Global space information concatenate in matrix
@@ -29,7 +31,7 @@ public:
 	glm::vec3 getRotation();
 	glm::vec3 getScale();
 	void setPosition(const glm::vec3& position);
-	void setRotation(const glm::vec3& rotation);
+	void setRotation(const glm::vec3& eulerDegrees);
 	void setScale(const glm::vec3& scale);
 
 	YAML::Node serialize();
