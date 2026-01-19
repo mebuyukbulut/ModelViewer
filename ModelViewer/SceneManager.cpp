@@ -219,6 +219,8 @@ void SceneManager::draw() {
 
 
     // mouse click ile ekranda öge yakalama
+    if (isViewportSelect && ImGuizmo::IsOver())
+        isViewportSelect = false;
     if (isViewportSelect) {
         glClearColor(0, 0, 0, 1);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
