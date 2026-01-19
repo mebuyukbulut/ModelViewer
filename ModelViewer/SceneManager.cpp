@@ -350,9 +350,9 @@ void SceneManager::drawHierarchyTreeRecursive(Entity* entity) {
     bool opened = false;
 
     if (isLastSelected(entity)) {
-        //ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255)); // orange foreground
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255)); // orange foreground
         opened = ImGui::TreeNodeEx(entity->name.c_str(), flags);
-        //ImGui::PopStyleColor(1);
+        ImGui::PopStyleColor(1);
     }
     else {
         opened = ImGui::TreeNodeEx(entity->name.c_str(), flags);
@@ -386,8 +386,7 @@ void SceneManager::drawHierarchyTreeRecursive(Entity* entity) {
 
             // Kendi kendine veya zaten parent'ı olan birine bırakılmadığından emin ol
             if (draggedEntity != entity) {
-                // MATEMATİKSEL PARENT ATAMA (Zıplamayı engelleyen fonksiyon)
-                draggedEntity->transform->setParent(entity->transform.get());
+                draggedEntity->transform->setParent(entity->transform.get()); 
             }
         }
         ImGui::EndDragDropTarget();
