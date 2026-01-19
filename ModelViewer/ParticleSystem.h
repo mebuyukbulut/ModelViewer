@@ -143,8 +143,8 @@ public:
     }
 
     void update(double deltaTime) {
-        _particleCtx.deltaTime = deltaTime;
-        _particleCtx.elapsedTime += deltaTime;
+        _particleCtx.deltaTime = static_cast<float>(deltaTime);
+        _particleCtx.elapsedTime += static_cast<float>(deltaTime);
         
         ch.start();
 
@@ -169,7 +169,7 @@ public:
         //        _particles.erase(_particles.begin() + i);
         //}
 
-        _PCount = _particles.size();
+        _PCount = static_cast<int>(_particles.size());
         auto it = std::remove_if(_particles.begin(), _particles.end(), 
             [&](Particle p) {
                 return !p.isactive;
@@ -178,15 +178,15 @@ public:
         _particles.erase(it, _particles.end());
 
 
-        float spawnRate = info.spawnRate; // 100 particle per second 
+        float spawnRate = static_cast<float>(info.spawnRate); // 100 particle per second 
         static float newParticleCount = 0;
-        newParticleCount += spawnRate * deltaTime;
+        newParticleCount += spawnRate * static_cast<float>(deltaTime);
         //std::cout << "Dtime: " << deltaTime << std::endl;
         //std::cout << newParticleCount << std::endl;
         //std::cout << "update _p.size(): " << _particles.size() << std::endl;
 
         if (newParticleCount > 1) {
-            int N = newParticleCount;
+            int N = static_cast<int>(newParticleCount);
             newParticleCount -= N;
 
             for (int i{}; i < N; i++) {

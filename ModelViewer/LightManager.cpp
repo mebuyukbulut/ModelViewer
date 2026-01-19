@@ -10,6 +10,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 #include "Camera.h"
 #include "Entity.h"
 #include "Transform.h"
@@ -24,22 +26,22 @@ glm::vec3 kelvin2RGB_fast(float kelvin) {
         color.r = 255;
 
         color.g = kelvin;
-        color.g = 99.4708025861 * std::log(color.g) - 161.1195681661;
+        color.g = 99.4708025861f * std::log(color.g) - 161.1195681661f;
 
         if (kelvin <= 19) {
             color.b = 0;
         }
         else {
             color.b = kelvin - 10;
-            color.b = 138.5177312231 * std::log(color.b) - 305.0447927307;
+            color.b = 138.5177312231f * std::log(color.b) - 305.0447927307f;
         }
     }
     else {
         color.r = kelvin - 66;
-        color.r = 329.698727446 * std::pow(color.r, -0.1332047592);
+        color.r = 329.698727446f * std::pow(color.r, -0.1332047592f);
 
         color.g = kelvin - 60;
-        color.g = 288.1221695283 * std::pow(color.g, -0.0755148492);
+        color.g = 288.1221695283f * std::pow(color.g, -0.0755148492f);
 
         color.b = 255;
     }
@@ -246,7 +248,7 @@ LightManager::~LightManager()
 
 void LightManager::queryLights(const std::vector<Light*> lights)
 {
-    blockData.numLights = lights.size();
+    blockData.numLights = static_cast<int>(lights.size());
 
     for (size_t i = 0; i < lights.size() && i < 8; i++) {
         lights[i]->update();

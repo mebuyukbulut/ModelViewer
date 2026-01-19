@@ -47,7 +47,7 @@ glm::mat4 Camera::getViewMatrix()
 }
 
 void Camera::setWindowSize(int width, int height){
-	_windowSize.x = width; _windowSize.y = height;
+	_windowSize.x = static_cast<float>(width); _windowSize.y = static_cast<float>(height);
 	_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
 glm::vec2  Camera::getWindowSize(){ return _windowSize; }

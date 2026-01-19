@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Component.h"
 #include <glm/gtc/quaternion.hpp>
-//#include <yaml-cpp/yaml.h>
 
 #include "Model.h"
 #include "LightManager.h"

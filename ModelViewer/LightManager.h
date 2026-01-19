@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <glm/glm.hpp>
 #include <glad/glad.h>
-#include <yaml-cpp/yaml.h>
 
 #include <iostream>
 #include <vector>

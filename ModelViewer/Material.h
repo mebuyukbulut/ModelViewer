@@ -16,12 +16,12 @@ public:
 	float ao;
 
 	Material() :
-		baseColor{ 1.0,1.0,1.0,1.0 },
-		emissive{ 0.0,0.0,0.0,0.0 },
-		metallic{ 0.0 },
-		roughness{ 0.5 },
-		reflectance{ 0.45 },
-		ao{ 1 }
+		baseColor{ 1.0f, 1.0f, 1.0f, 1.0f },
+		emissive{ 0.0f, 0.0f, 0.0f, 0.0f },
+		metallic{ 0.0f },
+		roughness{ 0.5f },
+		reflectance{ 0.45f },
+		ao{ 1.f }
 	{}
 	//Material(glm::vec4 baseColor, float roughness): 
 	//	baseColor{ baseColor }, 
