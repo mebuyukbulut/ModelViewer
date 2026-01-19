@@ -31,3 +31,14 @@ void Entity::onInspect()
 		component->onInspect();
 }
 
+void Entity::serialize(YAML::Emitter& out) const
+{
+	transform->serialize(out);
+    for (const auto& component : components)
+		component->serialize(out);
+}
+
+void Entity::deserialize(const YAML::Node& node)
+{
+}
+

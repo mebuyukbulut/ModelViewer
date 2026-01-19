@@ -365,16 +365,12 @@ void SceneManager::loadScene(std::string path) {
 }
 void SceneManager::saveScene() {
     LOG_ERROR("TO-DO: Save Scene");
-    //YAML::Node node;
-    //for (const auto& entity : _entities) {
-    //    node.push_back(entity->serialize());
-    //    //Light* light = transform->getEntity()->light.get();
-    //    //if(light)
-    //    //    node["Lights"].push_back(light->serialize());
-    //}
-    //std::string path = "save0.yaml";
-    //std::ofstream fout(path);
-    //fout << node;
+    YAML::Emitter out;
+    serialize(out);
+
+    std::string path = "save0.yaml";
+    std::ofstream fout(path);
+    fout << out.c_str();
 }
 
 /// Call recursively to populate each level of children
@@ -813,5 +809,16 @@ bool SceneManager::isUniqueName(std::string name)
         if (entity && entity->name == name) return false;
 
     return true;
+}
+
+void SceneManager::serialize(YAML::Emitter& out) const
+{
+    for (const auto& entity : _entities) {
+        entity->serialize(out);
+    }
+}
+
+void SceneManager::deserialize(const YAML::Node& node)
+{
 }
 

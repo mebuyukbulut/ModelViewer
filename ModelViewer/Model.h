@@ -61,6 +61,7 @@ public:
     LoadStatus getLoadStatus() const;
 
 	void onInspect() override;
-    //void drawUI() override;
+    void serialize(YAML::Emitter& out) const override;
+    void deserialize(const YAML::Node& node) override;
 };
 

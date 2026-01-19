@@ -243,3 +243,11 @@ void Model::onInspect()
 
     mat->drawUI(); 
 }
+
+void Model::serialize(YAML::Emitter& out) const
+{
+}
+
+void Model::deserialize(const YAML::Node& node)
+{
+}

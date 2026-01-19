@@ -8,6 +8,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include <yaml-cpp/yaml.h>
 #include <format>
 #include "Entity.h"
 
@@ -198,6 +199,28 @@ void Transform::onInspect()
     //}
 
     //owner->onInspect();
+}
+
+void Transform::serialize(YAML::Emitter& out) const
+{
+    Component::serialize(out);
+	out << YAML::Key << "position" << YAML::Value << _position.x << _position.y << _position.z;
+
+
+    bool _isDirty{ true };
+
+    glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
+    glm::quat _orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // Başlangıç (Identity)
+    glm::vec3 _eulerRotation{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 _scale{ 1.0f, 1.0f, 1.0f };
+
+    //Global space information concatenate in matrix
+    glm::mat4 _globalModelMatrix = glm::mat4(1.0f);
+    glm::mat4 _localModelMatrix = glm::mat4(1.0f);
+}
+
+void Transform::deserialize(const YAML::Node& node)
+{
 }
 
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Component.h"
 #include <glm/gtc/quaternion.hpp>
-#include <yaml-cpp/yaml.h>
+//#include <yaml-cpp/yaml.h>
 
 #include "Model.h"
 #include "LightManager.h"
@@ -47,9 +47,11 @@ public:
 
 	std::vector<Transform*>& getChildren() { return children; }
 
-	void onInspect() override;
-
 	bool isRoot() { return parent == nullptr; }
+
+	void onInspect() override;
+	void serialize(YAML::Emitter& out) const override;
+	void deserialize(const YAML::Node& node) override;
 };
 
 

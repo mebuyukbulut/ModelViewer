@@ -31,13 +31,17 @@ public:
 	T* getComponent();
 
 
+	// Inherited via Object
 	void onInspect() override;
+	void serialize(YAML::Emitter& out) const override;
+	void deserialize(const YAML::Node& node) override;
 
 private:
 	void terminate() {
 		//if (model)
 		//	model.get()->terminate();
 	}
+
 };
 
 

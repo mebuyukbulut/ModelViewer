@@ -86,5 +86,10 @@ public:
     std::string getUniqueName(std::string name);
     bool isUniqueName(std::string name);
 
+
+    // Inherited via Object
+    void serialize(YAML::Emitter& out) const override;
+    void deserialize(const YAML::Node& node) override;
+
 };
 
