@@ -77,17 +77,17 @@ void SceneManager::fileLoadManager()
 {   
     if (_pendingEntities.empty()) return;
 
-    bool isAllFinish = true; 
     for (auto& entity : _pendingEntities) {
         if (!entity) continue;
 
         if (Model* model = entity->getComponent<Model>()) {
             model->updateLoadStatus();
             LoadStatus loadStatus = model->getLoadStatus();
+
             if (loadStatus == LoadStatus::Complete) {
                 LOG_INFO("File successfully loaded: " + entity->name);
                 _entities.push_back(std::move(entity));
-                entity.reset();
+                //entity.reset(); // gereksizmiş
             }
             else if (loadStatus == LoadStatus::Error) {
                 LOG_ERROR("File cannot loaded: " + entity->name);
@@ -98,11 +98,12 @@ void SceneManager::fileLoadManager()
             }*/
 
         }
-
-        isAllFinish = false; 
     }
-    if (isAllFinish)
-        _pendingEntities.clear();
+
+    // Tek seferde tüm nullptr (işi bitmiş) olanları temizle
+    std::erase_if(_pendingEntities, [](const std::unique_ptr<Entity>& e) {
+        return e == nullptr;
+        });
 
 }
 
