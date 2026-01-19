@@ -134,6 +134,7 @@ void Engine::mainLoop()
         
         SM.draw();
         SM.sceneQuery();//(_renderer.getShader());
+        SM.fileLoadManager();
         
         
 		_UI.draw(&SM);

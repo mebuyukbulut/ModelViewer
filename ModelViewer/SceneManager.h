@@ -24,6 +24,7 @@ class SceneManager : public Object
 	std::vector<std::unique_ptr<Entity>> _entities{};
     std::vector <Entity*> _selectedEntities{};
     Entity* _selectedEntity{};
+	std::vector<std::unique_ptr<Entity>> _pendingEntities{};
 
     Renderer* _renderer{};
     class Camera* _camera{};
@@ -47,7 +48,7 @@ public:
     void CreateRenderTarget(RenderTarget& rt, int width, int height);
     void ResizeRenderTarget(int newWidth, int newHeight);
 
-
+    void fileLoadManager();
     void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
     void draw();
     void drawRecursive(Entity* entity);

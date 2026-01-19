@@ -73,6 +73,39 @@ void SceneManager::ResizeRenderTarget(int newWidth, int newHeight)
     CreateRenderTarget(_rt, newWidth, newHeight);
 }
 
+void SceneManager::fileLoadManager()
+{   
+    if (_pendingEntities.empty()) return;
+
+    bool isAllFinish = true; 
+    for (auto& entity : _pendingEntities) {
+        if (!entity) continue;
+
+        if (Model* model = entity->getComponent<Model>()) {
+            model->updateLoadStatus();
+            LoadStatus loadStatus = model->getLoadStatus();
+            if (loadStatus == LoadStatus::Complete) {
+                LOG_INFO("File successfully loaded: " + entity->name);
+                _entities.push_back(std::move(entity));
+                entity.reset();
+            }
+            else if (loadStatus == LoadStatus::Error) {
+                LOG_ERROR("File cannot loaded: " + entity->name);
+                entity.reset();
+            }/*
+            else {
+                LOG_ERROR("Undefined behavior at SceneManager::fileLoadManager");
+            }*/
+
+        }
+
+        isAllFinish = false; 
+    }
+    if (isAllFinish)
+        _pendingEntities.clear();
+
+}
+
 void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
     _renderer = renderer;
     _camera = camera;
@@ -133,7 +166,7 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
             return;
 
         Model *model = new Model(_materialMng.get());
-        if (model->loadFromFile(modelPath)) {
+        if (LoadStatus::Complete == model->loadFromFile(modelPath)) {
             //_models.push_back(model);
             //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
             LOG_INFO("Success to load model: " + modelPath);
@@ -171,10 +204,10 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
     CreateRenderTarget(_rt, 300, 300);
 
-	dispatcher.dispatch(Event{ EventType::AddTorus, EventData{} });
-	_entities[0]->transform->setPosition(glm::vec3(5, 0, 0));
-    dispatcher.dispatch(Event{ EventType::AddTorus, EventData{} });
-	_entities[0]->transform->setParent(_entities[1]->transform.get());
+	dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+	////_entities[0]->transform->setPosition(glm::vec3(2, 0, 0));
+    dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+	//_entities[0]->transform->setParent(_entities[1]->transform.get());
 
 }
 void SceneManager::draw() {
@@ -734,9 +767,9 @@ void SceneManager::addMonkey()
     auto entity = std::make_unique<Entity>();
     entity->name = getUniqueName("Monkey");
     auto model = std::make_unique<Model>(_materialMng.get());
-    model->loadFromFile("models\\monkey.obj");
+    model->loadFromFileAsync("models\\monkey.obj");
     entity->addComponent(std::move(model));
-    _entities.push_back(std::move(entity));
+    _pendingEntities.push_back(std::move(entity));
 }
 
 void SceneManager::deleteSelected()
@@ -771,7 +804,10 @@ std::string SceneManager::getUniqueName(std::string name)
 bool SceneManager::isUniqueName(std::string name)
 {
     for (const auto& entity : _entities)
-        if(entity->name == name) return false;
+        if (entity->name == name) return false;
+
+    for (const auto& entity : _pendingEntities)
+        if (entity && entity->name == name) return false;
 
     return true;
 }

@@ -1,9 +1,8 @@
-#include "Model.h"
-
+﻿#include "Model.h"
 #include "Texture.h"
 
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-bool Model::loadModel(std::string const& path)
+LoadStatus Model::loadModel(std::string const& path)
 {
     _path = path; 
 
@@ -15,7 +14,7 @@ bool Model::loadModel(std::string const& path)
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
         std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-        return false;
+        return LoadStatus::Error;
     }
     // retrieve the directory path of the filepath
     _directory = path.substr(0, path.find_last_of('\\'));
@@ -28,7 +27,7 @@ bool Model::loadModel(std::string const& path)
         _materials.push_back(_materialManager->getDefaultMaterial());
     }
 
-    return true;
+    return LoadStatus::ReadyToUpload;
 }
 
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -118,18 +117,18 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     // specular: texture_specularN
     // normal: texture_normalN
 
-    // 1. diffuse maps
-    std::vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    // 2. specular maps
-    std::vector<Texture*> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    // 3. normal maps
-    std::vector<Texture*> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-    // 4. height maps
-    std::vector<Texture*> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    //// 1. diffuse maps
+    //std::vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    //textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    //// 2. specular maps
+    //std::vector<Texture*> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+    //textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    //// 3. normal maps
+    //std::vector<Texture*> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+    //textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    //// 4. height maps
+    //std::vector<Texture*> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+    //textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
     Mesh newMesh;
@@ -192,15 +191,48 @@ void Model::loadDefault(DefaultShapes shape)
     Mesh mesh = MeshFactory::create(shape);
     meshes.push_back(mesh);
 
+
     // if model loading not create a material use default one 
     if (_materials.empty()) {
         _materials.push_back(_materialManager->getDefaultMaterial());
     }
 }
 
-bool Model::loadFromFile(const std::string& filename) {
-    return loadModel(filename);
+LoadStatus Model::loadFromFile(const std::string& filename) {
+    LoadStatus ls = loadModel(filename);
+	if (ls == LoadStatus::Error)
+        return ls;
+
+    for (auto& m : meshes)
+        m.upload2GPU();
+
+	// gpu ya yüklemede de hata olması durumunda hata döndürülebilir
+    _loadStatus = LoadStatus::Complete;
+    return LoadStatus::Complete;
 }
+
+LoadStatus Model::loadFromFileAsync(const std::string& filename){
+    _asyncLoadStatus = std::async(std::launch::async, &Model::loadModel, this, filename);
+    return LoadStatus::Loading; 
+}
+
+// Main threadde çalışır ve asenkron yükleme işleminin durumunu kontrol eder
+void Model::updateLoadStatus(){
+    if (_asyncLoadStatus.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+        LoadStatus ls = _asyncLoadStatus.get();
+        if (ls == LoadStatus::ReadyToUpload) {
+            // Yükleme tamamlandı, şimdi GPU'ya yükle
+            for (auto& m : meshes)
+                m.upload2GPU();
+            _loadStatus = LoadStatus::Complete;
+        }
+        else {
+            _loadStatus = ls; // Hata durumu
+		}
+    }
+}
+
+LoadStatus Model::getLoadStatus() const { return _loadStatus; }
 
 void Model::onInspect()
 {

@@ -51,6 +51,9 @@ void Mesh::init(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
 {
     _vertices = vertices;
     _indices = indices;
+}
+
+void Mesh::upload2GPU(){
     setupMesh();
 }
 
@@ -424,5 +427,6 @@ Mesh MeshFactory::create(DefaultShapes shape)
 
     Mesh m; 
     m.init(vertices, indices);
+    m.upload2GPU();
     return m;
 }

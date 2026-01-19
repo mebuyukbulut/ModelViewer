@@ -11,6 +11,7 @@
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 typedef OpenMesh::PolyMesh_ArrayKernelT<>  OMesh;
 
+
 struct Vertex
 {
 	glm::vec3 position;
@@ -27,15 +28,10 @@ class Mesh
 	unsigned int _vao, _vbo, _ebo;
 	void setupMesh();
 public:
-
-	//void loadFromFile(const char* filename);
-	//void loadDefault();
-	//void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+	void upload2GPU();
 	void draw(Shader& shader);
 	void terminate();
-	//void update(float deltaTime);
-
 };
 
 

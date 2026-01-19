@@ -46,7 +46,7 @@ void Renderer::init() {
     };
     std::vector<unsigned int> bgIndices{ 0, 1, 2 };
     _bgMesh->init(bgVertices, bgIndices);
-
+    _bgMesh->upload2GPU();
 
 
 
@@ -60,7 +60,7 @@ void Renderer::init() {
     };
     std::vector<unsigned int> gridIndices{ 0, 1, 2, 0, 2, 3 };
     _gridMesh->init(gridVertices, gridIndices);
-
+    _gridMesh->upload2GPU();
     //glDisable(GL_FRAMEBUFFER_SRGB);
     //GLboolean srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
     //std::cout << "Framebuffer sRGB: " << (srgbEnabled ? "ENABLED" : "DISABLED") << std::endl;
