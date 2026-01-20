@@ -36,8 +36,6 @@ public:
 	void setLocalMatrix(const glm::mat4& worldMatrix);
 
 
-	YAML::Node serialize();
-
 	glm::mat4 getGlobalMatrix();
 
 	void addChild(Transform* child);
@@ -49,7 +47,7 @@ public:
 	bool isRoot() { return parent == nullptr; }
 
 	void onInspect() override;
-	void serialize(YAML::Emitter& out) const override;
+	void serialize(YAML::Emitter& out) override;
 	void deserialize(const YAML::Node& node) override;
 };
 

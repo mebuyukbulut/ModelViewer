@@ -8,7 +8,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include <yaml-cpp/yaml.h>
+#include "YAMLHelper.h"
 #include <format>
 #include "Entity.h"
 
@@ -104,55 +104,6 @@ void Transform::setLocalMatrix(const glm::mat4& worldMatrix)
 }
 
 
-namespace YAML {
-    template<>
-    struct convert<glm::vec3> {
-        // glm::vec3 → YAML (C++ objesini dosyaya yazarken)
-        static Node encode(const glm::vec3& rhs) {
-            Node node;
-            //node.push_back(std::vector<float>{ rhs.x, rhs.y, rhs.z });
-            node.SetStyle(YAML::EmitterStyle::Flow);
-            node.push_back(rhs.x);
-            node.push_back(rhs.y);
-            node.push_back(rhs.z);
-            return node;
-        }
-
-        // YAML → glm::vec3 (dosyadan okurken)
-        static bool decode(const Node& node, glm::vec3& rhs) {
-            if (!node.IsSequence() || node.size() != 3)
-                return false;
-            rhs.x = node[0].as<float>();
-            rhs.y = node[1].as<float>();
-            rhs.z = node[2].as<float>();
-            return true;
-        }
-    };
-}
-
-
-YAML::Node Transform::serialize() {
-    YAML::Node node;
-
-    node["name"] = name;
-    node["position"] = _position;
-    node["rotation"] = _eulerRotation;
-    node["scale"] = _scale;
-
-    // light    
-    if (owner->getComponent<Light>()) node["light"].push_back(owner->getComponent<Light>()->serialize());
-    //node["light"].push_back(_entity->light ? _entity->light->serialize() : YAML::Node());
-    // model 
-    if (owner->getComponent<Model>()) node["modelPath"] = (owner->getComponent<Model>()->getPath());
-    //node["modelPath"] = _entity->model ? _entity->model->getPath() : "";
-
-
-    // serialize child of transform 
-    //    // entity
-    // components -> model, light, materials etc. 
-    return node;
-}
-
 
 void Transform::addChild(Transform* child)
 {
@@ -201,22 +152,16 @@ void Transform::onInspect()
     //owner->onInspect();
 }
 
-void Transform::serialize(YAML::Emitter& out) const
+void Transform::serialize(YAML::Emitter& out)
 {
+	out << YAML::BeginMap;
     Component::serialize(out);
-	out << YAML::Key << "position" << YAML::Value << _position.x << _position.y << _position.z;
+	out << YAML::Key << "position" << YAML::Value << _position;
+	out << YAML::Key << "orientation" << YAML::Value << _orientation;
+	out << YAML::Key << "rotation" << YAML::Value << _eulerRotation;
+	out << YAML::Key << "scale" << YAML::Value << _scale;
+    out << YAML::EndMap;
 
-
-    bool _isDirty{ true };
-
-    glm::vec3 _position{ 0.0f, 0.0f, 0.0f };
-    glm::quat _orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // Başlangıç (Identity)
-    glm::vec3 _eulerRotation{ 0.0f, 0.0f, 0.0f };
-    glm::vec3 _scale{ 1.0f, 1.0f, 1.0f };
-
-    //Global space information concatenate in matrix
-    glm::mat4 _globalModelMatrix = glm::mat4(1.0f);
-    glm::mat4 _localModelMatrix = glm::mat4(1.0f);
 }
 
 void Transform::deserialize(const YAML::Node& node)

@@ -2,7 +2,7 @@
 #include "Entity.h"
 #include <yaml-cpp/yaml.h>
 
-void Component::serialize(YAML::Emitter& out) const
+void Component::serialize(YAML::Emitter& out)
 {
 	Object::serialize(out);
 

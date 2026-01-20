@@ -70,11 +70,12 @@ public:
     virtual void update();
     GPULight getGPULight() { 
 		update(); // return isDirty ? update(), blockData : blockData;
-        return blockData; 
+        return blockData;  
     }
 
     //virtual void configShader(Shader& shader, std::string prefix);
-    virtual YAML::Node serialize();
+    void serialize(YAML::Emitter& out) override;
+    void deserialize(const YAML::Node& node) override;
     virtual void onInspect() override;
 
     virtual ~Light() = default;

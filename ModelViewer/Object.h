@@ -23,6 +23,6 @@ public:
 	virtual void onInspect() {}
 
 	// Her objenin kendini serileştirme (kaydetme) yeteneği olsun
-	virtual void serialize(YAML::Emitter& out) const;
+	virtual void serialize(YAML::Emitter& out);
 	virtual void deserialize(const YAML::Node& node);
 };

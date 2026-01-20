@@ -1,5 +1,6 @@
 ﻿#include "Model.h"
 #include "Texture.h"
+#include "YAMLHelper.h"
 
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 LoadStatus Model::loadModel(std::string const& path)
@@ -244,8 +245,13 @@ void Model::onInspect()
     mat->drawUI(); 
 }
 
-void Model::serialize(YAML::Emitter& out) const
+void Model::serialize(YAML::Emitter& out)
 {
+
+    out << YAML::BeginMap;
+    Component::serialize(out);
+	out << YAML::Key << "path" << YAML::Value << _path;
+    out << YAML::EndMap;
 }
 
 void Model::deserialize(const YAML::Node& node)

@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <yaml-cpp/yaml.h>
+#include "YAMLHelper.h"
 
 #include "Camera.h"
 #include "Entity.h"
@@ -90,37 +90,25 @@ DirectionalLight::DirectionalLight() {
 }
 
 
-YAML::Node Light::serialize()
+
+void Light::serialize(YAML::Emitter& out)
 {
-    YAML::Node n;
-    switch (blockData.getType()) // bu switch çok çirkin duruyor. daha estetik olmalı 
-		// ayrıca LightFactory da aynı switch var. orayı da düşün
-    {
-        case LightType::Point:
-        n["type"] = "point";
-		break;
+    out << YAML::BeginMap;
+    Component::serialize(out);
+    out << YAML::Key << "light_type" << YAML::Value << static_cast<int>(blockData.getType());
+    out << YAML::Key << "position" << YAML::Value << blockData.getPosition();
+	out << YAML::Key << "color" << YAML::Value << blockData.getColor();
+	out << YAML::Key << "intensity" << YAML::Value << blockData.getColor();
+	out << YAML::Key << "attenuation" << YAML::Value << blockData.getColor();
+	out << YAML::Key << "cutoff" << YAML::Value << blockData.getColor();
+	out << YAML::Key << "direction" << YAML::Value << blockData.getColor();
+	out << YAML::Key << "kelvinCB" << YAML::Value << kelvinCB;
+	out << YAML::Key << "kelvin" << YAML::Value << kelvin;
+    out << YAML::EndMap;
+}
 
-        case LightType::Spot:
-        n["type"] = "spot";
-		break;
-
-		case LightType::Directional:
-        n["type"] = "directional";
-		break;
-
-    default:
-        break;
-    }
-    //n["type"] = "directional";
-    n["position"] = blockData.getPosition();
-    n["color"] = blockData.getColor();
-    n["intensity"] = blockData.getIntensity();
-    n["attenuation"] = blockData.getAttenuation();
-    n["cutoff"] = blockData.getCutoff();
-    n["direction"] = blockData.getDirection();
-
-	// neden kelvini kaydetmiyoruz?
-    return n;
+void Light::deserialize(const YAML::Node& node)
+{
 }
 
 void Light::onInspect()
@@ -173,32 +161,6 @@ void SpotLight::setDirection(glm::vec3 rotation)
 
     blockData.setDirection(rotationMatrix * glm::vec4(0, 1, 0, 1));
 
-}
-
-namespace YAML {
-    template<>
-    struct convert<glm::vec3> {
-        // glm::vec3 → YAML (C++ objesini dosyaya yazarken)
-        static Node encode(const glm::vec3& rhs) {
-            Node node;
-            //node.push_back(std::vector<float>{ rhs.x, rhs.y, rhs.z });
-            node.SetStyle(YAML::EmitterStyle::Flow);
-            node.push_back(rhs.x);
-            node.push_back(rhs.y);
-            node.push_back(rhs.z);
-            return node;
-        }
-
-        // YAML → glm::vec3 (dosyadan okurken)
-        static bool decode(const Node& node, glm::vec3& rhs) {
-            if (!node.IsSequence() || node.size() != 3)
-                return false;
-            rhs.x = node[0].as<float>();
-            rhs.y = node[1].as<float>();
-            rhs.z = node[2].as<float>();
-            return true;
-        }
-    };
 }
 
 

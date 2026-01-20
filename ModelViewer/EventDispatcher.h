@@ -27,6 +27,8 @@ enum class EventType {
     Delete,
     Select, 
 
+    SaveScene,
+
     ScenePopup
 };
 

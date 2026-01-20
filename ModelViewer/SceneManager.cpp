@@ -157,6 +157,9 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     dispatcher.subscribe(EventType::ScenePopup, [&](const Event& e) {
         isScenePopupOpen = true;
         });
+    dispatcher.subscribe(EventType::SaveScene, [&](const Event& e) {
+        saveScene();
+        });
 
 
 
@@ -364,13 +367,14 @@ void SceneManager::loadScene(std::string path) {
 
 }
 void SceneManager::saveScene() {
-    LOG_ERROR("TO-DO: Save Scene");
+    LOG_TRACE("Scene is saving");
     YAML::Emitter out;
     serialize(out);
 
     std::string path = "save0.yaml";
     std::ofstream fout(path);
     fout << out.c_str();
+    LOG_INFO("Scene saved");
 }
 
 /// Call recursively to populate each level of children
@@ -811,11 +815,23 @@ bool SceneManager::isUniqueName(std::string name)
     return true;
 }
 
-void SceneManager::serialize(YAML::Emitter& out) const
+void SceneManager::serialize(YAML::Emitter& out)
 {
+    out << YAML::BeginDoc;
+	out << YAML::BeginMap;
+
+    out << YAML::Key << "Scene" << YAML::Value << "istanbul";
+    out << YAML::Key << "Version" << YAML::Value << "1.0";
+    out << YAML::Key << "Entities" << YAML::Value;
+
+    out << YAML::BeginSeq;
     for (const auto& entity : _entities) {
         entity->serialize(out);
     }
+    out << YAML::EndSeq;
+
+	out << YAML::EndMap;
+    out << YAML::EndDoc;
 }
 
 void SceneManager::deserialize(const YAML::Node& node)

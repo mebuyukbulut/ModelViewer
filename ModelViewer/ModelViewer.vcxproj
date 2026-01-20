@@ -210,6 +210,7 @@
     <ClInclude Include="Time.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="UIManager.h" />
+    <ClInclude Include="YAMLHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\basic_lighting.frag" />

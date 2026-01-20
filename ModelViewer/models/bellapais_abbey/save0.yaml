@@ -1,57 +1,31 @@
-- name: model2
-  position: [-2.34077191, -3.66196605e-06, 2.41418123]
-  rotation: [0, 180, 0]
-  scale: [1, 1, 1]
-  modelPath: models/monkey.obj
-- name: light0
-  position: [-1.87749147, 1.86819601, 2.27575707]
-  rotation: [0, 0, 0]
-  scale: [1, 1, 1]
-  light:
-    - type: point
-      attenuation: 3
-      position: [-1.87749147, 1.86819601, 2.27575707]
-      color: [1, 1, 1]
-      intensity: 7.5
-- name: light1
-  position: [0.369780302, 4.20607042, -1.21912646]
-  rotation: [0, 0, 0]
-  scale: [1, 1, 1]
-  light:
-    - type: spot
-      attenuation: 7.80000019
-      position: [0.369780302, 4.20607042, -1.21912646]
-      color: [1, 0, 0]
-      intensity: 47.4000015
-      direction: [0, -1, 0]
-      cutoff: 25
-- name: light2
-  position: [0, 0, 0]
-  rotation: [0, 0, 0]
-  scale: [1, 1, 1]
-  light:
-    - type: directional
+---
+Scene: istanbul
+Version: 1.0
+Entities:
+  - UUID: 4
+    name: Monkey0
+    transform:
+      UUID: 5
+      name: Object_5
       position: [0, 0, 0]
-      color: [0, 0.405063152, 1]
-      intensity: 1
-      direction: [0, 3.5999999, -6.19999981]
-- name: Cube
-  position: [-3.2456708, 0, -2.03283191]
-  rotation: [0, 0, 0]
-  scale: [1, 1, 1]
-  modelPath: ""
-- name: Cylinder
-  position: [3.61182666, 0.553903997, 0]
-  rotation: [1.6516062, 2.98341703, -28.5761395]
-  scale: [0.42140013, 0.538455784, 1]
-  modelPath: ""
-- name: Directional Light0
-  position: [0, 0, 0]
-  rotation: [0, 0, 0]
-  scale: [1, 1, 1]
-  light:
-    - type: directional
+      orientation: [1, 0, 0, 0]
+      rotation: [0, 0, 0]
+      scale: [1, 1, 1]
+    components:
+      - UUID: 6
+        name: Object_6
+        path: models\monkey.obj
+  - UUID: 1
+    name: Monkey
+    transform:
+      UUID: 2
+      name: Object_2
       position: [0, 0, 0]
-      color: [1, 0.659540415, 0.355399877]
-      intensity: 1.79999995
-      direction: [0, 3.79999995, 2.5999999]
+      orientation: [1, 0, 0, 0]
+      rotation: [0, 0, 0]
+      scale: [1, 1, 1]
+    components:
+      - UUID: 3
+        name: Object_3
+        path: models\monkey.obj
+...

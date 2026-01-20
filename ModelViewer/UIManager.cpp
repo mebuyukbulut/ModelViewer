@@ -188,6 +188,12 @@ void UIManager::mainMenu(){
                 Event e{ EventType::ModelOpened, ed };
                 dispatcher.dispatch(e);
             }
+            if (ImGui::MenuItem("Save", "Ctrl+S")) {
+                //EventData ed{};
+                //ed.text = FileUtils::openFileDialog();
+                Event e{ EventType::SaveScene, EventData{} };
+                dispatcher.dispatch(e);
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("View")) {

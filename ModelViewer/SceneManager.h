@@ -88,7 +88,7 @@ public:
 
 
     // Inherited via Object
-    void serialize(YAML::Emitter& out) const override;
+    void serialize(YAML::Emitter& out) override;
     void deserialize(const YAML::Node& node) override;
 
 };

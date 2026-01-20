@@ -8,7 +8,7 @@ public:
     virtual void onUpdate(float dt) {}
 
     // Inherited via Object
-    virtual void serialize(YAML::Emitter& out) const override;
+    virtual void serialize(YAML::Emitter& out) override;
     virtual void deserialize(const YAML::Node& node) override;
 };
 

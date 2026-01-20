@@ -2,6 +2,8 @@
 #include "Transform.h"
 #include "Logger.h"
 
+#include "YAMLHelper.h"
+
 Entity::Entity()
 {
     transform = std::make_unique<Transform>();
@@ -31,11 +33,21 @@ void Entity::onInspect()
 		component->onInspect();
 }
 
-void Entity::serialize(YAML::Emitter& out) const
+void Entity::serialize(YAML::Emitter& out)
 {
+    out << YAML::BeginMap; 
+	Object::serialize(out);
+
+	out << YAML::Key << "transform" << YAML::Value;
 	transform->serialize(out);
+
+    out << YAML::Key << "components" << YAML::Value;
+    out <<YAML::BeginSeq;
     for (const auto& component : components)
 		component->serialize(out);
+	out << YAML::EndSeq;
+
+    out << YAML::EndMap;
 }
 
 void Entity::deserialize(const YAML::Node& node)

@@ -1,0 +1,42 @@
+- name: model1
+  position: [0.458151162, -0.114518806, -1.42332363]
+  rotation: [0, 0, 0]
+  scale: [1, 1, 1]
+  modelPath: models/monkey.obj
+- name: model2
+  position: [-1.03835809, -3.66106906e-06, 0.240646794]
+  rotation: [0, 180, 0]
+  scale: [1, 1, 1]
+  modelPath: models/monkey.obj
+- name: light0
+  position: [-1.10902727, 0.910909235, 1.24608147]
+  rotation: [0, 0, 0]
+  scale: [1, 1, 1]
+  light:
+    - type: point
+      attenuation: 3
+      position: [-1.10902727, 0.910909235, 1.24608147]
+      color: [1, 1, 1]
+      intensity: 7.5
+- name: light1
+  position: [-0.729564726, 2.09089994, 0.364201546]
+  rotation: [0, 0, 0]
+  scale: [1, 1, 1]
+  light:
+    - type: spot
+      attenuation: 8.30000019
+      position: [-0.729564726, 2.09089994, 0.364201546]
+      color: [1, 0, 0]
+      intensity: 3.5
+      direction: [0, -1, 0]
+      cutoff: 25
+- name: light2
+  position: [0, 0, 0]
+  rotation: [0, 0, 0]
+  scale: [1, 1, 1]
+  light:
+    - type: directional
+      position: [0, 0, 0]
+      color: [0, 0.405063152, 1]
+      intensity: 1
+      direction: [0, -1, 0]
