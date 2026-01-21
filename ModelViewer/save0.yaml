@@ -2,10 +2,10 @@
 Scene: istanbul
 Version: 1.0
 Entities:
-  - UUID: 5714776663334491640
+  - UUID: 0x4F4EF718DCBE95F8
     name: Cube
     transform:
-      UUID: 2209614832184525116
+      UUID: 0x1EAA20FB9ACB013C
       name: Cube
       componentType: Transform
       position: [-2.20782065, 0, 1.48861897]
@@ -14,15 +14,15 @@ Entities:
       scale: [1, 1, 1]
       parentUUID: 0
     components:
-      - UUID: 9149926770210488971
+      - UUID: 0x7EFB11EB4B3BC28B
         name: Object_9149926770210488971
         componentType: Model
         path: ""
         shape: 0
-  - UUID: 11440339180981292007
+  - UUID: 0x9EC43FDF205F8BE7
     name: Cone
     transform:
-      UUID: 3443388687139720337
+      UUID: 0x2FC95FC4608FCC91
       name: Cone
       componentType: Transform
       position: [2.61984634, 0, 0]
@@ -31,24 +31,24 @@ Entities:
       scale: [1, 1, 1]
       parentUUID: 0
     components:
-      - UUID: 13036783230789784337
+      - UUID: 0xB4EBF546CCFE9311
         name: Object_13036783230789784337
         componentType: Model
         path: ""
         shape: 2
-  - UUID: 3982091737273704363
+  - UUID: 0x37433B5647379FAB
     name: Monkey
     transform:
-      UUID: 5354525892810778671
+      UUID: 0x4A4F18EE159E282F
       name: Object_5354525892810778671
       componentType: Transform
-      position: [-2.61984634, 0, 0]
+      position: [-5.23969269, 0, 0]
       orientation: [1, 0, 0, 0]
       rotation: [0, -0, 0]
       scale: [1, 1, 1]
       parentUUID: 3443388687139720337
     components:
-      - UUID: 15244133081089184309
+      - UUID: 0xD38E0A45371A1235
         name: Object_15244133081089184309
         componentType: Model
         path: models\monkey.obj

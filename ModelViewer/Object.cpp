@@ -1,8 +1,9 @@
-#include "Object.h"
+﻿#include "Object.h"
 #include <random>
 #include "yaml-cpp/yaml.h"
 
 #include <iostream>
+#include <sstream>
 
 class UUIDGenerator {
 public:
@@ -23,12 +24,22 @@ Object::Object() {
 
 void Object::serialize(YAML::Emitter& out)
 {
-	out << YAML::Key << "UUID" << YAML::Value << UUID;
+    // UUID'yi 0x ön ekiyle ve büyük harf hex olarak biçimlendiriyoruz
+    std::stringstream ss;
+    ss << "0x" << std::hex << std::uppercase << UUID;
+
+    out << YAML::Key << "UUID" << YAML::Value << ss.str();
+	//out << YAML::Key << "UUID" << YAML::Value << UUID;
 	out << YAML::Key << "name" << YAML::Value << name;
 }
 
 void Object::deserialize(const YAML::Node& node)
 {
-    UUID = node["UUID"].as<uint64_t>();
+    
+    std::string hexID = node["UUID"].as<std::string>();
+    // std::stoull hem normal sayıları hem de 0x ile başlayan hexleri anlar
+    UUID = std::stoull(hexID, nullptr, 0);
+    
+    //UUID = node["UUID"].as<uint64_t>();
 	name = node["name"].as<std::string>();
 }
