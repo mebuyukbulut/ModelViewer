@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <vector>
 #include <string>
 #include <iostream>
@@ -20,8 +20,9 @@ class Texture;
 enum class LoadStatus { None, Loading, ReadyToUpload, Complete, Error };
 // loading status can divide to 2 status -> loading to CPU and loading to GPU
 
-class Model : public Component
-{
+class Model : public Component{
+    static const bool registered;
+
     MaterialManager* _materialManager{};
     //TextureManager* _textureManager{};
 
@@ -30,6 +31,7 @@ class Model : public Component
 	std::vector<Mesh> meshes;
 	std::string _directory;
     std::string _path{};
+	DefaultShapes _shape{ DefaultShapes::Cube };
 
 	std::future<LoadStatus> _asyncLoadStatus = std::future<LoadStatus>();
 	LoadStatus _loadStatus = LoadStatus::None;
@@ -52,9 +54,12 @@ public:
         }
     }
     std::string getPath() { return _path; }
+	void setMaterialManager(MaterialManager* materialManager) {
+        _materialManager = materialManager;
+    }
 
-
-    Model(MaterialManager* materialManager) : _materialManager{ materialManager } {}
+    Model() { type = ComponentType::Model; }
+    Model(MaterialManager* materialManager) : _materialManager{ materialManager } { type = ComponentType::Model; }
 
     LoadStatus loadFromFileAsync(const std::string& filename);
     void updateLoadStatus();
@@ -63,5 +68,5 @@ public:
 	void onInspect() override;
     void serialize(YAML::Emitter& out) override;
     void deserialize(const YAML::Node& node) override;
-};
 
+};

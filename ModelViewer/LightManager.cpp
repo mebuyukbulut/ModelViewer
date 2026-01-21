@@ -16,6 +16,22 @@
 #include "Entity.h"
 #include "Transform.h"
 
+
+const bool PointLight::registered = []() {
+    ComponentFactory::registerType(ComponentType::PointLight, []() { return new PointLight(); });
+    return true;
+    }();
+const bool SpotLight::registered = []() {
+    ComponentFactory::registerType(ComponentType::SpotLight, []() { return new SpotLight(); });
+    return true;
+    }();
+const bool DirectionalLight::registered = []() {
+    ComponentFactory::registerType(ComponentType::DirectionalLight, []() { return new DirectionalLight(); });
+    return true;
+    }();
+
+
+
 // I cannot find yet true formula for this conversation  
 // for that reason I use that approximation
 glm::vec3 kelvin2RGB_fast(float kelvin) {
@@ -54,6 +70,7 @@ void Light::update()
 {
     
     blockData.setPosition(owner->transform->getGlobalPosition());
+	// update direction for spot and directional lights
     //isDirty = false; 
 }
 
@@ -68,6 +85,7 @@ Light::Light() {
 
 PointLight::PointLight() {
     name = "Point Light Component";
+	type = ComponentType::PointLight;
 
     blockData.setType(LightType::Point);
     blockData.setAttenuation(3);
@@ -75,6 +93,7 @@ PointLight::PointLight() {
 
 SpotLight::SpotLight() {
     name = "Spot Light";
+	type = ComponentType::SpotLight;
 
     blockData.setType(LightType::Spot);
     blockData.setDirection(glm::vec3(0, -1, 0));
@@ -84,6 +103,7 @@ SpotLight::SpotLight() {
 
 DirectionalLight::DirectionalLight() {
     name = "Directional Light Component";
+	type = ComponentType::DirectionalLight;
 
     blockData.setType(LightType::Directional);    
     blockData.setDirection(glm::vec3(0, -1, 0));
@@ -98,10 +118,10 @@ void Light::serialize(YAML::Emitter& out)
     out << YAML::Key << "light_type" << YAML::Value << static_cast<int>(blockData.getType());
     out << YAML::Key << "position" << YAML::Value << blockData.getPosition();
 	out << YAML::Key << "color" << YAML::Value << blockData.getColor();
-	out << YAML::Key << "intensity" << YAML::Value << blockData.getColor();
-	out << YAML::Key << "attenuation" << YAML::Value << blockData.getColor();
-	out << YAML::Key << "cutoff" << YAML::Value << blockData.getColor();
-	out << YAML::Key << "direction" << YAML::Value << blockData.getColor();
+	out << YAML::Key << "intensity" << YAML::Value << blockData.getIntensity();
+	out << YAML::Key << "attenuation" << YAML::Value << blockData.getAttenuation();
+	out << YAML::Key << "cutoff" << YAML::Value << blockData.getCutoff();
+	out << YAML::Key << "direction" << YAML::Value << blockData.getDirection();
 	out << YAML::Key << "kelvinCB" << YAML::Value << kelvinCB;
 	out << YAML::Key << "kelvin" << YAML::Value << kelvin;
     out << YAML::EndMap;
@@ -109,6 +129,15 @@ void Light::serialize(YAML::Emitter& out)
 
 void Light::deserialize(const YAML::Node& node)
 {
+    Component::deserialize(node);
+    blockData.setPosition(node["position"].as<glm::vec3>());
+    blockData.setColor(node["color"].as<glm::vec3>());
+    blockData.setIntensity(node["intensity"].as<float>());
+    blockData.setAttenuation(node["attenuation"].as<float>());
+    blockData.setCutoff(node["cutoff"].as<float>());
+    blockData.setDirection(node["direction"].as<glm::vec3>());
+    kelvinCB = node["kelvinCB"].as<bool>();
+	kelvin = node["kelvin"].as<float>();
 }
 
 void Light::onInspect()
@@ -163,34 +192,34 @@ void SpotLight::setDirection(glm::vec3 rotation)
 
 }
 
-
-std::unique_ptr<Light> LightFactory::create(const YAML::Node& node)
-{
-    std::string typeStr = node["type"].as<std::string>();
-
-	GPULight gpulight;
-	gpulight.setPosition(node["position"].as<glm::vec3>());
-	gpulight.setColor(node["color"].as<glm::vec3>());
-    gpulight.setIntensity(node["intensity"].as<float>());    
-	gpulight.setAttenuation(node["attenuation"].as<float>());
-    gpulight.setCutoff(node["cutoff"].as<float>());
-	gpulight.setDirection(node["direction"].as<glm::vec3>());
-
-    if (typeStr == "point") {
-        gpulight.setType(LightType::Point);        
-        return std::make_unique<PointLight>(gpulight);
-    }
-    else if (typeStr == "spot") {
-        gpulight.setType(LightType::Spot);
-        return std::make_unique<SpotLight>(gpulight);
-    }
-    else if (typeStr == "directional") {
-        gpulight.setType(LightType::Directional);
-        return std::make_unique<DirectionalLight>(gpulight);
-    }
-
-    return nullptr;
-}
+//
+//std::unique_ptr<Light> LightFactory::create(const YAML::Node& node)
+//{
+//    std::string typeStr = node["type"].as<std::string>();
+//
+//	GPULight gpulight;
+//	gpulight.setPosition(node["position"].as<glm::vec3>());
+//	gpulight.setColor(node["color"].as<glm::vec3>());
+//    gpulight.setIntensity(node["intensity"].as<float>());    
+//	gpulight.setAttenuation(node["attenuation"].as<float>());
+//    gpulight.setCutoff(node["cutoff"].as<float>());
+//	gpulight.setDirection(node["direction"].as<glm::vec3>());
+//
+//    if (typeStr == "point") {
+//        gpulight.setType(LightType::Point);        
+//        return std::make_unique<PointLight>(gpulight);
+//    }
+//    else if (typeStr == "spot") {
+//        gpulight.setType(LightType::Spot);
+//        return std::make_unique<SpotLight>(gpulight);
+//    }
+//    else if (typeStr == "directional") {
+//        gpulight.setType(LightType::Directional);
+//        return std::make_unique<DirectionalLight>(gpulight);
+//    }
+//
+//    return nullptr;
+//}
 
 LightManager::LightManager()
 {

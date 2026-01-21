@@ -7,6 +7,8 @@
 #include "Material.h"
 
 class Transform : public Component {
+	static const bool registered;
+
 	std::vector<Transform*> children;
 	Transform* parent{};
 
@@ -25,13 +27,22 @@ class Transform : public Component {
 	glm::mat4 getLocalMatrix();
 	void decomposeMatrix(const glm::mat4& matrix);
 public:
+	Transform() {
+		type = ComponentType::Transform;
+	}
+
 	glm::vec3 getGlobalPosition();
+
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
 	glm::vec3 getScale();
+
 	void setPosition(const glm::vec3& position);
 	void setRotation(const glm::vec3& eulerDegrees);
+	void setOrientation(const glm::quat& orientation);
 	void setScale(const glm::vec3& scale);
+
+
 
 	void setLocalMatrix(const glm::mat4& worldMatrix);
 
@@ -49,11 +60,5 @@ public:
 	void onInspect() override;
 	void serialize(YAML::Emitter& out) override;
 	void deserialize(const YAML::Node& node) override;
-};
 
-
-
-class TransformFactory {
-public:
-	static std::unique_ptr<class Entity> create(const YAML::Node& node, MaterialManager* materialManager);
 };

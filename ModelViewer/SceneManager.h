@@ -85,6 +85,8 @@ public:
     void addMonkey();
     
     void deleteSelected();
+	void clearScene();
+
     std::string getUniqueName(std::string name);
     bool isUniqueName(std::string name);
 

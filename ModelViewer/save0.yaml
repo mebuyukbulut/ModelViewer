@@ -2,72 +2,59 @@
 Scene: istanbul
 Version: 1.0
 Entities:
-  - UUID: 8
+  - UUID: 966796445
     name: Point Light Component
     transform:
-      UUID: 9
-      name: Object_9
-      position: [0, 0, 0]
+      UUID: 163229927
+      name: Object_163229927
+      componentType: Transform
+      position: [0.211122036, 1.62645149, 1.34963906]
       orientation: [1, 0, 0, 0]
-      rotation: [0, 0, 0]
+      rotation: [0, -0, 0]
       scale: [1, 1, 1]
     components:
-      - UUID: 7
+      - UUID: 915428359
         name: Point Light Component
-        type: 2
-        position: [0, 0, 0]
+        componentType: PointLight
+        light_type: 2
+        position: [0.211122036, 1.62645149, 1.34963906]
         color: [1, 1, 1]
-        intensity: [1, 1, 1]
-        attenuation: [1, 1, 1]
-        cutoff: [1, 1, 1]
-        direction: [1, 1, 1]
+        intensity: 11.8000002
+        attenuation: 17.7000008
+        cutoff: 0
+        direction: [0, 0, 0]
         kelvinCB: false
         kelvin: 1000
-  - UUID: 4
-    name: Monkey0
+  - UUID: 3895352060
+    name: Cone
     transform:
-      UUID: 5
-      name: Object_5
-      position: [0, 0, 0]
+      UUID: 622296699
+      name: Cone
+      componentType: Transform
+      position: [-1.31936979, -0.313593924, -2.58965635]
       orientation: [1, 0, 0, 0]
-      rotation: [0, 0, 0]
+      rotation: [0, -0, 0]
       scale: [1, 1, 1]
     components:
-      - UUID: 6
-        name: Object_6
-        path: models\monkey.obj
-  - UUID: 1
+      - UUID: 1609456552
+        name: Object_1609456552
+        componentType: Model
+        path: ""
+        shape: 2
+  - UUID: 2546394831
     name: Monkey
     transform:
-      UUID: 2
-      name: Object_2
-      position: [0, 0, 0]
+      UUID: 3372675309
+      name: Object_3372675309
+      componentType: Transform
+      position: [0.798785806, 0, -1.6554271]
       orientation: [1, 0, 0, 0]
-      rotation: [0, 0, 0]
+      rotation: [0, -0, 0]
       scale: [1, 1, 1]
     components:
-      - UUID: 3
-        name: Object_3
+      - UUID: 2880382708
+        name: Object_2880382708
+        componentType: Model
         path: models\monkey.obj
-  - UUID: 11
-    name: Directional Light Component
-    transform:
-      UUID: 12
-      name: Object_12
-      position: [0, 0, 0]
-      orientation: [1, 0, 0, 0]
-      rotation: [0, 0, 0]
-      scale: [1, 1, 1]
-    components:
-      - UUID: 10
-        name: Directional Light Component
-        type: 1
-        position: [0, 0, 0]
-        color: [1, 1, 1]
-        intensity: [1, 1, 1]
-        attenuation: [1, 1, 1]
-        cutoff: [1, 1, 1]
-        direction: [1, 1, 1]
-        kelvinCB: false
-        kelvin: 1000
+        shape: 0
 ...

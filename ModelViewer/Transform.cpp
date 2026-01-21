@@ -13,6 +13,12 @@
 #include "Entity.h"
 
 
+const bool Transform::registered = []() {
+    ComponentFactory::registerType(ComponentType::Transform, []() { return new Transform(); });
+    return true;
+    }();
+
+
 void Transform::update()
 {
     if (_isDirty) {
@@ -82,6 +88,7 @@ void Transform::setRotation(const glm::vec3& eulerDegrees) {
     _orientation = glm::quat(glm::radians(eulerDegrees));
     _isDirty = true;
 }
+void Transform::setOrientation(const glm::quat& orientation){ _orientation = orientation; _isDirty = true; }
 void Transform::setScale(const glm::vec3& scale) { _scale = scale; _isDirty = true; }
 
 
@@ -119,6 +126,11 @@ void Transform::removeChild(Transform* child)
 
 void Transform::setParent(Transform* newParent)
 {
+    // parent bir nesnenin child bir nesneye atanma durumu engellenmeli
+	// yani bir entity kendi child'ına child olamaz
+	// bu sebeple is in children kontrolü yapılmalı
+    // bool isAChild(newParent); 
+
 	glm::mat4 worldMatrix = getGlobalMatrix();
 
     if (parent) 
@@ -166,43 +178,48 @@ void Transform::serialize(YAML::Emitter& out)
 
 void Transform::deserialize(const YAML::Node& node)
 {
+	Component::deserialize(node);
+    setPosition(node["position"].as<glm::vec3>());
+    setRotation(node["rotation"].as<glm::vec3>());
+    setOrientation(node["orientation"].as<glm::quat>());
+    setScale(node["scale"].as<glm::vec3>());
 }
 
 
-
-std::unique_ptr<Entity> TransformFactory::create(const YAML::Node& node, MaterialManager* materialManager)
-{
-	auto entity = std::make_unique<Entity>();
-    //auto entity1 = std::unique_ptr<Entity>();
-
-    entity->transform->name = node["name"].as<std::string>();
-    entity->transform->setPosition(node["position"].as<glm::vec3>());
-    entity->transform->setRotation(node["rotation"].as<glm::vec3>());
-    entity->transform->setScale(node["scale"].as<glm::vec3>());
-
-    //if (node["light"].IsDefined()) {
-    //    for (const auto& light : node["light"])
-    //        transform->getEntity()->light = std::move(LightFactory::create(light));
-    //    transform->getEntity()->light->position = transform->getPosition();
-    //}
-
-    //if (node["modelPath"].IsDefined()) {
-    //    std::string path = node["modelPath"].as<std::string>();
-    //    Model* model = new Model(materialManager);
-    //    model->loadFromFile(path);
-    //    transform->getEntity()->model.reset(model);
-    //    LOG_TRACE(std::format("Path:{}", path));
-
-    //}
-
-
-
-    //if (auto lightNode = node["light"]; lightNode && lightNode.IsDefined()) {
-    //    LOG_INFO("Light was found");
-    //}
-    //else {
-    //    LOG_ERROR("Light was not found");
-    //}
-
-    return entity;
-}
+//
+//std::unique_ptr<Entity> TransformFactory::create(const YAML::Node& node, MaterialManager* materialManager)
+//{
+//	auto entity = std::make_unique<Entity>();
+//    //auto entity1 = std::unique_ptr<Entity>();
+//
+//    entity->transform->name = node["name"].as<std::string>();
+//    entity->transform->setPosition(node["position"].as<glm::vec3>());
+//    entity->transform->setRotation(node["rotation"].as<glm::vec3>());
+//    entity->transform->setScale(node["scale"].as<glm::vec3>());
+//
+//    //if (node["light"].IsDefined()) {
+//    //    for (const auto& light : node["light"])
+//    //        transform->getEntity()->light = std::move(LightFactory::create(light));
+//    //    transform->getEntity()->light->position = transform->getPosition();
+//    //}
+//
+//    //if (node["modelPath"].IsDefined()) {
+//    //    std::string path = node["modelPath"].as<std::string>();
+//    //    Model* model = new Model(materialManager);
+//    //    model->loadFromFile(path);
+//    //    transform->getEntity()->model.reset(model);
+//    //    LOG_TRACE(std::format("Path:{}", path));
+//
+//    //}
+//
+//
+//
+//    //if (auto lightNode = node["light"]; lightNode && lightNode.IsDefined()) {
+//    //    LOG_INFO("Light was found");
+//    //}
+//    //else {
+//    //    LOG_ERROR("Light was not found");
+//    //}
+//
+//    return entity;
+//}

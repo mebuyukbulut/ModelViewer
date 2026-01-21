@@ -81,11 +81,14 @@ void SceneManager::fileLoadManager()
         if (!entity) continue;
 
         if (Model* model = entity->getComponent<Model>()) {
-            model->updateLoadStatus();
+
             LoadStatus loadStatus = model->getLoadStatus();
+			if (loadStatus == LoadStatus::Loading)
+                model->updateLoadStatus();
 
             if (loadStatus == LoadStatus::Complete) {
                 LOG_INFO("File successfully loaded: " + entity->name);
+                entity->setActive(true);
                 _entities.push_back(std::move(entity));
                 //entity.reset(); // gereksizmiş
             }
@@ -160,7 +163,9 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     dispatcher.subscribe(EventType::SaveScene, [&](const Event& e) {
         saveScene();
         });
-
+    dispatcher.subscribe(EventType::LoadScene, [&](const Event& e) {
+        loadScene("");
+        });
 
 
     dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
@@ -208,10 +213,10 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
     CreateRenderTarget(_rt, 300, 300);
 
-	dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
-	////_entities[0]->transform->setPosition(glm::vec3(2, 0, 0));
-    dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
-	//_entities[0]->transform->setParent(_entities[1]->transform.get());
+	//dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+	//////_entities[0]->transform->setPosition(glm::vec3(2, 0, 0));
+ //   dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
+	////_entities[0]->transform->setParent(_entities[1]->transform.get());
 
 }
 void SceneManager::draw() {
@@ -228,12 +233,12 @@ void SceneManager::draw() {
         glClearColor(0, 0, 0, 1);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         
-
+		// update all global matrices
         for (const auto& entity : _entities) 
             if (entity->transform->isRoot()) // && entity->getComponent<Model>()
                 updateMatrixRecursive(entity.get());
         
-
+		// draw all entities with unique color
         for (uint32_t pickID = 0; pickID < _entities.size(); pickID++) {
 			Entity* entity = _entities[pickID].get();
 			if (!entity) continue;
@@ -246,21 +251,16 @@ void SceneManager::draw() {
 
         }
 
-
-
-        //for (const auto& entity : _entities) {
-        //    if (entity->transform->isRoot() && entity->getComponent<Model>())
-        //        drawAsColorRecursive(entity.get());
-        //}
-
+		// calculate mouse position relative to viewport
         glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
         glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
         glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
         mPos = mPos - panelPos;
         mPos.y = panelSize.y - mPos.y;
+
+		// get ID from framebuffer and object selection: 
         uint32_t selectedID = _renderer->getSelection(mPos);
         LOG_TRACE("selection UUID: " + std::to_string(selectedID));
-        //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
 
         if (selectedID != 0)
         {
@@ -269,14 +269,6 @@ void SceneManager::draw() {
                 deselectAll();
             select(_entities[selectedID].get());
 		}
-            //for (const auto& entity : _entities) {
-            //    
-            //    if (entity->transform->UUID == selectedID) {
-            //        if (!ImGui::GetIO().KeyCtrl)
-            //            deselectAll();
-            //        select(entity.get());
-            //    }
-            //}
         else
             deselectAll();
 
@@ -305,6 +297,8 @@ void SceneManager::draw() {
 // draw light? 
 void SceneManager::drawRecursive(Entity* entity)
 {
+    if (!entity->isActive()) return; 
+
     auto model = entity->getComponent<Model>();
     if(model)
         _renderer->drawModel(model, entity->transform->getGlobalMatrix());
@@ -315,6 +309,8 @@ void SceneManager::drawRecursive(Entity* entity)
 
 void SceneManager::drawAsColorRecursive(Entity* entity)
 {
+    if (!entity->isActive()) return;
+
     auto model = entity->getComponent<Model>();
     if (model)
         _renderer->drawModelAsColor(model, entity->transform->getGlobalMatrix(), entity->transform->UUID);
@@ -350,7 +346,6 @@ void SceneManager::select(Entity* entity){
 
     _selectedEntity = entity;
 }
-
 void SceneManager::deselect(Entity* entity)
 {
     if (!isSelected(entity))
@@ -362,14 +357,26 @@ void SceneManager::deselect(Entity* entity)
         _selectedEntity = _selectedEntities.back();
 
 }
-
 void SceneManager::deselectAll(){
     _selectedEntities.clear();
     _selectedEntity = nullptr;
 }
 
+
+
 void SceneManager::loadScene(std::string path) {
-    LOG_ERROR("TO-DO: Load Scene");
+    LOG_TRACE("Loading scene...");
+    std::string scene_name = "istanbul"; 
+	dispatcher.dispatch(Event{ EventType::SetMainWindowTitle, EventData{.text = "Model Viewer - " + scene_name}});
+
+    // 1. Aşama tüm entity'leri oluşturma 
+	path = "save0.yaml";
+	clearScene(); // delete all entities first
+    YAML::Node root = YAML::LoadFile(path);
+    deserialize(root);
+
+    LOG_TRACE("Scene was loaded.");
+
 
     ////YAML::Node root = YAML::LoadFile(path);
     //
@@ -811,7 +818,15 @@ void SceneManager::deleteSelected()
 {
     if (!_selectedEntity) return;
 
-    //_selectedEntity->terminate();
+    _entities.erase(std::remove_if(_entities.begin(), _entities.end(),
+        [this](const std::unique_ptr<Entity>& t) {
+            return t.get() == _selectedEntity;
+		}), 
+        _entities.end());
+
+	_selectedEntities.erase(std::find(_selectedEntities.begin(), _selectedEntities.end(), _selectedEntity));
+
+    _selectedEntity = nullptr;
 
     //_entities.remove_if([this](const std::unique_ptr<Entity>& t) {
     //    return t.get() == _selectedEntity;
@@ -820,8 +835,13 @@ void SceneManager::deleteSelected()
     //_selectedEntities.remove_if([this](Entity* t) {
     //    return t == _selectedEntity;
     //    });
+}
 
+void SceneManager::clearScene()
+{
     _selectedEntity = nullptr;
+    _selectedEntities.clear();
+    _entities.clear();
 }
 
 
@@ -868,5 +888,24 @@ void SceneManager::serialize(YAML::Emitter& out)
 
 void SceneManager::deserialize(const YAML::Node& node)
 {
+    auto sceneNameNode = node["Scene"];
+    auto versionNode = node["Version"];
+    auto entitiesNode = node["Entities"];
+
+    for (const auto& entityNode : entitiesNode) {
+        auto entity = std::make_unique<Entity>();
+		entity->setMaterialManager(_materialMng.get());
+        entity->deserialize(entityNode);
+        LOG_TRACE("Load entity: " + entity->name);
+
+        if (Model* model = entity->getComponent<Model>()) {
+            //model->setMaterialManager(_materialMng.get());
+            entity->setActive(false);
+            _pendingEntities.emplace_back(std::move(entity));
+        }
+        else {
+            _entities.emplace_back(std::move(entity));
+        }
+    }
 }
 

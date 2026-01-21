@@ -55,6 +55,9 @@ void Engine::initWindow()
     dispatcher.subscribe(EventType::onZoom, [&](const Event& e) {
         _camera->zoom(e.data.vec.y);
         });
+    dispatcher.subscribe(EventType::SetMainWindowTitle, [&](const Event& e) {
+        glfwSetWindowTitle(_window, e.data.text.c_str());
+		});
 }
 
 void Engine::initOpenGL()
@@ -104,7 +107,7 @@ void Engine::init(){
     //_renderer.enableWireframe();
 
     SM.init(&_renderer, _camera.get(),&(_renderer.getShader()),&_UI);
-    SM.loadScene("save.yaml");
+    //SM.loadScene("save.yaml");
 
 
 	initUI();

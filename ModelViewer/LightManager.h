@@ -81,6 +81,7 @@ public:
     virtual ~Light() = default;
 };
 class PointLight : public Light {
+    static const bool registered;
 public:
 
     PointLight();
@@ -90,6 +91,7 @@ public:
     void onInspect() override;
 };
 class SpotLight : public Light {
+    static const bool registered;
 public:
 
     SpotLight();
@@ -101,6 +103,7 @@ public:
     void setDirection(glm::vec3 rotation);
 };
 class DirectionalLight : public Light {
+    static const bool registered;
 public:
 
     DirectionalLight();
@@ -112,11 +115,10 @@ public:
 };
 
 
-
-class LightFactory {
-public:
-    static std::unique_ptr<Light> create(const YAML::Node& node);
-};
+//class LightFactory {
+//public:
+//    static std::unique_ptr<Light> create(const YAML::Node& node);
+//};
 
 
 

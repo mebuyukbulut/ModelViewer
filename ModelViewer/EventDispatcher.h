@@ -28,6 +28,9 @@ enum class EventType {
     Select, 
 
     SaveScene,
+    LoadScene,
+
+    SetMainWindowTitle,
 
     ScenePopup
 };

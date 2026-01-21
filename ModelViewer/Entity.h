@@ -13,20 +13,21 @@
 
 class Entity : public Object
 {
+	bool active{ true };
+	class MaterialManager* _materialManager{}; // bunu eklemeden bir yol bulmaliyiz
 public:
+	void setMaterialManager(MaterialManager* materialManager);
 
 	std::unique_ptr <class Transform> transform{};
 	std::vector<std::unique_ptr<Component>> components{};
 
-	//std::unique_ptr <Model> model{};
-	//std::unique_ptr <Light> light{};
-	//std::vector<MaterialHandle> materials{};
-
 	Entity();
 	~Entity();
 
-	void addComponent(std::unique_ptr <Component> component);
+	void setActive(bool active) { this->active = active; }
+	bool isActive() const { return active; }
 
+	void addComponent(std::unique_ptr <Component> component);
 	template<typename T>
 	T* getComponent();
 
@@ -37,10 +38,10 @@ public:
 	void deserialize(const YAML::Node& node) override;
 
 private:
-	void terminate() {
-		//if (model)
-		//	model.get()->terminate();
-	}
+	//void terminate() {
+	//	//if (model)
+	//	//	model.get()->terminate();
+	//}
 
 };
 

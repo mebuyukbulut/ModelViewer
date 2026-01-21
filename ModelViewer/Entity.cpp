@@ -3,6 +3,11 @@
 #include "Logger.h"
 
 #include "YAMLHelper.h"
+#include "Material.h" // bu burada olmamali
+
+void Entity::setMaterialManager(MaterialManager* materialManager) {
+    _materialManager = materialManager;
+}
 
 Entity::Entity()
 {
@@ -11,7 +16,7 @@ Entity::Entity()
 }
 
 Entity::~Entity() {
-    terminate();
+    //terminate();
 }
 
 void Entity::addComponent(std::unique_ptr<Component> component)
@@ -52,5 +57,59 @@ void Entity::serialize(YAML::Emitter& out)
 
 void Entity::deserialize(const YAML::Node& node)
 {
+
+    Object::deserialize(node);
+    auto transformNode = node["transform"];
+    if (transformNode && transformNode.IsDefined()) {
+        transform->deserialize(transformNode);
+    }
+    else {
+        LOG_ERROR("Entity has no transform node!");
+    }
+
+
+    auto componentsNode = node["components"];
+
+    if (!componentsNode || !componentsNode.IsDefined()) {
+        LOG_ERROR(name + " has no component!");
+    }   
+    
+    for (const auto& componentNode : componentsNode) {
+        std::string typeStr = componentNode["componentType"].as<std::string>();
+        ComponentType type = ComponentUtils::FromString(typeStr);
+
+        if (ComponentType::Model == type) {
+
+            Component* a = ComponentFactory::create(type);
+            Model* model = dynamic_cast<Model*>(a);
+            model->setMaterialManager(_materialManager);
+            model->deserialize(componentNode);
+            addComponent(std::unique_ptr<Component>(model));
+        }
+        else {
+
+
+            Component* a = ComponentFactory::create(type);
+            a->deserialize(componentNode);
+            addComponent(std::unique_ptr<Component>(a));
+        }
+
+        //std::unique_ptr<Component> component;
+        //switch (type) {
+        //case ComponentType::Transform:
+        //    component = std::make_unique<Transform>();
+        //    break;
+        //// Diğer bileşen türleri için benzer case blokları ekleyin
+        //default:
+        //    LOG_WARNING("Unknown component type: " + typeStr);
+        //    continue; // Bilinmeyen bileşen türlerini atla
+        //}
+        //if (component) {
+        //    component->deserialize(componentNode);
+        //    addComponent(std::move(component));
+        //}
+    }
+	
+
 }
 

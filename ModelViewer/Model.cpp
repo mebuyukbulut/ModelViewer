@@ -2,6 +2,15 @@
 #include "Texture.h"
 #include "YAMLHelper.h"
 
+// TO DO Material Manager sıkıntısın hallet
+const bool Model::registered = []() {
+    ComponentFactory::registerType(ComponentType::Model, []() { return new Model(); });
+    return true;
+    }();
+
+
+
+
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 LoadStatus Model::loadModel(std::string const& path)
 {
@@ -187,11 +196,12 @@ void Model::terminate() {
 
 void Model::loadDefault(DefaultShapes shape)
 {
+    _shape = shape; 
     // Load model from file
     // For simplicity, we will just load a default mesh here
     Mesh mesh = MeshFactory::create(shape);
     meshes.push_back(mesh);
-
+	_loadStatus = LoadStatus::Complete;
 
     // if model loading not create a material use default one 
     if (_materials.empty()) {
@@ -201,8 +211,10 @@ void Model::loadDefault(DefaultShapes shape)
 
 LoadStatus Model::loadFromFile(const std::string& filename) {
     LoadStatus ls = loadModel(filename);
-	if (ls == LoadStatus::Error)
+    if (ls == LoadStatus::Error) {
+        _loadStatus = LoadStatus::Error;
         return ls;
+    }
 
     for (auto& m : meshes)
         m.upload2GPU();
@@ -214,6 +226,7 @@ LoadStatus Model::loadFromFile(const std::string& filename) {
 
 LoadStatus Model::loadFromFileAsync(const std::string& filename){
     _asyncLoadStatus = std::async(std::launch::async, &Model::loadModel, this, filename);
+	_loadStatus = LoadStatus::Loading;
     return LoadStatus::Loading; 
 }
 
@@ -251,9 +264,23 @@ void Model::serialize(YAML::Emitter& out)
     out << YAML::BeginMap;
     Component::serialize(out);
 	out << YAML::Key << "path" << YAML::Value << _path;
+	out << YAML::Key << "shape" << YAML::Value << static_cast<int>(_shape);
     out << YAML::EndMap;
 }
 
 void Model::deserialize(const YAML::Node& node)
 {
+    Component::deserialize(node);
+    std::string path = node["path"].as<std::string>();
+	node["path"].IsNull() ? path = "" : path = node["path"].as<std::string>();
+
+    std::cout << "My way : " << path << std::endl;
+    if (path == "") {
+		_shape = static_cast<DefaultShapes>(node["shape"].as<int>());
+        loadDefault(_shape);
+        std::cout << " default loading..." << std::endl;
+    }
+    else
+	    loadFromFileAsync(path);
+
 }

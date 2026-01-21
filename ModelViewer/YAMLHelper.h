@@ -35,6 +35,26 @@ namespace YAML {
             return true;
         }
     };
+    template<>
+    struct convert<glm::quat> {
+        static Node encode(const glm::quat& v) {
+            Node node;
+            node.push_back(v.w);
+            node.push_back(v.x);
+            node.push_back(v.y);
+            node.push_back(v.z);
+            return node;
+        }
+
+        static bool decode(const Node& node, glm::quat& v) {
+            if (!node.IsSequence() || node.size() != 4) return false;
+            v.w = node[0].as<float>();
+            v.x = node[1].as<float>();
+            v.y = node[2].as<float>();
+            v.z = node[3].as<float>();
+            return true;
+        }
+    };
 }
 
 

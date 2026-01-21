@@ -194,6 +194,12 @@ void UIManager::mainMenu(){
                 Event e{ EventType::SaveScene, EventData{} };
                 dispatcher.dispatch(e);
             }
+            if (ImGui::MenuItem("Load")) {
+                //EventData ed{};
+                //ed.text = FileUtils::openFileDialog();
+                Event e{ EventType::LoadScene, EventData{} };
+                dispatcher.dispatch(e);
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("View")) {
