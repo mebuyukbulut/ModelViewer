@@ -29,6 +29,6 @@ void Object::serialize(YAML::Emitter& out)
 
 void Object::deserialize(const YAML::Node& node)
 {
-    UUID = node["UUID"].as<uint32_t>();
+    UUID = node["UUID"].as<uint64_t>();
 	name = node["name"].as<std::string>();
 }

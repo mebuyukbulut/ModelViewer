@@ -366,8 +366,6 @@ void SceneManager::deselectAll(){
 
 void SceneManager::loadScene(std::string path) {
     LOG_TRACE("Loading scene...");
-    std::string scene_name = "istanbul"; 
-	dispatcher.dispatch(Event{ EventType::SetMainWindowTitle, EventData{.text = "Model Viewer - " + scene_name}});
 
     // 1. Aşama tüm entity'leri oluşturma 
 	path = "save0.yaml";
@@ -378,30 +376,6 @@ void SceneManager::loadScene(std::string path) {
     LOG_TRACE("Scene was loaded.");
 
 
-    ////YAML::Node root = YAML::LoadFile(path);
-    //
-    ////for (const auto& lightNode : root["Lights"]) {
-    ////    auto light = LightFactory::create(lightNode);
-    //
-    ////    if (light.get()) {
-    //
-    ////        LOG_TRACE("Load light");
-    ////        addLight(std::move(light));
-    ////    }
-    ////}
-    //
-    //
-    //YAML::Node rootTest = YAML::LoadFile("save0.yaml");
-    //for (const auto& transformNode : rootTest) {
-    //    auto transform = TransformFactory::create(transformNode, _materialMng.get());
-    //
-    //    if (transform.get()) {
-    //
-    //        LOG_TRACE("Load transform...");
-    //        _transforms.emplace_back(std::move(transform));
-    //        //addLight(std::move(transform));
-    //    }
-    //}
 
 
 }
@@ -889,7 +863,14 @@ void SceneManager::serialize(YAML::Emitter& out)
 void SceneManager::deserialize(const YAML::Node& node)
 {
     auto sceneNameNode = node["Scene"];
-    auto versionNode = node["Version"];
+    std::string scene_name = sceneNameNode.as<std::string>();
+    dispatcher.dispatch(Event{ EventType::SetMainWindowTitle, EventData{.text = "Model Viewer - " + scene_name} });
+
+    auto versionNode = node["Version"]; // dosya versiyonu
+
+
+    // UUID -> Entity* eşleşmesi için geçici bir "adres defteri"
+    std::unordered_map<uint64_t, Transform*> entityMap;
     auto entitiesNode = node["Entities"];
 
     for (const auto& entityNode : entitiesNode) {
@@ -897,6 +878,10 @@ void SceneManager::deserialize(const YAML::Node& node)
 		entity->setMaterialManager(_materialMng.get());
         entity->deserialize(entityNode);
         LOG_TRACE("Load entity: " + entity->name);
+
+        // parent child relationship için transformun uuid sini mapliyoruz.
+        uint64_t id = entity->transform->UUID;
+        entityMap[id] = entity->transform.get();
 
         if (Model* model = entity->getComponent<Model>()) {
             //model->setMaterialManager(_materialMng.get());
@@ -907,5 +892,29 @@ void SceneManager::deserialize(const YAML::Node& node)
             _entities.emplace_back(std::move(entity));
         }
     }
+
+
+
+
+    // --- PASS 2: Aile Bağlarını (Parent-Child) Kur ---
+    for (const auto& entityNode : entitiesNode) {
+        auto transformNode = entityNode["transform"];
+        if (transformNode["parentUUID"]) { // YAML'da bu anahtarı kaydettiğini varsayıyoruz
+            uint64_t childID = transformNode["UUID"].as<uint64_t>();
+            uint64_t parentID = transformNode["parentUUID"].as<uint64_t>();
+
+            if (parentID != 0) { // 0 genelde "root" (ebeveynsiz) demektir
+                Transform* child = entityMap[childID];
+                Transform* parent = entityMap[parentID];
+
+                if (child && parent) {
+                    child->setParent(parent);
+                    LOG_TRACE("Pass 2: Linked " + child->owner->name + " -> Parent: " + parent->owner->name);
+                }
+            }
+        }
+    }
+
+
 }
 

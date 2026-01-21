@@ -172,6 +172,10 @@ void Transform::serialize(YAML::Emitter& out)
 	out << YAML::Key << "orientation" << YAML::Value << _orientation;
 	out << YAML::Key << "rotation" << YAML::Value << _eulerRotation;
 	out << YAML::Key << "scale" << YAML::Value << _scale;
+
+    uint64_t parentID = parent ? parent->UUID : 0;
+    out << YAML::Key << "parentUUID" << YAML::Value << parentID;
+
     out << YAML::EndMap;
 
 }

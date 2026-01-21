@@ -2,58 +2,54 @@
 Scene: istanbul
 Version: 1.0
 Entities:
-  - UUID: 966796445
-    name: Point Light Component
+  - UUID: 5714776663334491640
+    name: Cube
     transform:
-      UUID: 163229927
-      name: Object_163229927
+      UUID: 2209614832184525116
+      name: Cube
       componentType: Transform
-      position: [0.211122036, 1.62645149, 1.34963906]
+      position: [-2.20782065, 0, 1.48861897]
       orientation: [1, 0, 0, 0]
       rotation: [0, -0, 0]
       scale: [1, 1, 1]
+      parentUUID: 0
     components:
-      - UUID: 915428359
-        name: Point Light Component
-        componentType: PointLight
-        light_type: 2
-        position: [0.211122036, 1.62645149, 1.34963906]
-        color: [1, 1, 1]
-        intensity: 11.8000002
-        attenuation: 17.7000008
-        cutoff: 0
-        direction: [0, 0, 0]
-        kelvinCB: false
-        kelvin: 1000
-  - UUID: 3895352060
+      - UUID: 9149926770210488971
+        name: Object_9149926770210488971
+        componentType: Model
+        path: ""
+        shape: 0
+  - UUID: 11440339180981292007
     name: Cone
     transform:
-      UUID: 622296699
+      UUID: 3443388687139720337
       name: Cone
       componentType: Transform
-      position: [-1.31936979, -0.313593924, -2.58965635]
+      position: [2.61984634, 0, 0]
       orientation: [1, 0, 0, 0]
       rotation: [0, -0, 0]
       scale: [1, 1, 1]
+      parentUUID: 0
     components:
-      - UUID: 1609456552
-        name: Object_1609456552
+      - UUID: 13036783230789784337
+        name: Object_13036783230789784337
         componentType: Model
         path: ""
         shape: 2
-  - UUID: 2546394831
+  - UUID: 3982091737273704363
     name: Monkey
     transform:
-      UUID: 3372675309
-      name: Object_3372675309
+      UUID: 5354525892810778671
+      name: Object_5354525892810778671
       componentType: Transform
-      position: [0.798785806, 0, -1.6554271]
+      position: [-2.61984634, 0, 0]
       orientation: [1, 0, 0, 0]
       rotation: [0, -0, 0]
       scale: [1, 1, 1]
+      parentUUID: 3443388687139720337
     components:
-      - UUID: 2880382708
-        name: Object_2880382708
+      - UUID: 15244133081089184309
+        name: Object_15244133081089184309
         componentType: Model
         path: models\monkey.obj
         shape: 0

@@ -9,7 +9,7 @@ namespace YAML {
 
 class Object{
 public:
-	uint32_t UUID; 
+	uint64_t UUID; 
 	std::string name;
 
 	Object();
