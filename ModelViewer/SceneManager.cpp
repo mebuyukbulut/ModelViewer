@@ -400,11 +400,13 @@ void SceneManager::drawHierarchyTreeRecursive(Entity* entity) {
 
     if (isLastSelected(entity)) {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 125, 15, 255)); // orange foreground
-        opened = ImGui::TreeNodeEx(entity->name.c_str(), flags);
+        //opened = ImGui::TreeNodeEx((void*)(uintptr_t)entity->transform->UUID, flags, entity->name.c_str());
+        opened = ImGui::TreeNodeEx((void*)(uintptr_t)entity->transform->UUID, flags, "%s", entity->name.c_str());
+        //TreeNodeEx((void*)(uintptr_t)entity->UUID, flags, "%s", entity->name.c_str());
         ImGui::PopStyleColor(1);
     }
     else {
-        opened = ImGui::TreeNodeEx(entity->name.c_str(), flags);
+        opened = ImGui::TreeNodeEx((void*)(uintptr_t)entity->transform->UUID, flags, "%s", entity->name.c_str());
     }
 
 
@@ -781,7 +783,7 @@ void SceneManager::addShape(DefaultShapes shape)
 void SceneManager::addMonkey()
 {
     auto entity = std::make_unique<Entity>();
-    entity->name = getUniqueName("Monkey");
+    entity->name = "Monkey"; // getUniqueName("Monkey");
     auto model = std::make_unique<Model>(_materialMng.get());
     model->loadFromFileAsync("models\\monkey.obj");
     entity->addComponent(std::move(model));
