@@ -229,10 +229,29 @@ void SceneManager::draw() {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         
 
-        for (const auto& entity : _entities) {
-            if (entity->transform->isRoot() && entity->getComponent<Model>())
-                drawAsColorRecursive(entity.get());
+        for (const auto& entity : _entities) 
+            if (entity->transform->isRoot()) // && entity->getComponent<Model>()
+                updateMatrixRecursive(entity.get());
+        
+
+        for (uint32_t pickID = 0; pickID < _entities.size(); pickID++) {
+			Entity* entity = _entities[pickID].get();
+			if (!entity) continue;
+
+            if (Model * model = entity->getComponent<Model>())
+                _renderer->drawModelAsColor(
+                    model, 
+                    entity->transform->getGlobalMatrix(), 
+                    pickID + 1);
+
         }
+
+
+
+        //for (const auto& entity : _entities) {
+        //    if (entity->transform->isRoot() && entity->getComponent<Model>())
+        //        drawAsColorRecursive(entity.get());
+        //}
 
         glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
         glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
@@ -240,18 +259,24 @@ void SceneManager::draw() {
         mPos = mPos - panelPos;
         mPos.y = panelSize.y - mPos.y;
         uint32_t selectedID = _renderer->getSelection(mPos);
-        LOG_TRACE("selection UUID: " + std::to_string(_renderer->getSelection(mPos)));
+        LOG_TRACE("selection UUID: " + std::to_string(selectedID));
         //LOG_TRACE(std::to_string(mPos.x) + " " + std::to_string(mPos.y));
 
         if (selectedID != 0)
-            for (const auto& entity : _entities) {
-                
-                if (entity->transform->UUID == selectedID) {
-                    if (!ImGui::GetIO().KeyCtrl)
-                        deselectAll();
-                    select(entity.get());
-                }
-            }
+        {
+            selectedID -= 1; // because we added +1 when drawing
+            if (!ImGui::GetIO().KeyCtrl)
+                deselectAll();
+            select(_entities[selectedID].get());
+		}
+            //for (const auto& entity : _entities) {
+            //    
+            //    if (entity->transform->UUID == selectedID) {
+            //        if (!ImGui::GetIO().KeyCtrl)
+            //            deselectAll();
+            //        select(entity.get());
+            //    }
+            //}
         else
             deselectAll();
 
@@ -296,6 +321,13 @@ void SceneManager::drawAsColorRecursive(Entity* entity)
 
     for (Transform* i : entity->transform->getChildren())
         drawAsColorRecursive(i->owner);
+}
+void SceneManager::updateMatrixRecursive(Entity* entity)
+{
+    entity->transform->getGlobalMatrix();
+
+    for (Transform* i : entity->transform->getChildren())
+        updateMatrixRecursive(i->owner);
 }
 
 

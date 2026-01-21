@@ -53,6 +53,8 @@ public:
     void draw();
     void drawRecursive(Entity* entity);
     void drawAsColorRecursive(Entity* entity);
+    void updateMatrixRecursive(Entity* entity);
+
 
     Entity* getSelectedEntity() {
         //if (_selectedTransforms.empty()) return nullptr; 

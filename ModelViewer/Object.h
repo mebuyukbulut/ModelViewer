@@ -12,11 +12,7 @@ public:
 	uint32_t UUID; 
 	std::string name;
 
-	Object() {
-		static uint32_t nextUUID = 0;
-		UUID = nextUUID++;
-		name = "Object_" + std::to_string(UUID);
-	}
+	Object();
 	virtual ~Object() = default;
 
 	// Her objenin kendini UI'da çizme yeteneği olsun
