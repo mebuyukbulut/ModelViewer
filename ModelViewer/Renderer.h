@@ -35,6 +35,7 @@ private:
 	Mesh* _gridMesh{};
 	Texture* cubemapTexture;
 public:
+	Texture* matcapTexture;
 
 	void init();
 	void terminate();

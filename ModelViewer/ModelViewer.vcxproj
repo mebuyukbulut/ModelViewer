@@ -225,6 +225,8 @@
     <None Include="shaders\hdr2cubemap.vert" />
     <None Include="shaders\lambertian.frag" />
     <None Include="shaders\lambertian.vert" />
+    <None Include="shaders\matcap.frag" />
+    <None Include="shaders\matcap.vert" />
     <None Include="shaders\normal.frag" />
     <None Include="shaders\normal.vert" />
     <None Include="shaders\particle_point.frag" />

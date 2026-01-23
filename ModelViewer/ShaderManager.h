@@ -23,6 +23,7 @@ class ShaderManager
 		{"blinn-phong", "shaders/blinn-phong.vert", "shaders/blinn-phong.frag", Shader::Type::Foreground},
 		{"basic", "shaders/basic_lighting.vert", "shaders/basic_lighting.frag", Shader::Type::Foreground},
 		{"PBR0", "shaders/PBR0.vert", "shaders/PBR0.frag", Shader::Type::Foreground},
+		{"matcap", "shaders/matcap.vert", "shaders/matcap.frag", Shader::Type::Foreground},
 		{"bg", "shaders/bg_grad.vert", "shaders/bg_grad.frag", Shader::Type::Background},
 		{"skybox", "shaders/skybox.vert", "shaders/skybox.frag", Shader::Type::Background},
 		{"hdr2cubemap", "shaders/hdr2cubemap.vert", "shaders/hdr2cubemap.frag", Shader::Type::Background}, // ?

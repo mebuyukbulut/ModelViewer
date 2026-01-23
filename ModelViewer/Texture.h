@@ -17,7 +17,7 @@ public:
 };
 class TextureFactory {
 public:
-	static Texture* load(const char* path, const std::string& directory, bool gamma);
+	static Texture* load(const std::string& filename, bool gamma);
 	static Texture* loadCubeMap(std::vector<std::string> faces);
 	static Texture* loadHDR(std::string path, Shader* shader);
 };

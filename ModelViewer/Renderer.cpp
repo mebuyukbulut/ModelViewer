@@ -90,6 +90,7 @@ void Renderer::beginFrame() {
     _shader->setMat4("model", glm::mat4(1.0f));
     _shader->setVec3("viewPos", _camera->getPosition());
 
+
     _selectionShader->use();
     _selectionShader->setMat4("view", viewMatrix);
     _selectionShader->setMat4("projection", projMatrix);
@@ -114,6 +115,11 @@ void Renderer::endFrame() {
 
 void Renderer::drawModel(Model* model, const glm::mat4& transform) {
     _shader->use();
+
+    matcapTexture->_type = GL_TEXTURE_2D;
+    glActiveTexture(GL_TEXTURE2);
+    matcapTexture->use();
+
 	_shader->setMat4("model", transform);
     model->draw(*_shader);
 }

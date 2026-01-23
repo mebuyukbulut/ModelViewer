@@ -4,6 +4,7 @@
 #include "Model.h"
 #include "Renderer.h"
 #include "Material.h"
+#include "Texture.h"
 #include <functional>
 
 
@@ -89,6 +90,7 @@ void Engine::initUI()
     _UI.ps = &ps;
 }
 
+Texture* matcapTexture{}; // TO DO bunu buradan sil
 void Engine::init(){
     config.load();
 
@@ -99,7 +101,12 @@ void Engine::init(){
 	_camera->setWindowSize(config.window.width, config.window.height);
     _renderer.init();
 	_renderer.setCamera(_camera);
-    _renderer.setShader("PBR0", Renderer::ShaderType::Main);
+    //_renderer.setShader("PBR0", Renderer::ShaderType::Main);
+    _renderer.setShader("matcap", Renderer::ShaderType::Main);
+	matcapTexture = TextureFactory::load("data/matcaps/basic_1.png", false);
+    
+	_renderer.matcapTexture = matcapTexture;
+
     _renderer.setShader("bg", Renderer::ShaderType::Background);
     //_renderer.setShader("skybox", Renderer::ShaderType::Background);
     _renderer.setShader("grid", Renderer::ShaderType::Grid);

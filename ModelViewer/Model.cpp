@@ -170,7 +170,8 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType
 
         if (!skip)
         {   // if texture hasn't been loaded already, load it
-            Texture* texture = TextureFactory::load(str.C_Str(), this->_directory, false);
+			std::string filename = this->_directory + "/" + str.C_Str();
+            Texture* texture = TextureFactory::load(filename, false);
             textures.push_back(texture);
             textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
         }

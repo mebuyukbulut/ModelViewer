@@ -26,17 +26,17 @@ Texture::Texture(unsigned int id, unsigned int type) : _id{ id }, _type { type }
 void Texture::use() {
     if (!_type) 
         LOG_ERROR("Texture not initialized!");
-    
+    //glActiveTexture(_type);
     glBindTexture(_type, _id);
 }
 void Texture::terminate() {
     glDeleteTextures(1, &_id);
 }
 
-Texture* TextureFactory::load(const char* path, const std::string& directory, bool gamma)
+Texture* TextureFactory::load(const std::string& filename, bool gamma)
 {
-    std::string filename = std::string(path);
-    filename = directory + '/' + filename;
+    //std::string filename = std::string(path);
+    //filename = directory + '/' + filename;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
