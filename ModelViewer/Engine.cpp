@@ -44,7 +44,13 @@ void Engine::initWindow()
     glfwMakeContextCurrent(_window);
     glfwSetWindowUserPointer(_window, this);
     glfwSetFramebufferSizeCallback(_window, Engine::framebuffer_size_callback);
-
+    glfwSetDropCallback(_window, [](GLFWwindow* window, int count, const char** paths) {
+        for (int i = 0; i < count; ++i) {
+            Event e{ EventType::ModelOpened, EventData{} };
+            e.data.text = std::string(paths[i]);
+            dispatcher.dispatch(e);
+        }
+		});
 
     _mouse.init(_window, &_UI);
     dispatcher.subscribe(EventType::onMove, [&](const Event& e) {
