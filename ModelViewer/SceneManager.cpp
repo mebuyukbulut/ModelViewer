@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -10,14 +11,11 @@
 #include <yaml-cpp/yaml.h>
 
 #include "Camera.h"
-//#include "Entity.h"
 #include "Transform.h"
 #include "EventDispatcher.h"
 #include "Inspectable.h"
 #include "LightManager.h"
-//#include "Material.h"
 #include "Renderer.h"
-//#include "Scene.h"
 #include "Shader.h"
 #include "UIManager.h"
 
@@ -111,6 +109,8 @@ void SceneManager::fileLoadManager()
 }
 
 void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
+	MWD = std::filesystem::current_path().string();
+    
     _renderer = renderer;
     _camera = camera;
     _UI = UI;
@@ -146,7 +146,7 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         addShape(DefaultShapes::Torus);
         });
     dispatcher.subscribe(EventType::AddMonkey, [&](const Event& e) {
-        addMonkey();
+        addModel(MWD + "\\models\\monkey.obj", "Monkey", true);
         });
 
     dispatcher.subscribe(EventType::Delete, [&](const Event& e) {
@@ -170,54 +170,11 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
     dispatcher.subscribe(EventType::ModelOpened, [&](const Event& e) {
         std::string modelPath = e.data.text;
-
-        if (modelPath.empty())
-            return;
-
-        Model *model = new Model(_materialMng.get());
-        if (LoadStatus::Complete == model->loadFromFile(modelPath)) {
-            //_models.push_back(model);
-            //std::wcout << L"Success to load model: " << FileUtils::UTF8ToWString(modelPath) << std::endl;
-            LOG_INFO("Success to load model: " + modelPath);
-        }
-        else {
-            LOG_ERROR("Failed to load model: " + modelPath);
-        }
-
-        //The position of the last character that matches.
-        //If no matches are found, the function returns string::npos.
-        //
-        //size_t is an unsigned integral type(the same as member type string::size_type).
-        
-        unsigned int slashIndex = modelPath.find_last_of('\\');
-        unsigned int pointIndex = modelPath.find_last_of('.');
-        std::string directory = modelPath.substr(0, slashIndex);
-        std::string modelName = modelPath.substr(slashIndex+1, pointIndex-slashIndex -1);
-
-		// Yeni 
-        Entity* entity = new Entity;
-		entity->addComponent(std::unique_ptr<Model>(model));
-		entity->name = getUniqueName(modelName);
-		_entities.emplace_back(entity);
-
-        //// Eski
-        //Transform* transform = new Transform;
-        //transform->setEntity(new Entity);
-        //transform->getEntity()->model.reset(model);
-        //transform->name = getUniqueName(modelName);
-        //_transforms.emplace_back(transform);  
-
-        LOG_TRACE(modelName);
+        addModel(modelPath, "", true);
         });
 
 
     CreateRenderTarget(_rt, 300, 300);
-
-	//dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
-	//////_entities[0]->transform->setPosition(glm::vec3(2, 0, 0));
- //   dispatcher.dispatch(Event{ EventType::AddMonkey, EventData{} });
-	////_entities[0]->transform->setParent(_entities[1]->transform.get());
-
 }
 void SceneManager::draw() {
     // FBO’ya çiz
@@ -780,15 +737,38 @@ void SceneManager::addShape(DefaultShapes shape)
     _entities.push_back(std::move(entity));
 }
 
-void SceneManager::addMonkey()
+void SceneManager::addModel(std::string path, std::string entityName, bool loadAsync)
 {
     auto entity = std::make_unique<Entity>();
-    entity->name = "Monkey"; // getUniqueName("Monkey");
+
+    if (!entityName.empty())
+        entity->name = getUniqueName(entityName);
+    else {
+        unsigned int slashIndex = path.find_last_of('\\');
+        unsigned int pointIndex = path.find_last_of('.');
+        std::string directory = path.substr(0, slashIndex);
+        std::string modelName = path.substr(slashIndex+1, pointIndex-slashIndex -1);
+		entity->name = getUniqueName(modelName);
+    }
+
+
     auto model = std::make_unique<Model>(_materialMng.get());
-    model->loadFromFileAsync("models\\monkey.obj");
-    entity->addComponent(std::move(model));
-    _pendingEntities.push_back(std::move(entity));
+
+	// TO-DO: hata kontrolü
+    if (loadAsync) {
+        model->loadFromFileAsync(path);
+        entity->addComponent(std::move(model));
+        _pendingEntities.push_back(std::move(entity));
+    }
+    else {
+		model->loadFromFile(path);
+        entity->addComponent(std::move(model));
+		_entities.push_back(std::move(entity));
+    }
 }
+
+	
+
 
 void SceneManager::deleteSelected()
 {

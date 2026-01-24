@@ -2,6 +2,8 @@
 #include "Texture.h"
 #include "YAMLHelper.h"
 
+#include "Logger.h"
+
 // TO DO Material Manager sıkıntısın hallet
 const bool Model::registered = []() {
     ComponentFactory::registerType(ComponentType::Model, []() { return new Model(); });
@@ -18,17 +20,19 @@ LoadStatus Model::loadModel(std::string const& path)
 
     // read file via ASSIMP 
     Assimp::Importer importer;
-    //std::string modelPathStr = std::string(path.begin(), path.end());
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     // check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
-        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+        LOG_ERROR( "ASSIMP: " + std::string(importer.GetErrorString()) );
         return LoadStatus::Error;
-    }
+    } 
+
     // retrieve the directory path of the filepath
     _directory = path.substr(0, path.find_last_of('\\'));
     std::cout << "_directory: " << _directory << std::endl;
+
+
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 
@@ -194,6 +198,9 @@ void Model::terminate() {
         mesh.terminate();
     }
 }
+
+// TO-DO: Load fonksiyonlarını standartlaştırıp tek bir isme topla 
+// Neden her şeyi ayrı bir isim ve fonksiyon gerekli olsun ki? 
 
 void Model::loadDefault(DefaultShapes shape)
 {

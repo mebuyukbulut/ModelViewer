@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <memory>
 #include <vector>
+
 #include <glm/glm.hpp>
 
 #include "Scene.h"
@@ -20,12 +21,13 @@ struct RenderTarget {
 class SceneManager : public Object
 {
     Scene scene;
+	std::string MWD; // Main Working Directory
 
 	std::vector<std::unique_ptr<Entity>> _entities{};
     std::vector <Entity*> _selectedEntities{};
     Entity* _selectedEntity{};
 	std::vector<std::unique_ptr<Entity>> _pendingEntities{};
-
+    
     Renderer* _renderer{};
     class Camera* _camera{};
     class UIManager* _UI{};
@@ -82,7 +84,7 @@ public:
 
     // SHAPES
     void addShape(DefaultShapes shape); 
-    void addMonkey();
+	void addModel(std::string path, std::string entityName = "", bool loadAsync = false);
     
     void deleteSelected();
 	void clearScene();
