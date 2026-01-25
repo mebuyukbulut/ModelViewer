@@ -23,7 +23,7 @@ void Renderer::initMatcap() {
 
     matcapTexture = TextureFactory::load(matcapTexturePaths.front(), false);
 }
-void Renderer::init() {
+void Renderer::init(std::shared_ptr<Camera> camera) {
 	_shaderManager.init(); // load all shaders
 	//setShader("basic", ShaderType::Main); // set default shader
 	glEnable(GL_DEPTH_TEST);
@@ -79,6 +79,19 @@ void Renderer::init() {
     //std::cout << "Framebuffer sRGB: " << (srgbEnabled ? "ENABLED" : "DISABLED") << std::endl;
 
 	initMatcap();
+
+    setCamera(camera);
+
+    setShader("PBR0", Renderer::ShaderType::Material);
+    setShader("matcap", Renderer::ShaderType::Matcap);
+    setViewMode(ViewMode::Material);
+
+
+    setShader("bg", Renderer::ShaderType::Background);
+    //_renderer.setShader("skybox", Renderer::ShaderType::Background);
+    setShader("grid", Renderer::ShaderType::Grid);
+    setShader("selection", Renderer::ShaderType::Selection);
+
 }
 void Renderer::terminate() {
     _shaderManager.terminate(); 

@@ -53,7 +53,7 @@ private:
 	//void initSkybox();
 public:
 	
-	void init();
+	void init(std::shared_ptr<Camera> camera);
 	void terminate();
 
 	void beginFrame();

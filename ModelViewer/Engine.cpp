@@ -105,28 +105,14 @@ void Engine::init(){
     
 	_camera->init(glm::vec2(config.window.width, config.window.height));
 	_camera->setWindowSize(config.window.width, config.window.height);
-    _renderer.init();
-	_renderer.setCamera(_camera);
-    _renderer.setShader("PBR0", Renderer::ShaderType::Material);
-    _renderer.setShader("matcap", Renderer::ShaderType::Matcap);
-    _renderer.setViewMode(ViewMode::Material);
 
-
-    _renderer.setShader("bg", Renderer::ShaderType::Background);
-    //_renderer.setShader("skybox", Renderer::ShaderType::Background);
-    _renderer.setShader("grid", Renderer::ShaderType::Grid);
-    _renderer.setShader("selection", Renderer::ShaderType::Selection);
-    //_renderer.enableWireframe();
+    _renderer.init(_camera);
 
     SM.init(&_renderer, _camera.get(),&(_renderer.getShader()),&_UI);
-    //SM.loadScene("save.yaml");
-
 
 	initUI();
 
     LOG_INFO("engine was initialized");
-    //LOG_WARNING("test 0");
-    //LOG_ERROR("test 1");
 }
 void Engine::mainLoop()
 {
@@ -159,9 +145,6 @@ void Engine::mainLoop()
     }
 }
 void Engine::terminate() {
-    ////for (Model& model : _models) 
-    ////    model.terminate();
-    //_model.terminate();
     _renderer.terminate();
     _UI.terminate();
     glfwTerminate();
