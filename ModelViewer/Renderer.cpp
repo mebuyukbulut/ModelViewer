@@ -7,9 +7,22 @@
 #include "Camera.h"
 #include "Logger.h"
 #include "Texture.h"
+#include <filesystem>
 
 
+void Renderer::initMatcap() {
+    //matcapTexture = TextureFactory::load("data/matcaps/basic_1.png", false);
+	
+    // Scan directory for matcap textures    
+    std::string path = "data/matcaps/";
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+        matcapTexturePaths.push_back(entry.path().string());
 
+    for(const auto& p : matcapTexturePaths)
+		LOG_TRACE("Found matcap texture: " + p);
+
+    matcapTexture = TextureFactory::load(matcapTexturePaths.front(), false);
+}
 void Renderer::init() {
 	_shaderManager.init(); // load all shaders
 	//setShader("basic", ShaderType::Main); // set default shader
@@ -65,6 +78,7 @@ void Renderer::init() {
     //GLboolean srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
     //std::cout << "Framebuffer sRGB: " << (srgbEnabled ? "ENABLED" : "DISABLED") << std::endl;
 
+	initMatcap();
 }
 void Renderer::terminate() {
     _shaderManager.terminate(); 
@@ -108,6 +122,8 @@ void Renderer::beginFrame() {
     _gridShader->setMat4("projection", projMatrix);
 
 
+
+
 }
 void Renderer::endFrame() {
     
@@ -115,11 +131,6 @@ void Renderer::endFrame() {
 
 void Renderer::drawModel(Model* model, const glm::mat4& transform) {
     _shader->use();
-
-    matcapTexture->_type = GL_TEXTURE_2D;
-    glActiveTexture(GL_TEXTURE2);
-    matcapTexture->use();
-
 	_shader->setMat4("model", transform);
     model->draw(*_shader);
 }
@@ -182,6 +193,42 @@ uint32_t Renderer::getSelection(glm::vec2 mousePos)
     return pickedID;
 }
 
+void Renderer::setViewMode(ViewMode mode)
+{
+
+    switch (mode)
+    {   
+    case ViewMode::Wireframe:
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		_viewMode = ViewMode::Wireframe;
+        break;
+
+    case ViewMode::Matcap:
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        _viewMode = ViewMode::Matcap;
+		_shader = _matcapShader;
+
+        matcapTexture->_type = GL_TEXTURE_2D;
+        glActiveTexture(GL_TEXTURE2);
+        matcapTexture->use();
+
+        break;
+
+    case ViewMode::Material:
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        _viewMode = ViewMode::Material;
+        _shader = _materialShader;
+        break;
+
+    default:
+        break;
+    }
+}
+
+ViewMode Renderer::getViewMode(){
+    return _viewMode;
+}
+
 
 void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
 void Renderer::setShader(const std::string name, ShaderType shaderType) {
@@ -192,7 +239,13 @@ void Renderer::setShader(const std::string name, ShaderType shaderType) {
     switch (shaderType)
     {
     case Renderer::ShaderType::Main:
+        LOG_ERROR("Wrong call");
+        assert(true);
+
         _shader = shader;
+        break;
+    case Renderer::ShaderType::Material:
+        _materialShader = shader;
         break;
     case Renderer::ShaderType::Background:
         _bgShader = shader;
@@ -206,11 +259,14 @@ void Renderer::setShader(const std::string name, ShaderType shaderType) {
     case Renderer::ShaderType::Selection:
         _selectionShader = shader;
         break;
+    case Renderer::ShaderType::Matcap:
+        _matcapShader = shader;
+        break;
     default:
         break;
     }
 }
 
-void Renderer::enableWireframe() {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-}
+//void Renderer::enableWireframe() {
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//}

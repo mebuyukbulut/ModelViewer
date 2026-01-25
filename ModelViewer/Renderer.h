@@ -8,6 +8,12 @@ class Shader;
 class Mesh; 
 class Texture; 
 
+enum class ViewMode {
+	Wireframe,
+	Matcap,
+	Material,
+};
+
 class Renderer
 {
 public:
@@ -18,14 +24,20 @@ public:
 		Grid,
 		Light,
 		Selection,
-
+		Matcap,
+		Material, 
 	};
 private:
+	ViewMode _viewMode{ ViewMode::Material };
 
 	ShaderManager _shaderManager;
 	Shader* _shader{};
+	Shader* _materialShader{};
+	Shader* _matcapShader{};
+
 	Shader* _bgShader{};
 	Shader* _gridShader{};
+
 	Shader* _lightShader{};
 	Shader* _selectionShader{};
 
@@ -34,9 +46,13 @@ private:
 	Mesh* _bgMesh{};
 	Mesh* _gridMesh{};
 	Texture* cubemapTexture;
-public:
+	//std::vector<Texture*> loadedMatcapTextures; 
 	Texture* matcapTexture;
-
+	std::vector<std::string> matcapTexturePaths;
+	void initMatcap();
+	//void initSkybox();
+public:
+	
 	void init();
 	void terminate();
 
@@ -50,9 +66,12 @@ public:
 	void drawGrid();
 	uint32_t getSelection(glm::vec2 mousePos);
 
+	void setViewMode(ViewMode mode);
+	ViewMode getViewMode();
+
 	void setCamera(std::shared_ptr<Camera> camera);
 	void setShader(const std::string name, ShaderType shaderType);
-	void enableWireframe();
+	//void enableWireframe();
 
 	Shader& getShader() { return *_shader; }
 

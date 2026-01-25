@@ -177,6 +177,10 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     CreateRenderTarget(_rt, 300, 300);
 }
 void SceneManager::draw() {
+    // Çizim işlemine başlamadan önce ışık verilerini güncelliyoruz. 
+    if (_renderer->getViewMode() == ViewMode::Material)
+        sceneQuery();
+
     // FBO’ya çiz
     glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
     glViewport(0, 0, _rt.width, _rt.height);
@@ -234,19 +238,20 @@ void SceneManager::draw() {
 
     
     
-    
+
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    _renderer->drawBackground();
-
-
-
-    for (const auto& entity : _entities) {
+    
+    if (_renderer->getViewMode() == ViewMode::Material) 
+        _renderer->drawBackground();
+    
+    for (const auto& entity : _entities) 
         if (entity->transform->isRoot() && entity->getComponent<Model>())
             drawRecursive(entity.get()); 
-    }
 
-    _renderer->drawGrid();
-    _renderer->getShader().use();
+    if (_renderer->getViewMode() == ViewMode::Material) 
+        _renderer->drawGrid();
+    
+    //_renderer->getShader().use(); // bunu neden kullandık? 
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -601,6 +606,20 @@ void SceneManager::onInspect()
     if (ImGui::Button("S", ImVec2(0, 37))) // scale
         mCurrentGizmoOperation = ImGuizmo::SCALE;
     //ImGui::Button("Toolbar goes here", ImVec2(0, 37));
+
+    ImGui::SameLine();
+	ImGui::Dummy(ImVec2(0, 240)); // boşluk olsun 
+
+    ImGui::SameLine();
+	// view mode buttons
+    if (ImGui::Button("P", ImVec2(0, 37))) // Solid (material) view 
+        _renderer->setViewMode(ViewMode::Material);
+    ImGui::SameLine();
+    if (ImGui::Button("M", ImVec2(0, 37))) // Matcap view
+        _renderer->setViewMode(ViewMode::Matcap);
+    ImGui::SameLine();
+    if (ImGui::Button("W", ImVec2(0, 37))) // Wireframe view
+		_renderer->setViewMode(ViewMode::Wireframe);
 
     ImGui::End();
     ImGui::PopStyleVar();
