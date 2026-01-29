@@ -3,20 +3,15 @@
 #include "YAMLHelper.h"
 
 #include "Logger.h"
-
-// TO DO Material Manager sıkıntısın hallet
-const bool Model::registered = []() {
-    ComponentFactory::registerType(ComponentType::Model, []() { return new Model(); });
-    return true;
-    }();
-
+#include <filesystem>
+#include "AssetManager.h"
 
 
 
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-LoadStatus Model::loadModel(std::string const& path)
+void Model::loadModel(const std::string& path)
 {
-    _path = path; 
+    _loadStatus = AssetLoadStatus::LoadingToCPU;
 
     // read file via ASSIMP 
     Assimp::Importer importer;
@@ -25,23 +20,19 @@ LoadStatus Model::loadModel(std::string const& path)
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
         LOG_ERROR( "ASSIMP: " + std::string(importer.GetErrorString()) );
-        return LoadStatus::Error;
-    } 
-
-    // retrieve the directory path of the filepath
-    _directory = path.substr(0, path.find_last_of('\\'));
-    std::cout << "_directory: " << _directory << std::endl;
-
+        _loadStatus = AssetLoadStatus::Error;
+        return;
+    }
 
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 
     // if model loading not create a material use default one 
-    if (_materials.empty()) {
-        _materials.push_back(_materialManager->getDefaultMaterial());
-    }
+    //if (_materials.empty()) {
+    //    _materials.push_back(_materialManager->getDefaultMaterial());
+    //}
 
-    return LoadStatus::ReadyToUpload;
+    _loadStatus = AssetLoadStatus::ReadyToUpload;
 }
 
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -166,7 +157,7 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType
         {
             if (std::strcmp(textures_loaded[j]->_path.data(), str.C_Str()) == 0)
             {
-                textures.push_back(textures_loaded[j]);
+                textures.push_back(textures_loaded[j].get());
                 skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
                 break;
             }
@@ -174,10 +165,11 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType
 
         if (!skip)
         {   // if texture hasn't been loaded already, load it
-			std::string filename = this->_directory + "/" + str.C_Str();
+            std::string _directory = "TODO";
+			std::string filename = _directory + "/" + str.C_Str();
             Texture* texture = TextureFactory::load(filename, false);
             textures.push_back(texture);
-            textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+            textures_loaded.push_back(g_Assets.get<Texture>(filename));  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
         }
     }
     return textures;
@@ -187,108 +179,91 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType
 
 // draws the model, and thus all its meshes
 void Model::draw(Shader& shader) {
+    if (_loadStatus != AssetLoadStatus::Complete) return; 
+
     if(shader._type == Shader::Type::Foreground)
         _materialManager->useMaterial(_materials.at(0));
 
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].draw(shader);
 }
-void Model::terminate() {
+
+
+// TO-DO: Load fonksiyonlarını standartlaştırıp tek bir isme topla 
+// Neden her şeyi ayrı bir isim ve fonksiyon gerekli olsun ki? 
+
+//void Model::loadDefault(DefaultShapes shape)
+//{
+//    _shape = shape; 
+//    // Load model from file
+//    // For simplicity, we will just load a default mesh here
+//    Mesh mesh = MeshFactory::create(shape);
+//    meshes.push_back(mesh);
+//	_loadStatus = LoadStatus::Complete;
+//
+//    // if model loading not create a material use default one 
+//    if (_materials.empty()) {
+//        _materials.push_back(_materialManager->getDefaultMaterial());
+//    }
+//}
+
+//LoadStatus Model::loadFromFile(const std::string& filename) {
+//    LoadStatus ls = loadModel(filename);
+//    if (ls == LoadStatus::Error) {
+//        _loadStatus = LoadStatus::Error;
+//        return ls;
+//    }
+//
+//    for (auto& m : meshes)
+//        m.upload2GPU();
+//
+//	// gpu ya yüklemede de hata olması durumunda hata döndürülebilir
+//    _loadStatus = LoadStatus::Complete;
+//    return LoadStatus::Complete;
+//}
+//
+//LoadStatus Model::loadFromFileAsync(const std::string& filename){
+//    _asyncLoadStatus = std::async(std::launch::async, &Model::loadModel, this, filename);
+//	_loadStatus = LoadStatus::Loading;
+//    return LoadStatus::Loading; 
+//}
+//
+//// Main threadde çalışır ve asenkron yükleme işleminin durumunu kontrol eder
+//void Model::updateLoadStatus(){
+//    if (_asyncLoadStatus.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+//        LoadStatus ls = _asyncLoadStatus.get();
+//        if (ls == LoadStatus::ReadyToUpload) {
+//            // Yükleme tamamlandı, şimdi GPU'ya yükle
+//            for (auto& m : meshes)
+//                m.upload2GPU();
+//            _loadStatus = LoadStatus::Complete;
+//        }
+//        else {
+//            _loadStatus = ls; // Hata durumu
+//		}
+//    }
+//}
+
+//LoadStatus Model::getLoadStatus() const { return _loadStatus; }
+
+void Model::load(std::filesystem::path path, IAssetSettings settings)
+{
+    _path = path; // bunu Model::Load da yapabiliriz belki. 
+    std::string pathStr(_path.string());
+    loadModel(pathStr);
+}
+
+void Model::unload()
+{
     for (auto& mesh : meshes) {
         mesh.terminate();
     }
 }
 
-// TO-DO: Load fonksiyonlarını standartlaştırıp tek bir isme topla 
-// Neden her şeyi ayrı bir isim ve fonksiyon gerekli olsun ki? 
-
-void Model::loadDefault(DefaultShapes shape)
+void Model::uploadToGPU()
 {
-    _shape = shape; 
-    // Load model from file
-    // For simplicity, we will just load a default mesh here
-    Mesh mesh = MeshFactory::create(shape);
-    meshes.push_back(mesh);
-	_loadStatus = LoadStatus::Complete;
-
-    // if model loading not create a material use default one 
-    if (_materials.empty()) {
-        _materials.push_back(_materialManager->getDefaultMaterial());
-    }
-}
-
-LoadStatus Model::loadFromFile(const std::string& filename) {
-    LoadStatus ls = loadModel(filename);
-    if (ls == LoadStatus::Error) {
-        _loadStatus = LoadStatus::Error;
-        return ls;
-    }
-
+    // herhangi bir mesh fail olabilir. error durumunu handle et!
     for (auto& m : meshes)
         m.upload2GPU();
-
-	// gpu ya yüklemede de hata olması durumunda hata döndürülebilir
-    _loadStatus = LoadStatus::Complete;
-    return LoadStatus::Complete;
-}
-
-LoadStatus Model::loadFromFileAsync(const std::string& filename){
-    _asyncLoadStatus = std::async(std::launch::async, &Model::loadModel, this, filename);
-	_loadStatus = LoadStatus::Loading;
-    return LoadStatus::Loading; 
-}
-
-// Main threadde çalışır ve asenkron yükleme işleminin durumunu kontrol eder
-void Model::updateLoadStatus(){
-    if (_asyncLoadStatus.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-        LoadStatus ls = _asyncLoadStatus.get();
-        if (ls == LoadStatus::ReadyToUpload) {
-            // Yükleme tamamlandı, şimdi GPU'ya yükle
-            for (auto& m : meshes)
-                m.upload2GPU();
-            _loadStatus = LoadStatus::Complete;
-        }
-        else {
-            _loadStatus = ls; // Hata durumu
-		}
-    }
-}
-
-LoadStatus Model::getLoadStatus() const { return _loadStatus; }
-
-void Model::onInspect()
-{
-
-    if (_materials.empty()) return;
-
-    Material * mat = _materialManager->getMaterial(*_materials.begin());
-
-    mat->drawUI(); 
-}
-
-void Model::serialize(YAML::Emitter& out)
-{
-
-    out << YAML::BeginMap;
-    Component::serialize(out);
-	out << YAML::Key << "path" << YAML::Value << _path;
-	out << YAML::Key << "shape" << YAML::Value << static_cast<int>(_shape);
-    out << YAML::EndMap;
-}
-
-void Model::deserialize(const YAML::Node& node)
-{
-    Component::deserialize(node);
-    std::string path = node["path"].as<std::string>();
-	node["path"].IsNull() ? path = "" : path = node["path"].as<std::string>();
-
-    std::cout << "My way : " << path << std::endl;
-    if (path == "") {
-		_shape = static_cast<DefaultShapes>(node["shape"].as<int>());
-        loadDefault(_shape);
-        std::cout << " default loading..." << std::endl;
-    }
-    else
-	    loadFromFileAsync(path);
-
+    _loadStatus = AssetLoadStatus::Complete;
 }

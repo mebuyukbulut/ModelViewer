@@ -26,7 +26,6 @@ class SceneManager : public Object
 	std::vector<std::unique_ptr<Entity>> _entities{};
     std::vector <Entity*> _selectedEntities{};
     Entity* _selectedEntity{};
-	std::vector<std::unique_ptr<Entity>> _pendingEntities{};
     
     Renderer* _renderer{};
     class Camera* _camera{};

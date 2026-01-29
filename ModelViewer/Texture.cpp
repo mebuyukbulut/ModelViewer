@@ -33,6 +33,29 @@ void Texture::terminate() {
     glDeleteTextures(1, &_id);
 }
 
+
+
+void Texture::load(std::filesystem::path path, IAssetSettings settings)
+{
+}
+
+void Texture::unload()
+{
+}
+
+void Texture::uploadToGPU()
+{
+}
+
+
+
+
+
+
+
+
+
+
 Texture* TextureFactory::load(const std::string& filename, bool gamma)
 {
     //std::string filename = std::string(path);

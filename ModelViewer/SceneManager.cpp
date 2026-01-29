@@ -20,6 +20,8 @@
 #include "UIManager.h"
 
 #include "Logger.h"
+#include "AssetManager.h"
+#include "RenderComponent.h"
 
 
 ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -73,38 +75,40 @@ void SceneManager::ResizeRenderTarget(int newWidth, int newHeight)
 
 void SceneManager::fileLoadManager()
 {   
-    if (_pendingEntities.empty()) return;
+    g_Assets.update();
+   // 
+   // if (_pendingEntities.empty()) return;
 
-    for (auto& entity : _pendingEntities) {
-        if (!entity) continue;
+   // for (auto& entity : _pendingEntities) {
+   //     if (!entity) continue;
 
-        if (Model* model = entity->getComponent<Model>()) {
+   //     if (Model* model = entity->getComponent<Model>()) {
 
-            LoadStatus loadStatus = model->getLoadStatus();
-			if (loadStatus == LoadStatus::Loading)
-                model->updateLoadStatus();
+   //         LoadStatus loadStatus = model->getLoadStatus();
+			//if (loadStatus == LoadStatus::Loading)
+   //             model->updateLoadStatus();
 
-            if (loadStatus == LoadStatus::Complete) {
-                LOG_INFO("File successfully loaded: " + entity->name);
-                entity->setActive(true);
-                _entities.push_back(std::move(entity));
-                //entity.reset(); // gereksizmiş
-            }
-            else if (loadStatus == LoadStatus::Error) {
-                LOG_ERROR("File cannot loaded: " + entity->name);
-                entity.reset();
-            }/*
-            else {
-                LOG_ERROR("Undefined behavior at SceneManager::fileLoadManager");
-            }*/
+   //         if (loadStatus == LoadStatus::Complete) {
+   //             LOG_INFO("File successfully loaded: " + entity->name);
+   //             entity->setActive(true);
+   //             _entities.push_back(std::move(entity));
+   //             //entity.reset(); // gereksizmiş
+   //         }
+   //         else if (loadStatus == LoadStatus::Error) {
+   //             LOG_ERROR("File cannot loaded: " + entity->name);
+   //             entity.reset();
+   //         }/*
+   //         else {
+   //             LOG_ERROR("Undefined behavior at SceneManager::fileLoadManager");
+   //         }*/
 
-        }
-    }
+   //     }
+   // }
 
-    // Tek seferde tüm nullptr (işi bitmiş) olanları temizle
-    std::erase_if(_pendingEntities, [](const std::unique_ptr<Entity>& e) {
-        return e == nullptr;
-        });
+   // // Tek seferde tüm nullptr (işi bitmiş) olanları temizle
+   // std::erase_if(_pendingEntities, [](const std::unique_ptr<Entity>& e) {
+   //     return e == nullptr;
+   //     });
 
 }
 
@@ -204,9 +208,9 @@ void SceneManager::draw() {
 			Entity* entity = _entities[pickID].get();
 			if (!entity) continue;
 
-            if (Model * model = entity->getComponent<Model>())
+            if (RenderComponent * renderComponent = entity->getComponent<RenderComponent>())
                 _renderer->drawModelAsColor(
-                    model, 
+                    renderComponent->_model.get(),
                     entity->transform->getGlobalMatrix(), 
                     pickID + 1);
 
@@ -245,7 +249,7 @@ void SceneManager::draw() {
         _renderer->drawBackground();
     
     for (const auto& entity : _entities) 
-        if (entity->transform->isRoot() && entity->getComponent<Model>())
+        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
             drawRecursive(entity.get()); 
 
     if (_renderer->getViewMode() == ViewMode::Material) 
@@ -261,7 +265,8 @@ void SceneManager::drawRecursive(Entity* entity)
 {
     if (!entity->isActive()) return; 
 
-    auto model = entity->getComponent<Model>();
+    auto renderComponent = entity->getComponent<RenderComponent>();
+    Model* model = renderComponent->_model.get();
     if(model)
         _renderer->drawModel(model, entity->transform->getGlobalMatrix());
 
@@ -730,30 +735,30 @@ void SceneManager::sceneQuery()//(Shader& shader)
 
 void SceneManager::addShape(DefaultShapes shape)
 {
-    std::map<DefaultShapes, std::string> shapedToString {
-        { DefaultShapes::Cube, "Cube" },
-        { DefaultShapes::Cylinder, "Cylinder" },
-        { DefaultShapes::Cone, "Cone" },
-        { DefaultShapes::Plane, "Quad" },
-        { DefaultShapes::Torus, "Torus" },
-    };
+ //   std::map<DefaultShapes, std::string> shapedToString {
+ //       { DefaultShapes::Cube, "Cube" },
+ //       { DefaultShapes::Cylinder, "Cylinder" },
+ //       { DefaultShapes::Cone, "Cone" },
+ //       { DefaultShapes::Plane, "Quad" },
+ //       { DefaultShapes::Torus, "Torus" },
+ //   };
 
-	auto entity = std::make_unique<Entity>();
-	std::string name = getUniqueName(shapedToString[shape]);
-    
-    entity->transform->name = name;
-    entity->name = name;
-    LOG_TRACE(shapedToString[shape]);
+	//auto entity = std::make_unique<Entity>();
+	//std::string name = getUniqueName(shapedToString[shape]);
+ //   
+ //   entity->transform->name = name;
+ //   entity->name = name;
+ //   LOG_TRACE(shapedToString[shape]);
 
-    entity->transform->setPosition(glm::vec3(0,0,0));
-    entity->transform->setRotation(glm::vec3(0,0,0));
-    entity->transform->setScale(glm::vec3(1,1,1));
+ //   entity->transform->setPosition(glm::vec3(0,0,0));
+ //   entity->transform->setRotation(glm::vec3(0,0,0));
+ //   entity->transform->setScale(glm::vec3(1,1,1));
 
-	auto model = std::make_unique<Model>(_materialMng.get());
-    model->loadDefault(shape);
-	entity->addComponent(std::move(model));
+	//auto model = std::make_unique<Model>(_materialMng.get());
+ //   model->loadDefault(shape);
+	//entity->addComponent(std::move(model));
 
-    _entities.push_back(std::move(entity));
+ //   _entities.push_back(std::move(entity));
 }
 
 void SceneManager::addModel(std::string path, std::string entityName, bool loadAsync)
@@ -771,19 +776,28 @@ void SceneManager::addModel(std::string path, std::string entityName, bool loadA
     }
 
 
-    auto model = std::make_unique<Model>(_materialMng.get());
+    auto renderComponent = std::make_unique<RenderComponent>(_materialMng.get());
+    renderComponent->_model = g_Assets.get<Model>(path,nullptr,true);
+    renderComponent->_model->setMaterialManager(_materialMng.get());
+    entity->addComponent(std::move(renderComponent));
+    _entities.push_back(std::move(entity));
 
-	// TO-DO: hata kontrolü
-    if (loadAsync) {
-        model->loadFromFileAsync(path);
-        entity->addComponent(std::move(model));
-        _pendingEntities.push_back(std::move(entity));
-    }
-    else {
-		model->loadFromFile(path);
-        entity->addComponent(std::move(model));
-		_entities.push_back(std::move(entity));
-    }
+
+    //auto model = std::make_unique<Model>(_materialMng.get());
+
+	//// TO-DO: hata kontrolü
+ //   if (loadAsync) {
+ //       model->loadFromFileAsync(path);
+ //       entity->addComponent(std::move(model));
+ //       _pendingEntities.push_back(std::move(entity));
+ //   }
+ //   else {
+	//	model->loadFromFile(path);
+ //       entity->addComponent(std::move(model));
+	//	_entities.push_back(std::move(entity));
+ //   }
+
+
 }
 
 	
@@ -836,9 +850,6 @@ bool SceneManager::isUniqueName(std::string name)
     for (const auto& entity : _entities)
         if (entity->name == name) return false;
 
-    for (const auto& entity : _pendingEntities)
-        if (entity && entity->name == name) return false;
-
     return true;
 }
 
@@ -884,14 +895,15 @@ void SceneManager::deserialize(const YAML::Node& node)
         uint64_t id = entity->transform->UUID;
         entityMap[id] = entity->transform.get();
 
-        if (Model* model = entity->getComponent<Model>()) {
-            //model->setMaterialManager(_materialMng.get());
-            entity->setActive(false);
-            _pendingEntities.emplace_back(std::move(entity));
-        }
-        else {
-            _entities.emplace_back(std::move(entity));
-        }
+        //if (Model* model = entity->getComponent<Model>()) {
+        //    //model->setMaterialManager(_materialMng.get());
+        //    entity->setActive(false);
+        //    _pendingEntities.emplace_back(std::move(entity));
+        //}
+        //else {
+        //    _entities.emplace_back(std::move(entity));
+        //}
+        _entities.emplace_back(std::move(entity));
     }
 
 

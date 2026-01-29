@@ -1,5 +1,6 @@
 ﻿#include "Entity.h"
 #include "Transform.h"
+#include "RenderComponent.h"
 #include "Logger.h"
 
 #include "YAMLHelper.h"
@@ -81,10 +82,10 @@ void Entity::deserialize(const YAML::Node& node)
         if (ComponentType::Model == type) {
 
             Component* a = ComponentFactory::create(type);
-            Model* model = dynamic_cast<Model*>(a);
-            model->setMaterialManager(_materialManager);
-            model->deserialize(componentNode);
-            addComponent(std::unique_ptr<Component>(model));
+            RenderComponent* renderComponent = dynamic_cast<RenderComponent*>(a);
+            renderComponent->_materialManager = _materialManager;
+            renderComponent->deserialize(componentNode);
+            addComponent(std::unique_ptr<Component>(renderComponent));
         }
         else {
 
