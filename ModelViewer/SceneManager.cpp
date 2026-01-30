@@ -135,19 +135,19 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
 
     dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
-        addShape(DefaultShapes::Cube);
+        addModel("engine::models::cube","Cube");
         });
     dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
-        addShape(DefaultShapes::Cone);
+        addModel("engine::models::cone","Cone");
         });
     dispatcher.subscribe(EventType::AddCylinder, [&](const Event& e) {
-        addShape(DefaultShapes::Cylinder);
+        addModel("engine::models::cylinder","Cylinder");
         });
     dispatcher.subscribe(EventType::AddPlane, [&](const Event& e) {
-        addShape(DefaultShapes::Plane);
+        addModel("engine::models::plane","Plane");
         });
     dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
-        addShape(DefaultShapes::Torus);
+        addModel("engine::models::torus","Torus");
         });
     dispatcher.subscribe(EventType::AddMonkey, [&](const Event& e) {
         addModel(MWD + "\\models\\monkey.obj", "Monkey", true);
@@ -777,7 +777,7 @@ void SceneManager::addModel(std::string path, std::string entityName, bool loadA
 
 
     auto renderComponent = std::make_unique<RenderComponent>(_materialMng.get());
-    renderComponent->_model = g_Assets.get<Model>(path,nullptr,true);
+    renderComponent->_model = g_Assets.get<Model>(path, nullptr, loadAsync);
     renderComponent->_model->setMaterialManager(_materialMng.get());
     entity->addComponent(std::move(renderComponent));
     _entities.push_back(std::move(entity));

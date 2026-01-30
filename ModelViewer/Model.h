@@ -17,10 +17,6 @@
 
 class Texture;
 
-// Load status for asynchronous model loading
-enum class LoadStatus { None, Loading, ReadyToUpload, Complete, Error };
-// loading status can divide to 2 status -> loading to CPU and loading to GPU
-
 class Model : public Asset{
 
     MaterialManager* _materialManager{};
@@ -33,6 +29,7 @@ class Model : public Asset{
 	//std::string _directory;
 	//DefaultShapes _shape{ DefaultShapes::Cube };
 
+    void loadDefault(DefaultShapes shape);
 
     //unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = 1);
     void loadModel(const std::string& path);
@@ -51,10 +48,6 @@ public:
     }
 
     Model() { _type = AssetType::Model; }
-
-    //LoadStatus loadFromFileAsync(const std::string& filename);
-    //void updateLoadStatus();
-    //LoadStatus getLoadStatus() const;
 
 
 

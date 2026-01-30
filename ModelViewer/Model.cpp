@@ -192,64 +192,41 @@ void Model::draw(Shader& shader) {
 // TO-DO: Load fonksiyonlarını standartlaştırıp tek bir isme topla 
 // Neden her şeyi ayrı bir isim ve fonksiyon gerekli olsun ki? 
 
-//void Model::loadDefault(DefaultShapes shape)
-//{
-//    _shape = shape; 
-//    // Load model from file
-//    // For simplicity, we will just load a default mesh here
-//    Mesh mesh = MeshFactory::create(shape);
-//    meshes.push_back(mesh);
-//	_loadStatus = LoadStatus::Complete;
-//
-//    // if model loading not create a material use default one 
-//    if (_materials.empty()) {
-//        _materials.push_back(_materialManager->getDefaultMaterial());
-//    }
-//}
+void Model::loadDefault(DefaultShapes shape)
+{
+    _loadStatus = AssetLoadStatus::LoadingToCPU;
 
-//LoadStatus Model::loadFromFile(const std::string& filename) {
-//    LoadStatus ls = loadModel(filename);
-//    if (ls == LoadStatus::Error) {
-//        _loadStatus = LoadStatus::Error;
-//        return ls;
-//    }
-//
-//    for (auto& m : meshes)
-//        m.upload2GPU();
-//
-//	// gpu ya yüklemede de hata olması durumunda hata döndürülebilir
-//    _loadStatus = LoadStatus::Complete;
-//    return LoadStatus::Complete;
-//}
-//
-//LoadStatus Model::loadFromFileAsync(const std::string& filename){
-//    _asyncLoadStatus = std::async(std::launch::async, &Model::loadModel, this, filename);
-//	_loadStatus = LoadStatus::Loading;
-//    return LoadStatus::Loading; 
-//}
-//
-//// Main threadde çalışır ve asenkron yükleme işleminin durumunu kontrol eder
-//void Model::updateLoadStatus(){
-//    if (_asyncLoadStatus.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-//        LoadStatus ls = _asyncLoadStatus.get();
-//        if (ls == LoadStatus::ReadyToUpload) {
-//            // Yükleme tamamlandı, şimdi GPU'ya yükle
-//            for (auto& m : meshes)
-//                m.upload2GPU();
-//            _loadStatus = LoadStatus::Complete;
-//        }
-//        else {
-//            _loadStatus = ls; // Hata durumu
-//		}
-//    }
-//}
+    // For simplicity, we will just load a default mesh here
+    Mesh mesh = MeshFactory::create(shape);
+    meshes.push_back(mesh);
 
-//LoadStatus Model::getLoadStatus() const { return _loadStatus; }
+    //// if model loading not create a material use default one 
+    //if (_materials.empty()) {
+    //    _materials.push_back(_materialManager->getDefaultMaterial());
+    //}
+
+	_loadStatus = AssetLoadStatus::Complete;
+}
 
 void Model::load(std::filesystem::path path, IAssetSettings settings)
 {
     _path = path; // bunu Model::Load da yapabiliriz belki. 
-    std::string pathStr(_path.string());
+    std::string pathStr = path.string(); 
+
+    // 1. Sanal Yol Kontrolü (Internal Primitives)
+    if (pathStr.starts_with("engine::models::")) {
+        if (pathStr == "engine::models::cube") loadDefault(DefaultShapes::Cube);        
+        else if (pathStr == "engine::models::cone") loadDefault(DefaultShapes::Cone);        
+        else if (pathStr == "engine::models::cylinder") loadDefault(DefaultShapes::Cylinder);        
+        else if (pathStr == "engine::models::plane") loadDefault(DefaultShapes::Plane);        
+        else if (pathStr == "engine::models::sphere") loadDefault(DefaultShapes::Sphere);        
+        else if (pathStr == "engine::models::torus") loadDefault(DefaultShapes::Torus);        
+        else LOG_ERROR("The given path for shape is unknown!");        
+        // ... diğer shape'ler
+
+        return;
+    }
+
     loadModel(pathStr);
 }
 
