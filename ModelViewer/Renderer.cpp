@@ -8,6 +8,7 @@
 #include "Logger.h"
 #include "Texture.h"
 #include <filesystem>
+#include "AssetManager.h"
 
 
 void Renderer::initMatcap() {
@@ -21,7 +22,8 @@ void Renderer::initMatcap() {
     for(const auto& p : matcapTexturePaths)
 		LOG_TRACE("Found matcap texture: " + p);
 
-    matcapTexture = TextureFactory::load(matcapTexturePaths.front(), false);
+    //matcapTexture = TextureFactory::load(matcapTexturePaths.front(), false);
+    matcapTexture = g_Assets.get<Texture>( matcapTexturePaths.front());
 }
 void Renderer::init(std::shared_ptr<Camera> camera) {
 	_shaderManager.init(); // load all shaders
@@ -221,7 +223,7 @@ void Renderer::setViewMode(ViewMode mode)
         _viewMode = ViewMode::Matcap;
 		_shader = _matcapShader;
 
-        matcapTexture->_type = GL_TEXTURE_2D;
+        //matcapTexture->_type = GL_TEXTURE_2D;
         glActiveTexture(GL_TEXTURE2);
         matcapTexture->use();
 

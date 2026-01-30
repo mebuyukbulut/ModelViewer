@@ -19,9 +19,6 @@ layout (std140, binding = 0) uniform LightBlock {
 } ubo_data;
 
 
-
-
-
 //struct Light {    
 //    vec3 position;
 //	vec3 color;
@@ -35,6 +32,13 @@ layout (std140, binding = 0) uniform LightBlock {
 //uniform Light _lights[NR_LIGHTS];
 //uniform int numLights;
 
+layout(binding = 0) uniform sampler2D baseColorTexture;
+layout(binding = 1) uniform sampler2D emissiveTexture;
+layout(binding = 2) uniform sampler2D metallicTexture;
+layout(binding = 3) uniform sampler2D roughnessTexture;
+layout(binding = 4) uniform sampler2D aoTexture;
+
+
 uniform float ambientIntensity;
 uniform vec3 ambientColor;
 
@@ -47,8 +51,16 @@ struct Material{
 	float roughness;
 	float reflectance;
 	float ao;
+
+    // rgba flags of textures. 0 -> null, 1 -> exits 
+    vec4 is_BaseColorTex;
+    vec4 is_EmissiveTex;
+    vec4 is_MetallicTex;
+    vec4 is_RoughnessTex;
+    vec4 is_AoTex;
 };
 uniform Material material;
+Material _material;
 
 uniform sampler2D texture_diffuse1;
 
@@ -115,11 +127,11 @@ float Fd_Lambert() {
 }
 
 vec3 CalcPointLight(Light light){
-    vec4 baseColor = material.baseColor;
-    float metallic = material.metallic;
-    float perceptualRoughness = material.roughness;  
-    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    float reflectance = material.reflectance;
+    vec4 baseColor = _material.baseColor;
+    float metallic = _material.metallic;
+    float perceptualRoughness = _material.roughness;  
+    float roughness = clamp(pow(_material.roughness,2), pow(0.01,2), 1) ; 
+    float reflectance = _material.reflectance;
     float attRad = light.params.x; 
 
     vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
@@ -160,11 +172,11 @@ vec3 CalcPointLight(Light light){
 } 
 
 vec3 CalcDirectionalLight(Light light){
-    vec4 baseColor = material.baseColor;
-    float metallic = material.metallic;
-    float perceptualRoughness = material.roughness;  
-    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    float reflectance = material.reflectance;
+    vec4 baseColor = _material.baseColor;
+    float metallic = _material.metallic;
+    float perceptualRoughness = _material.roughness;  
+    float roughness = clamp(pow(_material.roughness,2), pow(0.01,2), 1) ; 
+    float reflectance = _material.reflectance;
     //float attRad = light.attenuation;
 
     vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
@@ -214,11 +226,11 @@ vec3 CalcSpotLight(Light light){
       return vec3(0,0,0); 
 
 
-    vec4 baseColor = material.baseColor;
-    float metallic = material.metallic;
-    float perceptualRoughness = material.roughness;  
-    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    float reflectance = material.reflectance;
+    vec4 baseColor = _material.baseColor;
+    float metallic = _material.metallic;
+    float perceptualRoughness = _material.roughness;  
+    float roughness = clamp(pow(_material.roughness,2), pow(0.01,2), 1) ; 
+    float reflectance = _material.reflectance;
     float attRad = light.params.x;
 
     vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
@@ -281,8 +293,67 @@ vec3 ACESFilm(vec3 x)
 }
 
 
+// texture kullanılmışsa kanala göre atama yapar. 
+void setMaterial(){
+
+    if(material.is_BaseColorTex.x == 1)
+        _material.baseColor = texture2D(baseColorTexture, fTexCoords);
+    else
+        _material.baseColor = vec4(1,0,0,1); //material.baseColor;
+
+
+
+
+    if(material.is_EmissiveTex.x == 1)
+        _material.emissive = texture(emissiveTexture, fTexCoords);
+    else
+        _material.emissive = material.emissive;
+        
+
+
+
+    if(material.is_MetallicTex.x == 1)
+        _material.metallic = texture(metallicTexture, fTexCoords).x;
+    else if(material.is_MetallicTex.y == 1)
+        _material.metallic = texture(metallicTexture, fTexCoords).y;
+    else if(material.is_MetallicTex.z == 1)
+        _material.metallic = texture(metallicTexture, fTexCoords).z;
+    else if(material.is_MetallicTex.a == 1)
+        _material.metallic = texture(metallicTexture, fTexCoords).a;
+    else
+        _material.metallic = material.metallic;
+
+
+
+
+    if(material.is_RoughnessTex.x == 1)
+        _material.roughness = texture(roughnessTexture, fTexCoords).x;
+    else if(material.is_RoughnessTex.y == 1)
+        _material.roughness = texture(roughnessTexture, fTexCoords).y;
+    else if(material.is_RoughnessTex.z == 1)
+        _material.roughness = texture(roughnessTexture, fTexCoords).z;
+    else if(material.is_RoughnessTex.a == 1)
+        _material.roughness = texture(roughnessTexture, fTexCoords).a;
+    else
+        _material.roughness = material.roughness;
+
+
+
+
+    if(material.is_AoTex.x == 1)
+        _material.ao = texture(aoTexture, fTexCoords).x;
+    else if(material.is_AoTex.y == 1)
+        _material.ao = texture(aoTexture, fTexCoords).y;
+    else if(material.is_AoTex.z == 1)
+        _material.ao = texture(aoTexture, fTexCoords).z;
+    else if(material.is_AoTex.a == 1)
+        _material.ao = texture(aoTexture, fTexCoords).a;
+    else
+        _material.ao = material.ao;
+}   
+
 void main(){
-	
+	setMaterial();
 
     vec3 pLights = vec3(0.0);
     for(int i = 0; i < ubo_data.numLights; i++){

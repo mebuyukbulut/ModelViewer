@@ -23,7 +23,6 @@ class Model : public Asset{
     //TextureManager* _textureManager{};
     
     std::vector<std::shared_ptr<Material>> _materials{};
-    std::vector<std::shared_ptr<Texture>> textures_loaded;
 	
     std::vector<Mesh> meshes;
 	//std::string _directory;
@@ -35,7 +34,7 @@ class Model : public Asset{
     void loadModel(const std::string& path);
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-    std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+    std::shared_ptr<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type);
 
 public:
     Model() { _type = AssetType::Model; }

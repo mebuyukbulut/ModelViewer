@@ -47,7 +47,7 @@ private:
 	Mesh* _gridMesh{};
 	Texture* cubemapTexture;
 	//std::vector<Texture*> loadedMatcapTextures; 
-	Texture* matcapTexture;
+	std::shared_ptr<Texture> matcapTexture;
 	std::vector<std::string> matcapTexturePaths;
 	void initMatcap();
 	//void initSkybox();

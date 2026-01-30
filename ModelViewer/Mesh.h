@@ -23,7 +23,6 @@ class Mesh
 {
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
-	//std::vector<Texture> _textures;
 
 	unsigned int _vao, _vbo, _ebo;
 	void setupMesh();
