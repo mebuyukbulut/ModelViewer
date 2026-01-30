@@ -48,6 +48,8 @@ public:
     void CreateRenderTarget(RenderTarget& rt, int width, int height);
     void ResizeRenderTarget(int newWidth, int newHeight);
 
+    void initCommands();
+    void initDefaults();
     void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
     void draw();
     void drawRecursive(Entity* entity);

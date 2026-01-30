@@ -73,16 +73,8 @@ void SceneManager::ResizeRenderTarget(int newWidth, int newHeight)
     CreateRenderTarget(_rt, newWidth, newHeight);
 }
 
-void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
-	MWD = std::filesystem::current_path().string();
-    
-    _renderer = renderer;
-    _camera = camera;
-    _UI = UI;
-
-	_lightMng = std::make_unique<LightManager>();
-    
-
+void SceneManager::initCommands()
+{
     dispatcher.subscribe(EventType::AddPointLight, [&](const Event& e) {
         addLight(LightType::Point);
         });
@@ -93,21 +85,20 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         addLight(LightType::Directional);
         });
 
-
     dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
-        addModel("engine::models::cube","Cube");
+        addModel("engine::models::cube", "Cube");
         });
     dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
-        addModel("engine::models::cone","Cone");
+        addModel("engine::models::cone", "Cone");
         });
     dispatcher.subscribe(EventType::AddCylinder, [&](const Event& e) {
-        addModel("engine::models::cylinder","Cylinder");
+        addModel("engine::models::cylinder", "Cylinder");
         });
     dispatcher.subscribe(EventType::AddPlane, [&](const Event& e) {
-        addModel("engine::models::plane","Plane");
+        addModel("engine::models::plane", "Plane");
         });
     dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
-        addModel("engine::models::torus","Torus");
+        addModel("engine::models::torus", "Torus");
         });
     dispatcher.subscribe(EventType::AddMonkey, [&](const Event& e) {
         addModel(MWD + "\\models\\monkey.obj", "Monkey", true);
@@ -137,10 +128,37 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         addModel(modelPath, "", true);
         });
 
-    g_Assets.get<Material>("engine::materials::defaultMaterial");
+}
+void SceneManager::initDefaults()
+{
+    // Load default Material
+    g_Assets.get<Material>("engine::materials::defaultMaterial"); 
+
+    // Load default Models
+    g_Assets.get<Model>("engine::models::cube");
+    g_Assets.get<Model>("engine::models::cone");
+    g_Assets.get<Model>("engine::models::cylinder");
+    g_Assets.get<Model>("engine::models::plane");
+    g_Assets.get<Model>("engine::models::torus");
+    g_Assets.get<Model>(MWD + "\\models\\monkey.obj", nullptr, true);
+}
+void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
+	MWD = std::filesystem::current_path().string();
+    
+    _renderer = renderer;
+    _camera = camera;
+    _UI = UI;
+
+	_lightMng = std::make_unique<LightManager>();
+    
+    initCommands();
+    initDefaults();
 
     CreateRenderTarget(_rt, 300, 300);
 }
+
+
+
 void SceneManager::draw() {
     // Çizim işlemine başlamadan önce ışık verilerini güncelliyoruz. 
     if (_renderer->getViewMode() == ViewMode::Material)
@@ -809,14 +827,6 @@ void SceneManager::deserialize(const YAML::Node& node)
         uint64_t id = entity->transform->UUID;
         entityMap[id] = entity->transform.get();
 
-        //if (Model* model = entity->getComponent<Model>()) {
-        //    //model->setMaterialManager(_materialMng.get());
-        //    entity->setActive(false);
-        //    _pendingEntities.emplace_back(std::move(entity));
-        //}
-        //else {
-        //    _entities.emplace_back(std::move(entity));
-        //}
         _entities.emplace_back(std::move(entity));
     }
 
