@@ -6,10 +6,6 @@
 #include "YAMLHelper.h"
 #include "Material.h" // bu burada olmamali
 
-void Entity::setMaterialManager(MaterialManager* materialManager) {
-    _materialManager = materialManager;
-}
-
 Entity::Entity()
 {
     transform = std::make_unique<Transform>();
@@ -83,7 +79,6 @@ void Entity::deserialize(const YAML::Node& node)
 
             Component* a = ComponentFactory::create(type);
             RenderComponent* renderComponent = dynamic_cast<RenderComponent*>(a);
-            renderComponent->_materialManager = _materialManager;
             renderComponent->deserialize(componentNode);
             addComponent(std::unique_ptr<Component>(renderComponent));
         }

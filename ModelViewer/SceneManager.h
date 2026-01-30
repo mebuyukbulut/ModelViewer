@@ -32,7 +32,6 @@ class SceneManager : public Object
     class UIManager* _UI{};
 
     std::unique_ptr<class LightManager> _lightMng{};
-    std::unique_ptr<MaterialManager> _materialMng{};
 
     RenderTarget _rt{};
 
@@ -49,7 +48,6 @@ public:
     void CreateRenderTarget(RenderTarget& rt, int width, int height);
     void ResizeRenderTarget(int newWidth, int newHeight);
 
-    void fileLoadManager();
     void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
     void draw();
     void drawRecursive(Entity* entity);
@@ -82,7 +80,6 @@ public:
     void sceneQuery(); // (Shader& shader);
 
     // SHAPES
-    void addShape(DefaultShapes shape); 
 	void addModel(std::string path, std::string entityName = "", bool loadAsync = false);
     
     void deleteSelected();

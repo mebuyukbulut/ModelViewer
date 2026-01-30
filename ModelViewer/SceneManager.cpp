@@ -73,45 +73,6 @@ void SceneManager::ResizeRenderTarget(int newWidth, int newHeight)
     CreateRenderTarget(_rt, newWidth, newHeight);
 }
 
-void SceneManager::fileLoadManager()
-{   
-    g_Assets.update();
-   // 
-   // if (_pendingEntities.empty()) return;
-
-   // for (auto& entity : _pendingEntities) {
-   //     if (!entity) continue;
-
-   //     if (Model* model = entity->getComponent<Model>()) {
-
-   //         LoadStatus loadStatus = model->getLoadStatus();
-			//if (loadStatus == LoadStatus::Loading)
-   //             model->updateLoadStatus();
-
-   //         if (loadStatus == LoadStatus::Complete) {
-   //             LOG_INFO("File successfully loaded: " + entity->name);
-   //             entity->setActive(true);
-   //             _entities.push_back(std::move(entity));
-   //             //entity.reset(); // gereksizmiş
-   //         }
-   //         else if (loadStatus == LoadStatus::Error) {
-   //             LOG_ERROR("File cannot loaded: " + entity->name);
-   //             entity.reset();
-   //         }/*
-   //         else {
-   //             LOG_ERROR("Undefined behavior at SceneManager::fileLoadManager");
-   //         }*/
-
-   //     }
-   // }
-
-   // // Tek seferde tüm nullptr (işi bitmiş) olanları temizle
-   // std::erase_if(_pendingEntities, [](const std::unique_ptr<Entity>& e) {
-   //     return e == nullptr;
-   //     });
-
-}
-
 void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
 	MWD = std::filesystem::current_path().string();
     
@@ -120,7 +81,6 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     _UI = UI;
 
 	_lightMng = std::make_unique<LightManager>();
-    _materialMng.reset(new MaterialManager(shader));
     
 
     dispatcher.subscribe(EventType::AddPointLight, [&](const Event& e) {
@@ -177,6 +137,7 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
         addModel(modelPath, "", true);
         });
 
+    g_Assets.get<Material>("engine::materials::defaultMaterial");
 
     CreateRenderTarget(_rt, 300, 300);
 }
@@ -732,35 +693,6 @@ void SceneManager::sceneQuery()//(Shader& shader)
     _lightMng->queryLights(lights);
 }
 
-
-void SceneManager::addShape(DefaultShapes shape)
-{
- //   std::map<DefaultShapes, std::string> shapedToString {
- //       { DefaultShapes::Cube, "Cube" },
- //       { DefaultShapes::Cylinder, "Cylinder" },
- //       { DefaultShapes::Cone, "Cone" },
- //       { DefaultShapes::Plane, "Quad" },
- //       { DefaultShapes::Torus, "Torus" },
- //   };
-
-	//auto entity = std::make_unique<Entity>();
-	//std::string name = getUniqueName(shapedToString[shape]);
- //   
- //   entity->transform->name = name;
- //   entity->name = name;
- //   LOG_TRACE(shapedToString[shape]);
-
- //   entity->transform->setPosition(glm::vec3(0,0,0));
- //   entity->transform->setRotation(glm::vec3(0,0,0));
- //   entity->transform->setScale(glm::vec3(1,1,1));
-
-	//auto model = std::make_unique<Model>(_materialMng.get());
- //   model->loadDefault(shape);
-	//entity->addComponent(std::move(model));
-
- //   _entities.push_back(std::move(entity));
-}
-
 void SceneManager::addModel(std::string path, std::string entityName, bool loadAsync)
 {
     auto entity = std::make_unique<Entity>();
@@ -776,28 +708,11 @@ void SceneManager::addModel(std::string path, std::string entityName, bool loadA
     }
 
 
-    auto renderComponent = std::make_unique<RenderComponent>(_materialMng.get());
+    auto renderComponent = std::make_unique<RenderComponent>();
     renderComponent->_model = g_Assets.get<Model>(path, nullptr, loadAsync);
-    renderComponent->_model->setMaterialManager(_materialMng.get());
     entity->addComponent(std::move(renderComponent));
+
     _entities.push_back(std::move(entity));
-
-
-    //auto model = std::make_unique<Model>(_materialMng.get());
-
-	//// TO-DO: hata kontrolü
- //   if (loadAsync) {
- //       model->loadFromFileAsync(path);
- //       entity->addComponent(std::move(model));
- //       _pendingEntities.push_back(std::move(entity));
- //   }
- //   else {
-	//	model->loadFromFile(path);
- //       entity->addComponent(std::move(model));
-	//	_entities.push_back(std::move(entity));
- //   }
-
-
 }
 
 	
@@ -887,7 +802,6 @@ void SceneManager::deserialize(const YAML::Node& node)
 
     for (const auto& entityNode : entitiesNode) {
         auto entity = std::make_unique<Entity>();
-		entity->setMaterialManager(_materialMng.get());
         entity->deserialize(entityNode);
         LOG_TRACE("Load entity: " + entity->name);
 

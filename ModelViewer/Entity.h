@@ -2,21 +2,15 @@
 #include <vector>
 #include <memory>
 
-//#include <glm/glm.hpp>
-//#include <list>
-
 #include "Object.h"
 #include "Component.h"
-//#include "Inspectable.h"
 
 
 
 class Entity : public Object
 {
 	bool active{ true };
-	class MaterialManager* _materialManager{}; // bunu eklemeden bir yol bulmaliyiz
 public:
-	void setMaterialManager(MaterialManager* materialManager);
 
 	std::unique_ptr <class Transform> transform{};
 	std::vector<std::unique_ptr<Component>> components{};
@@ -36,13 +30,6 @@ public:
 	void onInspect() override;
 	void serialize(YAML::Emitter& out) override;
 	void deserialize(const YAML::Node& node) override;
-
-private:
-	//void terminate() {
-	//	//if (model)
-	//	//	model.get()->terminate();
-	//}
-
 };
 
 

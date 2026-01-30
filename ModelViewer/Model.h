@@ -19,10 +19,10 @@ class Texture;
 
 class Model : public Asset{
 
-    MaterialManager* _materialManager{};
+    //MaterialManager* _materialManager{};
     //TextureManager* _textureManager{};
     
-    std::vector<MaterialHandle> _materials{};
+    std::vector<std::shared_ptr<Material>> _materials{};
     std::vector<std::shared_ptr<Texture>> textures_loaded;
 	
     std::vector<Mesh> meshes;
@@ -38,24 +38,18 @@ class Model : public Asset{
     std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 
 public:
-    void draw(Shader& shader);
-	void setMaterialManager(MaterialManager* materialManager) {
-        _materialManager = materialManager;
-        // if model loading not create a material use default one 
-        if (_materials.empty()) {
-            _materials.push_back(_materialManager->getDefaultMaterial());
-        }
-    }
-
     Model() { _type = AssetType::Model; }
 
-
+    void draw(Shader& shader);
 
     // Inherited via Asset
     void load(std::filesystem::path path, IAssetSettings settings) override;
-
     void unload() override;
-
     void uploadToGPU() override;
+
+    virtual void onInspect() {
+        if (_materials.size())
+            _materials.front().get()->onInspect();
+    }
 
 };

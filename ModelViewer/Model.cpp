@@ -8,6 +8,7 @@
 
 
 
+
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 void Model::loadModel(const std::string& path)
 {
@@ -28,9 +29,9 @@ void Model::loadModel(const std::string& path)
     processNode(scene->mRootNode, scene);
 
     // if model loading not create a material use default one 
-    //if (_materials.empty()) {
-    //    _materials.push_back(_materialManager->getDefaultMaterial());
-    //}
+    if (_materials.empty()) {
+        _materials.push_back(g_Assets.get<Material>("engine::materials::defaultMaterial")); // TO-DO bu sabiti birden fazla yerde kullandık refactor et!
+    }
 
     _loadStatus = AssetLoadStatus::ReadyToUpload;
 }
@@ -181,8 +182,11 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType
 void Model::draw(Shader& shader) {
     if (_loadStatus != AssetLoadStatus::Complete) return; 
 
-    if(shader._type == Shader::Type::Foreground)
-        _materialManager->useMaterial(_materials.at(0));
+    if (shader._type == Shader::Type::Foreground)
+        if (_materials.size())
+            _materials[0]->use(&shader);
+        else
+            g_Assets.get<Material>("engine::materials::defaultMaterial")->use(&shader);  // her seferinde bunu sormasına gerek yok. initialization kısmında bunu default olarak alması lazım. 
 
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].draw(shader);
@@ -200,10 +204,7 @@ void Model::loadDefault(DefaultShapes shape)
     Mesh mesh = MeshFactory::create(shape);
     meshes.push_back(mesh);
 
-    //// if model loading not create a material use default one 
-    //if (_materials.empty()) {
-    //    _materials.push_back(_materialManager->getDefaultMaterial());
-    //}
+    _materials.push_back(g_Assets.get<Material>("engine::materials::defaultMaterial"));
 
 	_loadStatus = AssetLoadStatus::Complete;
 }

@@ -1,4 +1,4 @@
-#include "Material.h"
+﻿#include "Material.h"
 #include "Shader.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -25,47 +25,27 @@ void Material::use(Shader* shader) {
 	shader->setFloat("material.ao", ao);
 }
 
-void Material::drawUI() {
-	//ImGui::Begin("Material");
+void Material::load(std::filesystem::path path, IAssetSettings settings)
+{
+	// dosyadan okuyup material oluştur. 
+}
+
+void Material::unload()
+{
+}
+
+void Material::uploadToGPU()
+{
+}
+
+void Material::onInspect()
+{
 	ImGui::SeparatorText("MATERIAL");
-	ImGui::ColorEdit4("baseColor", glm::value_ptr(baseColor),ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel);
-	
+	ImGui::ColorEdit4("baseColor", glm::value_ptr(baseColor), ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel);
+
 	ImGui::DragFloat("metallic", &metallic, 0.02f, 0.0f, 1.0f);
 	ImGui::DragFloat("roughness", &roughness, 0.02f, 0.0f, 1.0f);
 	ImGui::DragFloat("reflectance", &reflectance, 0.02f, 0.0f, 1.0f);
 	ImGui::DragFloat("ao", &ao, 0.02f, 0.0f, 1.0f);
-	ImGui::ColorEdit4("emissive", glm::value_ptr(emissive),ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel);
-	
-	//ImGui::End();
-}
-
-MaterialHandle MaterialManager::createMaterial() {
-	int id = nextId++;
-	materials[id] = std::make_unique<Material>();
-	return MaterialHandle{ id };
-}
-
-Material* MaterialManager::getMaterial(MaterialHandle handle) {
-	if (materials.empty()) return nullptr;
-	auto it = materials.find(handle.id);
-	if (it != materials.end())
-		return it->second.get();
-	return nullptr;
-}
-
-MaterialHandle MaterialManager::getDefaultMaterial()
-{
-	MaterialHandle mh; mh.id = 0; 
-	if (!getMaterial(mh))
-		return createMaterial();
-	return mh;
-}
-
-void MaterialManager::useMaterial(MaterialHandle handle){
-
-	materials[handle.id].get()->use(_shader);
-}
-
-void MaterialManager::destroyMaterial(MaterialHandle handle) {
-	materials.erase(handle.id);
+	ImGui::ColorEdit4("emissive", glm::value_ptr(emissive), ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel);
 }

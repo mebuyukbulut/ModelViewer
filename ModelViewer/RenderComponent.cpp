@@ -12,12 +12,7 @@ const bool RenderComponent::registered = []() {
 
 void RenderComponent::onInspect()
 {
-
-    //if (_materials.empty()) return;
-
-    //Material* mat = _materialManager->getMaterial(*_materials.begin());
-
-    //mat->drawUI();
+    _model->onInspect();
 }
 
 void RenderComponent::serialize(YAML::Emitter& out)

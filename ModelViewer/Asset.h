@@ -64,6 +64,10 @@ public:
     bool isDirty() const { return _isDirty; }
     void setDirty(bool dirty) { _isDirty = dirty; }
 
+
+    // OBject ten inherit edilen fonksiyonlar 
+    virtual void onInspect() {};
+
     // --- Serialization (Object'ten override) ---
     //void serialize(YAML::Emitter& out) override {
     //    Object::serialize(out); // UUID ve Name buradan gelir

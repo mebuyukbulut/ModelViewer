@@ -16,6 +16,7 @@
 
 #include "EventDispatcher.h"
 #include "Logger.h"
+#include "AssetManager.h"
 
 
 void Engine::initWindow()
@@ -134,7 +135,7 @@ void Engine::mainLoop()
         //ps.draw();
         
         SM.draw();
-        SM.fileLoadManager();
+        g_Assets.update(); 
         
         
 		_UI.draw(&SM);
