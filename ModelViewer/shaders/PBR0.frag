@@ -299,7 +299,7 @@ void setMaterial(){
     if(material.is_BaseColorTex.x == 1)
         _material.baseColor = texture2D(baseColorTexture, fTexCoords);
     else
-        _material.baseColor = vec4(1,0,0,1); //material.baseColor;
+        _material.baseColor = material.baseColor;
 
 
 
