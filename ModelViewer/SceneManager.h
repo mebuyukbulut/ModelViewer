@@ -40,10 +40,8 @@ public:
     void initCommands();
     void initDefaults();
 
-    void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
+    void init(Renderer* renderer, Camera* camera, UIManager* UI);
     void draw();
-    void drawRecursive(Entity* entity);
-    void drawAsColorRecursive(Entity* entity);
     void updateMatrixRecursive(Entity* entity);
 
 

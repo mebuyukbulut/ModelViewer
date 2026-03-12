@@ -1,5 +1,6 @@
-#pragma once
+﻿#pragma once
 #include "Model.h"
+#include "Entity.h"
 #include "ShaderManager.h"
 #include <memory>
 
@@ -40,14 +41,13 @@ private:
 
 	ViewMode _viewMode{ ViewMode::Material };
 
-	ShaderManager _shaderManager;
-	Shader* _shader{};
+	ShaderManager _shaderManager; // burada olması gerçekten gerekli mi? 
+
 	Shader* _materialShader{};
 	Shader* _matcapShader{};
-
-	Shader* _bgShader{};
+	Shader* _wireframeShader{};
+	Shader* _backgroundShader{};
 	Shader* _gridShader{};
-
 	Shader* _lightShader{};
 	Shader* _selectionShader{};
 
@@ -65,7 +65,24 @@ private:
 	void createRenderTarget(RenderTarget& rt, int width, int height);
 	void resizeRenderTarget(int newWidth, int newHeight);
 
+	
+	void setupMaterialPass();
+	void setupMatcapPass();
+	void setupWireframePass();
+	void setupBackgroundPass();
+	void setupGridPass();
+	void setupLightPass();
+	void setupSelectionPass();
+
 public:
+	void materialPass(const std::vector<std::unique_ptr<Entity>>& entities);
+	void matcapPass(const std::vector<std::unique_ptr<Entity>>& entities);
+	void wireframePass(const std::vector<std::unique_ptr<Entity>>& entities);
+	void backgroundPass();
+	void gridPass();
+	void lightPass();
+	void selectionPass(const std::vector<std::unique_ptr<Entity>> &entities);
+
 	
 	void init(std::shared_ptr<Camera> camera);
 	void terminate();
@@ -78,25 +95,22 @@ public:
 		glViewport(0, 0, _rt.width, _rt.height);
 	}
 	void bindDefaultFBO() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+	void clearBuffer() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
 	void resizeViewport(int width, int height) { resizeRenderTarget(width, height); }
 	GLuint getViewportImage() { return _rt.colorTex; }
-
-	void drawModel(Model* model, const glm::mat4& transform);
+	
+	void drawRecursive(Entity* entity, bool isMaterialPass);
+	void drawModelAsMaterial(Model* model, const glm::mat4& transform);
+	void drawModelAsMatcap(Model* model, const glm::mat4& transform);
 	void drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID);
 	
-	void drawBackground();
-	void drawGrid();
 	uint32_t getSelection(glm::vec2 mousePos);
 
 	void setViewMode(ViewMode mode);
 	ViewMode getViewMode();
 
 	void setCamera(std::shared_ptr<Camera> camera);
-	void setShader(const std::string name, ShaderType shaderType);
-	//void enableWireframe();
-
-	Shader& getShader() { return *_shader; }
 
 	//void setShader(const std::string& name) { _shader = shader; }
 };

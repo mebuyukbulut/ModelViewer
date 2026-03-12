@@ -96,7 +96,7 @@ void SceneManager::initDefaults()
     g_Assets.get<Model>("engine::models::torus");
     g_Assets.get<Model>(MWD + "\\models\\monkey.obj", nullptr, true);
 }
-void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI) {
+void SceneManager::init(Renderer* renderer, Camera* camera, UIManager* UI) {
 	MWD = std::filesystem::current_path().string();
     
     _renderer = renderer;
@@ -113,9 +113,16 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
 
 
 void SceneManager::draw() {
+	ViewMode viewMode = _renderer->getViewMode();
+
     // Çizim işlemine başlamadan önce ışık verilerini güncelliyoruz. 
-    if (_renderer->getViewMode() == ViewMode::Material)
+    if (viewMode == ViewMode::Material)
         sceneQuery();
+
+	// update all global matrices
+    for (const auto& entity : _entities) 
+        if (entity->transform->isRoot()) // && entity->getComponent<Model>()
+            updateMatrixRecursive(entity.get());
 
     // FBO’ya çiz
     _renderer->bindViewportFBO();
@@ -126,26 +133,7 @@ void SceneManager::draw() {
     if (isViewportSelect && ImGuizmo::IsOver())
         isViewportSelect = false;
     if (isViewportSelect) {
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        
-		// update all global matrices
-        for (const auto& entity : _entities) 
-            if (entity->transform->isRoot()) // && entity->getComponent<Model>()
-                updateMatrixRecursive(entity.get());
-        
-		// draw all entities with unique color
-        for (uint32_t pickID = 0; pickID < _entities.size(); pickID++) {
-			Entity* entity = _entities[pickID].get();
-			if (!entity) continue;
-
-            if (RenderComponent * renderComponent = entity->getComponent<RenderComponent>())
-                _renderer->drawModelAsColor(
-                    renderComponent->_model.get(),
-                    entity->transform->getGlobalMatrix(), 
-                    pickID + 1);
-
-        }
+		_renderer->selectionPass(_entities);
 
 		// calculate mouse position relative to viewport
         glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
@@ -171,51 +159,29 @@ void SceneManager::draw() {
         isViewportSelect = false;
     }
 
-    
+    _renderer->clearBuffer();
     
 
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    
-    if (_renderer->getViewMode() == ViewMode::Material) 
-        _renderer->drawBackground();
-    
-    for (const auto& entity : _entities) 
-        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
-            drawRecursive(entity.get()); 
+    _renderer->backgroundPass();
 
-    if (_renderer->getViewMode() == ViewMode::Material) 
-        _renderer->drawGrid();
+    if (viewMode == ViewMode::Material) 
+        _renderer->materialPass(_entities);
+    else if (viewMode == ViewMode::Matcap)
+        _renderer->matcapPass(_entities);
+    else if (viewMode == ViewMode::Wireframe)
+        _renderer->wireframePass(_entities);
+
+    _renderer->gridPass();
+
+    // bg ve grid matcap ve material pass ile iyi gidiyor ama wireframe  de sırıtıyor. 
+    // bu sebeple wireframe için ayrı bir pass yapabiliriz. 
+
+
     
-    //_renderer->getShader().use(); // bunu neden kullandık? 
 
     _renderer->bindDefaultFBO();
 }
 
-// draw light? 
-void SceneManager::drawRecursive(Entity* entity)
-{
-    if (!entity->isActive()) return; 
-
-    auto renderComponent = entity->getComponent<RenderComponent>();
-    Model* model = renderComponent->_model.get();
-    if(model)
-        _renderer->drawModel(model, entity->transform->getGlobalMatrix());
-
-    for (Transform* i : entity->transform->getChildren())
-        drawRecursive(i->owner);
-}
-
-void SceneManager::drawAsColorRecursive(Entity* entity)
-{
-    if (!entity->isActive()) return;
-
-    auto model = entity->getComponent<Model>();
-    if (model)
-        _renderer->drawModelAsColor(model, entity->transform->getGlobalMatrix(), entity->transform->UUID);
-
-    for (Transform* i : entity->transform->getChildren())
-        drawAsColorRecursive(i->owner);
-}
 void SceneManager::updateMatrixRecursive(Entity* entity)
 {
     entity->transform->getGlobalMatrix();

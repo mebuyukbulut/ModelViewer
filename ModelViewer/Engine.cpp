@@ -86,7 +86,7 @@ void Engine::initUI()
 	//_UI.setWindowSize(SCR_WIDTH, SCR_HEIGHT);
     
     dispatcher.subscribe(EventType::ShaderSelected, [&](const Event& e) {
-        _renderer.setShader(e.data.text,Renderer::ShaderType::Main);
+        //_renderer.setShader(e.data.text,Renderer::ShaderType::Main);
         });
     dispatcher.subscribe(EventType::EngineExit, [&](const Event& e) {
         SM.saveScene();
@@ -109,7 +109,7 @@ void Engine::init(){
 
     _renderer.init(_camera);
 
-    SM.init(&_renderer, _camera.get(),&(_renderer.getShader()),&_UI);
+    SM.init(&_renderer, _camera.get(), &_UI);
 
 	initUI();
 

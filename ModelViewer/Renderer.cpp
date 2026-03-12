@@ -9,7 +9,8 @@
 #include "Texture.h"
 #include <filesystem>
 #include "AssetManager.h"
-
+#include "RenderComponent.h"
+#include "Transform.h"
 
 
 void Renderer::initMatcap() {
@@ -73,9 +74,108 @@ void Renderer::resizeRenderTarget(int newWidth, int newHeight)
     createRenderTarget(_rt, newWidth, newHeight);
 }
 
+void Renderer::setupMaterialPass(){
+    _materialShader = &_shaderManager.getShader("PBR0");
+}
+void Renderer::setupMatcapPass(){
+	_matcapShader = &_shaderManager.getShader("matcap");
+}
+void Renderer::setupWireframePass()
+{
+}
+void Renderer::setupBackgroundPass(){
+	_backgroundShader = &_shaderManager.getShader("bg");
+}
+void Renderer::setupGridPass(){
+	_gridShader = &_shaderManager.getShader("grid");
+}
+void Renderer::setupLightPass(){
+	//ışık ögelerinin sahnede çizimi için olabilir. Şimdilik kullanmıyoruz.
+}
+void Renderer::setupSelectionPass(){
+	_selectionShader = &_shaderManager.getShader("selection");
+}
+
+void Renderer::materialPass(const std::vector<std::unique_ptr<Entity>>& entities)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    for (const auto& entity : entities)
+        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
+            drawRecursive(entity.get(), true);
+}
+
+void Renderer::matcapPass(const std::vector<std::unique_ptr<Entity>>& entities)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glActiveTexture(GL_TEXTURE2);
+    matcapTexture->use();
 
 
+    for (const auto& entity : entities)
+        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
+            drawRecursive(entity.get(), false);
+}
 
+void Renderer::wireframePass(const std::vector<std::unique_ptr<Entity>>& entities)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glActiveTexture(GL_TEXTURE2);
+    matcapTexture->use();
+
+    for (const auto& entity : entities)
+        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
+            drawRecursive(entity.get(), false);
+}
+
+void Renderer::backgroundPass()
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glDisable(GL_DEPTH_TEST);
+    _backgroundShader->use();
+    _bgMesh->draw(*_backgroundShader);
+
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::gridPass()
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    _gridShader->use();
+    _gridMesh->draw(*_gridShader);
+    glDisable(GL_CULL_FACE);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glEnable(GL_CULL_FACE);
+}
+
+void Renderer::lightPass()
+{
+
+}
+
+void Renderer::selectionPass(const std::vector<std::unique_ptr<Entity>>& entities)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+    // draw all entities with unique color
+    for (uint32_t pickID = 0; pickID < entities.size(); pickID++) {
+        Entity* entity = entities[pickID].get();
+        if (!entity) continue;
+
+        if (RenderComponent* renderComponent = entity->getComponent<RenderComponent>())
+            drawModelAsColor(
+                renderComponent->_model.get(),
+                entity->transform->getGlobalMatrix(),
+                pickID + 1);
+
+    }
+}
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
 	_shaderManager.init(); // load all shaders
@@ -136,15 +236,21 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 
     setCamera(camera);
 
-    setShader("PBR0", Renderer::ShaderType::Material);
-    setShader("matcap", Renderer::ShaderType::Matcap);
+	// Setup rendering passes
+    setupMaterialPass();
+	setupMatcapPass();
+	setupBackgroundPass();
+	setupGridPass();
+    setupSelectionPass();
+
+    //setShader("PBR0", Renderer::ShaderType::Material);
+    //setShader("matcap", Renderer::ShaderType::Matcap);
+
+    //setShader("bg", Renderer::ShaderType::Background);
+    //setShader("grid", Renderer::ShaderType::Grid);
+    //setShader("selection", Renderer::ShaderType::Selection);
+
     setViewMode(ViewMode::Material);
-
-
-    setShader("bg", Renderer::ShaderType::Background);
-    //_renderer.setShader("skybox", Renderer::ShaderType::Background);
-    setShader("grid", Renderer::ShaderType::Grid);
-    setShader("selection", Renderer::ShaderType::Selection);
 
 
     createRenderTarget(_rt, 300, 300); // create default frame buffer for viewport
@@ -152,27 +258,30 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 }
 void Renderer::terminate() {
     _shaderManager.terminate(); 
-    _shader = nullptr; 
 }
 
 void Renderer::beginFrame() {
 	// clear the color buffer
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //static float a = 0.0; 
-    //a = a > 1.0f ? 0.0f : a + 0.01f;
-    //
-    //glClearColor(a,a,a, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 viewMatrix = _camera->getViewMatrix();
     glm::mat4 projMatrix = _camera->getProjectionMatrix();
 
+    // TO-DO: tüm shaderlarda ortak olan uniformları UBO veya benzeri bir yapı ile yönetmek daha kolay olabilir. 
+
 	// set view and projection matrices
-    _shader->use();
-    _shader->setMat4("view", viewMatrix);
-    _shader->setMat4("projection", projMatrix);
-    _shader->setMat4("model", glm::mat4(1.0f));
-    _shader->setVec3("viewPos", _camera->getPosition());
+    _materialShader->use();
+    _materialShader->setMat4("view", viewMatrix);
+    _materialShader->setMat4("projection", projMatrix);
+    _materialShader->setMat4("model", glm::mat4(1.0f));
+    _materialShader->setVec3("viewPos", _camera->getPosition());
+
+    _matcapShader->use();
+    _matcapShader->setMat4("view", viewMatrix);
+    _matcapShader->setMat4("projection", projMatrix);
+    _matcapShader->setMat4("model", glm::mat4(1.0f));
+    _matcapShader->setVec3("viewPos", _camera->getPosition());
 
 
     _selectionShader->use();
@@ -180,10 +289,10 @@ void Renderer::beginFrame() {
     _selectionShader->setMat4("projection", projMatrix);
 
     // skybox için
-    _bgShader->use(); 
+    _backgroundShader->use(); 
     glm::mat4 viewSkybox = glm::mat4(glm::mat3(viewMatrix));
-    _bgShader->setMat4("view", viewSkybox);
-    _bgShader->setMat4("projection", projMatrix);
+    _backgroundShader->setMat4("view", viewSkybox);
+    _backgroundShader->setMat4("projection", projMatrix);
 
 
     _gridShader->use();
@@ -191,18 +300,38 @@ void Renderer::beginFrame() {
     _gridShader->setMat4("view", viewMatrix);
     _gridShader->setMat4("projection", projMatrix);
 
-
-
-
 }
+
 void Renderer::endFrame() {
     
 }
 
-void Renderer::drawModel(Model* model, const glm::mat4& transform) {
-    _shader->use();
-	_shader->setMat4("model", transform);
-    model->draw(*_shader);
+void Renderer::drawRecursive(Entity* entity, bool isMaterialPass) // Modelleri artık recursive çizmeli miyiz? 
+{
+    if (!entity->isActive()) return;
+
+    auto renderComponent = entity->getComponent<RenderComponent>();
+    Model* model = renderComponent->_model.get();
+    if (model)
+        if(isMaterialPass)
+            drawModelAsMaterial(model, entity->transform->getGlobalMatrix());
+        else
+			drawModelAsMatcap(model, entity->transform->getGlobalMatrix());
+
+    for (Transform* i : entity->transform->getChildren())
+        drawRecursive(i->owner, isMaterialPass);
+}
+
+void Renderer::drawModelAsMaterial(Model* model, const glm::mat4& transform) {
+    _materialShader->use();
+    _materialShader->setMat4("model", transform);
+    model->draw(*_materialShader);
+}
+
+void Renderer::drawModelAsMatcap(Model* model, const glm::mat4& transform) {
+    _matcapShader->use();
+    _matcapShader->setMat4("model", transform);
+    model->draw(*_matcapShader);
 }
 
 void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID)
@@ -214,44 +343,6 @@ void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32
     model->draw(*_selectionShader);
 }
 
-void Renderer::drawBackground()
-{
-    glDisable(GL_DEPTH_TEST);
-    _bgShader->use();
-
-    _bgMesh->draw(*_bgShader);
-    //_shaderManager.getShader("bg").use();
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
-    glEnable(GL_DEPTH_TEST);
-    //_shader->use();
-
-
-
-    //glDepthMask(GL_FALSE);
-    //glCullFace(GL_FRONT);
-    //
-    //_bgShader->use();
-    //_bgMesh->draw(*_bgShader);
-    //cubemapTexture->use();
-    //
-    //glCullFace(GL_BACK);
-    //glDepthMask(GL_TRUE);
-
-
-
-
-}
-
-void Renderer::drawGrid()
-{
-    //glDepthMask(GL_FALSE);
-    _gridShader->use();
-    _gridMesh->draw(*_gridShader);
-    glDisable(GL_CULL_FACE);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-    glEnable(GL_CULL_FACE);
-    //glDepthMask(GL_TRUE);
-}
 
 uint32_t Renderer::getSelection(glm::vec2 mousePos)
 {
@@ -263,80 +354,12 @@ uint32_t Renderer::getSelection(glm::vec2 mousePos)
     return pickedID;
 }
 
-void Renderer::setViewMode(ViewMode mode)
-{
-
-    switch (mode)
-    {   
-    case ViewMode::Wireframe:
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		_viewMode = ViewMode::Wireframe;
-        break;
-
-    case ViewMode::Matcap:
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        _viewMode = ViewMode::Matcap;
-		_shader = _matcapShader;
-
-        //matcapTexture->_type = GL_TEXTURE_2D;
-        glActiveTexture(GL_TEXTURE2);
-        matcapTexture->use();
-
-        break;
-
-    case ViewMode::Material:
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        _viewMode = ViewMode::Material;
-        _shader = _materialShader;
-        break;
-
-    default:
-        break;
-    }
+void Renderer::setViewMode(ViewMode mode){
+	_viewMode = mode;
 }
-
 ViewMode Renderer::getViewMode(){
     return _viewMode;
 }
 
-
 void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
-void Renderer::setShader(const std::string name, ShaderType shaderType) {
-    Shader* shader{};
-    shader = &_shaderManager.getShader(name);
-    shader->use();
 
-    switch (shaderType)
-    {
-    case Renderer::ShaderType::Main:
-        LOG_ERROR("Wrong call");
-        assert(true);
-
-        _shader = shader;
-        break;
-    case Renderer::ShaderType::Material:
-        _materialShader = shader;
-        break;
-    case Renderer::ShaderType::Background:
-        _bgShader = shader;
-        break;
-    case Renderer::ShaderType::Grid:
-        _gridShader = shader;
-        break;
-    case Renderer::ShaderType::Light:
-        _lightShader = shader;
-        break;
-    case Renderer::ShaderType::Selection:
-        _selectionShader = shader;
-        break;
-    case Renderer::ShaderType::Matcap:
-        _matcapShader = shader;
-        break;
-    default:
-        break;
-    }
-}
-
-//void Renderer::enableWireframe() {
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-//}
