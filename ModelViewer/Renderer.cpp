@@ -1,4 +1,4 @@
-#include "Renderer.h"
+﻿#include "Renderer.h"
 
 #include <glad/glad.h>
 #include "Model.h"
@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include <filesystem>
 #include "AssetManager.h"
+
 
 
 void Renderer::initMatcap() {
@@ -25,6 +26,57 @@ void Renderer::initMatcap() {
     //matcapTexture = TextureFactory::load(matcapTexturePaths.front(), false);
     matcapTexture = g_Assets.get<Texture>( matcapTexturePaths.front());
 }
+
+void Renderer::createRenderTarget(RenderTarget& rt, int width, int height)
+{
+    rt.width = width;
+    rt.height = height;
+
+    glGenTextures(1, &rt.colorTex);
+    glBindTexture(GL_TEXTURE_2D, rt.colorTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenRenderbuffers(1, &rt.depthRbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rt.depthRbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
+    glGenFramebuffers(1, &rt.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, rt.fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt.colorTex, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rt.depthRbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        LOG_ERROR("RenderTarget incomplete!");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+void Renderer::resizeRenderTarget(int newWidth, int newHeight)
+{
+    if (newWidth == _rt.width && newHeight == _rt.height)
+        return; // boyut değişmemiş
+
+    _rt.width = newWidth;
+    _rt.height = newHeight;
+
+    if (_rt.width && _rt.height)
+        _camera->setWindowSize(_rt.width, _rt.height);
+
+    // Eski GPU kaynaklarını serbest bırak
+    glDeleteFramebuffers(1, &_rt.fbo);
+    glDeleteTextures(1, &_rt.colorTex);
+    glDeleteRenderbuffers(1, &_rt.depthRbo);
+
+    // Yeni boyutla tekrar oluştur
+    createRenderTarget(_rt, newWidth, newHeight);
+}
+
+
+
+
+
 void Renderer::init(std::shared_ptr<Camera> camera) {
 	_shaderManager.init(); // load all shaders
 	//setShader("basic", ShaderType::Main); // set default shader
@@ -94,6 +146,9 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     setShader("grid", Renderer::ShaderType::Grid);
     setShader("selection", Renderer::ShaderType::Selection);
 
+
+    createRenderTarget(_rt, 300, 300); // create default frame buffer for viewport
+
 }
 void Renderer::terminate() {
     _shaderManager.terminate(); 
@@ -124,7 +179,7 @@ void Renderer::beginFrame() {
     _selectionShader->setMat4("view", viewMatrix);
     _selectionShader->setMat4("projection", projMatrix);
 
-    // skybox i�in
+    // skybox için
     _bgShader->use(); 
     glm::mat4 viewSkybox = glm::mat4(glm::mat3(viewMatrix));
     _bgShader->setMat4("view", viewSkybox);

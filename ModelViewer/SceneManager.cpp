@@ -27,52 +27,6 @@
 ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 
 
-void SceneManager::CreateRenderTarget(RenderTarget& rt, int width, int height) 
-{
-    rt.width = width;
-    rt.height = height;
-
-    glGenTextures(1, &rt.colorTex);
-    glBindTexture(GL_TEXTURE_2D, rt.colorTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
-        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glGenRenderbuffers(1, &rt.depthRbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rt.depthRbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-
-    glGenFramebuffers(1, &rt.fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, rt.fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt.colorTex, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rt.depthRbo);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        LOG_ERROR("RenderTarget incomplete!");
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-void SceneManager::ResizeRenderTarget(int newWidth, int newHeight)
-{
-    if (newWidth == _rt.width && newHeight == _rt.height)
-        return; // boyut değişmemiş
-
-    _rt.width = newWidth;
-    _rt.height = newHeight;
-
-    if (_rt.width && _rt.height)
-        _camera->setWindowSize(_rt.width, _rt.height);
-
-    // Eski GPU kaynaklarını serbest bırak
-    glDeleteFramebuffers(1, &_rt.fbo);
-    glDeleteTextures(1, &_rt.colorTex);
-    glDeleteRenderbuffers(1, &_rt.depthRbo);
-
-    // Yeni boyutla tekrar oluştur
-    CreateRenderTarget(_rt, newWidth, newHeight);
-}
-
 void SceneManager::initCommands()
 {
     dispatcher.subscribe(EventType::AddPointLight, [&](const Event& e) {
@@ -154,7 +108,6 @@ void SceneManager::init(Renderer* renderer, Camera* camera, Shader* shader, UIMa
     initCommands();
     initDefaults();
 
-    CreateRenderTarget(_rt, 300, 300);
 }
 
 
@@ -165,8 +118,7 @@ void SceneManager::draw() {
         sceneQuery();
 
     // FBO’ya çiz
-    glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
-    glViewport(0, 0, _rt.width, _rt.height);
+    _renderer->bindViewportFBO();
     //glClearColor(1, 0, 0, 1); // error check
 
 
@@ -236,7 +188,7 @@ void SceneManager::draw() {
     
     //_renderer->getShader().use(); // bunu neden kullandık? 
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    _renderer->bindDefaultFBO();
 }
 
 // draw light? 
@@ -555,7 +507,7 @@ void SceneManager::onInspect()
     viewportPanelSize = glm::vec2(panelSize.x, panelSize.y);
     ImVec2 cursorScreenPos = ImGui::GetCursorScreenPos(); 
     viewportPos = glm::vec2(cursorScreenPos.x, cursorScreenPos.y);
-    ImGui::Image((ImTextureID)(intptr_t)_rt.colorTex,
+    ImGui::Image((ImTextureID)(intptr_t)_renderer->getViewportImage(),
         panelSize, ImVec2(0, 1), ImVec2(1, 0));
 
     // viewport toolbar BEGIN
@@ -609,7 +561,7 @@ void SceneManager::onInspect()
     ImGui::PopStyleVar();
 
 
-    ResizeRenderTarget(panelSize.x, panelSize.y);
+    _renderer->resizeViewport(panelSize.x, panelSize.y);
     // viewport toolbar END
 
     drawGizmo();

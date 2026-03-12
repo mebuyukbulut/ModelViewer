@@ -167,7 +167,7 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (app) {
         LOG_TRACE(std::format("Window resized to: {} x {}",width,height));
-        app->SM.ResizeRenderTarget(width, height);
+        app->_renderer.resizeViewport(width, height);
     }
 }
 

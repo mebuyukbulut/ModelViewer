@@ -11,13 +11,6 @@
 
 class Renderer;
 
-struct RenderTarget {
-    GLuint fbo;
-    GLuint colorTex;
-    GLuint depthRbo;
-    int width, height;
-};
-
 class SceneManager : public Object
 {
     Scene scene;
@@ -33,8 +26,6 @@ class SceneManager : public Object
 
     std::unique_ptr<class LightManager> _lightMng{};
 
-    RenderTarget _rt{};
-
     bool isScenePopupOpen = false;
     bool isViewportSelect = false; 
     glm::vec2 mousePos{};
@@ -45,11 +36,10 @@ public:
 	SceneManager() = default;
     ~SceneManager() = default; 
 
-    void CreateRenderTarget(RenderTarget& rt, int width, int height);
-    void ResizeRenderTarget(int newWidth, int newHeight);
 
     void initCommands();
     void initDefaults();
+
     void init(Renderer* renderer, Camera* camera, Shader* shader, UIManager* UI);
     void draw();
     void drawRecursive(Entity* entity);

@@ -14,6 +14,14 @@ enum class ViewMode {
 	Material,
 };
 
+struct RenderTarget {
+	GLuint fbo;
+	GLuint colorTex;
+	GLuint depthRbo;
+	int width, height;
+};
+
+
 class Renderer
 {
 public:
@@ -28,6 +36,8 @@ public:
 		Material, 
 	};
 private:
+	RenderTarget _rt{};
+
 	ViewMode _viewMode{ ViewMode::Material };
 
 	ShaderManager _shaderManager;
@@ -51,6 +61,10 @@ private:
 	std::vector<std::string> matcapTexturePaths;
 	void initMatcap();
 	//void initSkybox();
+
+	void createRenderTarget(RenderTarget& rt, int width, int height);
+	void resizeRenderTarget(int newWidth, int newHeight);
+
 public:
 	
 	void init(std::shared_ptr<Camera> camera);
@@ -58,6 +72,15 @@ public:
 
 	void beginFrame();
 	void endFrame();
+
+	void bindViewportFBO() {
+		glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
+		glViewport(0, 0, _rt.width, _rt.height);
+	}
+	void bindDefaultFBO() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+
+	void resizeViewport(int width, int height) { resizeRenderTarget(width, height); }
+	GLuint getViewportImage() { return _rt.colorTex; }
 
 	void drawModel(Model* model, const glm::mat4& transform);
 	void drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID);
