@@ -2,6 +2,7 @@
 #include "Model.h"
 #include "Entity.h"
 #include "ShaderManager.h"
+#include "RenderItem.h"
 #include <memory>
 
 class Camera;
@@ -75,13 +76,13 @@ private:
 	void setupSelectionPass();
 
 public:
-	void materialPass(const std::vector<std::unique_ptr<Entity>>& entities);
-	void matcapPass(const std::vector<std::unique_ptr<Entity>>& entities);
-	void wireframePass(const std::vector<std::unique_ptr<Entity>>& entities);
+	void materialPass(const std::vector<RenderItem>& renderItems);
+	void matcapPass(const std::vector<RenderItem>& renderItems);
+	void wireframePass(const std::vector<RenderItem>& renderItems);
 	void backgroundPass();
 	void gridPass();
 	void lightPass();
-	void selectionPass(const std::vector<std::unique_ptr<Entity>> &entities);
+	void selectionPass(const std::vector<RenderItem>& renderItems);
 
 	
 	void init(std::shared_ptr<Camera> camera);

@@ -96,36 +96,41 @@ void Renderer::setupSelectionPass(){
 	_selectionShader = &_shaderManager.getShader("selection");
 }
 
-void Renderer::materialPass(const std::vector<std::unique_ptr<Entity>>& entities)
+void Renderer::materialPass(const std::vector<RenderItem>& renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    for (const auto& entity : entities)
-        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
-            drawRecursive(entity.get(), true);
+    _materialShader->use();
+    for (const RenderItem& item : renderItems) {
+        _materialShader->setMat4("model", item.transform);    
+        item.model->draw(*_materialShader);
+    }
 }
 
-void Renderer::matcapPass(const std::vector<std::unique_ptr<Entity>>& entities)
+void Renderer::matcapPass(const std::vector<RenderItem>& renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glActiveTexture(GL_TEXTURE2);
     matcapTexture->use();
 
-
-    for (const auto& entity : entities)
-        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
-            drawRecursive(entity.get(), false);
+    _matcapShader->use();
+    for (const RenderItem& item : renderItems) {
+        _matcapShader->setMat4("model", item.transform);
+        item.model->draw(*_matcapShader);
+    }
 }
 
-void Renderer::wireframePass(const std::vector<std::unique_ptr<Entity>>& entities)
+void Renderer::wireframePass(const std::vector<RenderItem>& renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glActiveTexture(GL_TEXTURE2);
     matcapTexture->use();
 
-    for (const auto& entity : entities)
-        if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
-            drawRecursive(entity.get(), false);
+    _matcapShader->use();
+    for (const RenderItem& item : renderItems) {
+        _matcapShader->setMat4("model", item.transform);
+        item.model->draw(*_matcapShader);
+    }
 }
 
 void Renderer::backgroundPass()
@@ -156,25 +161,30 @@ void Renderer::lightPass()
 
 }
 
-void Renderer::selectionPass(const std::vector<std::unique_ptr<Entity>>& entities)
+void Renderer::selectionPass(const std::vector<RenderItem>& renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glClearColor(0, 0, 0, 1);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    // draw all entities with unique color
-    for (uint32_t pickID = 0; pickID < entities.size(); pickID++) {
-        Entity* entity = entities[pickID].get();
-        if (!entity) continue;
-
-        if (RenderComponent* renderComponent = entity->getComponent<RenderComponent>())
-            drawModelAsColor(
-                renderComponent->_model.get(),
-                entity->transform->getGlobalMatrix(),
-                pickID + 1);
-
+	for (const RenderItem& item : renderItems) {
+        drawModelAsColor(item.model, item.transform, item.entityIndex + 1);
     }
+
+
+    //// draw all entities with unique color
+    //for (uint32_t pickID = 0; pickID < entities.size(); pickID++) {
+    //    Entity* entity = entities[pickID].get();
+    //    if (!entity) continue;
+
+    //    if (RenderComponent* renderComponent = entity->getComponent<RenderComponent>())
+    //        drawModelAsColor(
+    //            renderComponent->_model.get(),
+    //            entity->transform->getGlobalMatrix(),
+    //            pickID + 1);
+
+    //}
 }
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
@@ -304,34 +314,6 @@ void Renderer::beginFrame() {
 
 void Renderer::endFrame() {
     
-}
-
-void Renderer::drawRecursive(Entity* entity, bool isMaterialPass) // Modelleri artık recursive çizmeli miyiz? 
-{
-    if (!entity->isActive()) return;
-
-    auto renderComponent = entity->getComponent<RenderComponent>();
-    Model* model = renderComponent->_model.get();
-    if (model)
-        if(isMaterialPass)
-            drawModelAsMaterial(model, entity->transform->getGlobalMatrix());
-        else
-			drawModelAsMatcap(model, entity->transform->getGlobalMatrix());
-
-    for (Transform* i : entity->transform->getChildren())
-        drawRecursive(i->owner, isMaterialPass);
-}
-
-void Renderer::drawModelAsMaterial(Model* model, const glm::mat4& transform) {
-    _materialShader->use();
-    _materialShader->setMat4("model", transform);
-    model->draw(*_materialShader);
-}
-
-void Renderer::drawModelAsMatcap(Model* model, const glm::mat4& transform) {
-    _matcapShader->use();
-    _matcapShader->setMat4("model", transform);
-    model->draw(*_matcapShader);
 }
 
 void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID)
