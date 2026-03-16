@@ -57,7 +57,7 @@ void SceneManager::initCommands()
     dispatcher.subscribe(EventType::AddMonkey, [&](const Event& e) {
 
         std::filesystem::path AssetRoot = std::filesystem::current_path().parent_path() / "assets";
-        auto model = AssetRoot / "models/monkey.obj";
+        auto model = AssetRoot / "models/monkey/monkey.obj";
         addModel(model.c_str(), "Monkey", true);
         });
 
@@ -99,10 +99,10 @@ void SceneManager::initDefaults()
     g_Assets.get<Model>("engine::models::torus");
 
     std::filesystem::path AssetRoot = std::filesystem::current_path().parent_path() / "assets";
-    auto model = AssetRoot / "models/monkey.obj";
+    auto model = AssetRoot / "models/monkey/monkey.obj";
     
     g_Assets.get<Model>(model.c_str(), nullptr, true);
-    //g_Assets.get<Model>(MWD + "/../assets/models/monkey.obj", nullptr, true);
+    //g_Assets.get<Model>(MWD + "/../assets/models/monkey/monkey.obj", nullptr, true);
 }
 void SceneManager::init(Renderer* renderer, Camera* camera, UIManager* UI) {
 	MWD = std::filesystem::current_path().string();

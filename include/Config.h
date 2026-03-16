@@ -24,8 +24,8 @@ class Config
 public:
     Window window;
     UI ui;
-    void load(std::string path = "../assets/config.yaml");
-    void save(std::string path = "../assets/config.yaml");
+    void load(std::string path = "../assets/config/config.yaml");
+    void save(std::string path = "../assets/config/config.yaml");
 };
 
 inline Config config{}; // declared and defined in one place

@@ -17,7 +17,7 @@ void Renderer::initMatcap() {
     //matcapTexture = TextureFactory::load("data/matcaps/basic_1.png", false);
 	
     // Scan directory for matcap textures    
-    std::string path = "../assets/data/matcaps/";
+    std::string path = "../assets/env/matcaps/";
     for (const auto& entry : std::filesystem::directory_iterator(path))
         matcapTexturePaths.push_back(entry.path().string());
 
