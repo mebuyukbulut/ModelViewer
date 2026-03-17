@@ -247,7 +247,8 @@ void LightManager::queryLights(const std::vector<Light*> lights)
 	}
 
     // activeLights verilerini GPULightBlock'a kopyala...
-
+    //glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboLights);
+    
     glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GPULightBlock), &blockData);
 

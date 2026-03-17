@@ -123,14 +123,41 @@ void SceneManager::init(Renderer* renderer, Camera* camera, UIManager* UI) {
 void SceneManager::draw() {
 	ViewMode viewMode = _renderer->getViewMode();
 
-    // Çizim işlemine başlamadan önce ışık verilerini güncelliyoruz. 
-    if (viewMode == ViewMode::Material)
-        sceneQuery();
-
 	// update all global matrices
     for (const auto& entity : _entities) 
         if (entity->transform->isRoot()) // && entity->getComponent<Model>()
             updateMatrixRecursive(entity.get());
+
+    // Çizim işlemine başlamadan önce ışık verilerini güncelliyoruz. 
+    if (viewMode == ViewMode::Material)
+        sceneQuery();
+    //_renderer->materialPass({});
+
+	std::vector<RenderItem> renderItems;
+    //for (const auto& entity : _entities)
+    //    if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
+	   //     drawRecursive(entity.get(), renderItems);
+    for (uint32_t pickID = 0; pickID < _entities.size(); pickID++) 
+    {
+		Entity* entity = _entities[pickID].get();
+
+        if (!entity->isActive()) continue;
+
+        RenderComponent* renderComponent = entity->getComponent<RenderComponent>();
+        if(!renderComponent)continue;
+        if (Model* model = renderComponent->_model.get()) {
+            RenderItem item;
+            item.model = model;
+            item.transform = entity->transform->getGlobalMatrix();
+			item.entityIndex = pickID;
+            renderItems.push_back(item);
+        }
+
+    }
+
+
+
+
 
     // FBO’ya çiz
     _renderer->bindViewportFBO();
@@ -141,7 +168,7 @@ void SceneManager::draw() {
     if (isViewportSelect && ImGuizmo::IsOver())
         isViewportSelect = false;
     if (isViewportSelect) {
-		_renderer->selectionPass(_entities);
+		_renderer->selectionPass(renderItems);
 
 		// calculate mouse position relative to viewport
         glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
@@ -173,11 +200,11 @@ void SceneManager::draw() {
     _renderer->backgroundPass();
 
     if (viewMode == ViewMode::Material) 
-        _renderer->materialPass(_entities);
+        _renderer->materialPass(renderItems);
     else if (viewMode == ViewMode::Matcap)
-        _renderer->matcapPass(_entities);
+        _renderer->matcapPass(renderItems);
     else if (viewMode == ViewMode::Wireframe)
-        _renderer->wireframePass(_entities);
+        _renderer->wireframePass(renderItems);
 
     _renderer->gridPass();
 
@@ -189,6 +216,25 @@ void SceneManager::draw() {
 
     _renderer->bindDefaultFBO();
 }
+
+
+void SceneManager::drawRecursive(Entity* entity, std::vector<RenderItem>& renderItems)
+{
+    if (!entity->isActive()) return;
+
+    RenderComponent* renderComponent = entity->getComponent<RenderComponent>();
+
+    if (Model* model = renderComponent->_model.get()) {
+        RenderItem item;
+        item.model = model;
+        item.transform = entity->transform->getGlobalMatrix();
+        renderItems.push_back(item);
+    }
+
+    for (Transform* i : entity->transform->getChildren())
+        drawRecursive(i->owner, renderItems);
+}
+
 
 void SceneManager::updateMatrixRecursive(Entity* entity)
 {
@@ -633,7 +679,8 @@ void SceneManager::sceneQuery()//(Shader& shader)
     for (const auto& entity : _entities) 
         if (Light* light = entity->getComponent<Light>()) 
 			lights.push_back(light);
-
+            
+    //LOG_ERROR("lights.size(): " + std::to_string(lights.size()));
     _lightMng->queryLights(lights);
 }
 

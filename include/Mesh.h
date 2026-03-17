@@ -29,7 +29,7 @@ class Mesh
 public:
 	void init(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	void upload2GPU();
-	void draw(Shader& shader);
+	void draw(Shader* shader);
 	void terminate();
 };
 

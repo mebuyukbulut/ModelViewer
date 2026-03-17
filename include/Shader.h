@@ -11,7 +11,7 @@ class Shader
 
 	unsigned int compileShader(std::string shaderCode, unsigned int shaderType);
 	unsigned int linkProgram(unsigned int vertexShader, unsigned int fragmentShader);
-	unsigned int getUniformLocation(const std::string& name);
+	int getUniformLocation(const std::string& name);
 
 public:
 	enum class Type

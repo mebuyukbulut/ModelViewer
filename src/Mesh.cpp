@@ -57,7 +57,7 @@ void Mesh::upload2GPU(){
     setupMesh();
 }
 
-void Mesh::draw(Shader& shader)
+void Mesh::draw(Shader* shader)
 {
     glBindVertexArray(_vao);
     glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);

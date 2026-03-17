@@ -46,10 +46,10 @@ unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmen
 
     // check for linking errors
     int success;
-    char infoLog[512];
+    char infoLog[2048];
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        glGetProgramInfoLog(shaderProgram, 2048, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
     glDeleteShader(vertexShader);
@@ -57,11 +57,12 @@ unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmen
     return shaderProgram;
 }
 
-unsigned int Shader::getUniformLocation(const std::string& name){
+int Shader::getUniformLocation(const std::string& name){
     if (_uniforms.contains(name))
         return _uniforms[name];
     
-	unsigned int location = glGetUniformLocation(_shaderProgram, name.c_str());
+	int location = glGetUniformLocation(_shaderProgram, name.c_str());
+    if(location < 0) return location;
     _uniforms[name] = location;
     return location;
 }
@@ -82,21 +83,30 @@ void Shader::terminate(){
 }
 
 void Shader::setMat4(const std::string& name, const glm::mat4& mat){
+    if(getUniformLocation(name)<0) return;
     glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::setVec3(const std::string& name, const glm::vec3& vec) {
+    if(getUniformLocation(name)<0) return;
+
     glUniform3fv(getUniformLocation(name), 1, &vec[0]);
 }
 
 void Shader::setVec4(const std::string& name, const glm::vec4& vec) {
+    if(getUniformLocation(name)<0) return;
+
     glUniform4fv(getUniformLocation(name), 1, &vec[0]);
 }
 
 void Shader::setFloat(const std::string& name, float value){
-	glUniform1f(getUniformLocation(name), value);
+    if(getUniformLocation(name)<0) return;
+
+    glUniform1f(getUniformLocation(name), value);
 }
 
 void Shader::setInt(const std::string& name, float value){
+    if(getUniformLocation(name)<0) return;
+
     glUniform1i(getUniformLocation(name), value);
 }

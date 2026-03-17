@@ -168,14 +168,14 @@ std::shared_ptr<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureT
 
 
 // draws the model, and thus all its meshes
-void Model::draw(Shader& shader) {
+void Model::draw(Shader* shader) {
     if (_loadStatus != AssetLoadStatus::Complete) return; 
 
-    if (shader._type == Shader::Type::Foreground)
+    //if (shader->_type == Shader::Type::Foreground)
         if (_materials.size())
-            _materials[0]->use(&shader);
+            _materials[0]->use(shader);
         else
-            g_Assets.get<Material>("engine::materials::defaultMaterial")->use(&shader);  // her seferinde bunu sormasına gerek yok. initialization kısmında bunu default olarak alması lazım. 
+            g_Assets.get<Material>("engine::materials::defaultMaterial")->use(shader);  // her seferinde bunu sormasına gerek yok. initialization kısmında bunu default olarak alması lazım. 
 
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].draw(shader);
