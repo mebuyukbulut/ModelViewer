@@ -80,6 +80,7 @@ glm::vec3 Transform::getGlobalPosition() {
 
 glm::vec3 Transform::getPosition() { return _position; }
 glm::vec3 Transform::getRotation() { return _eulerRotation; }
+glm::quat Transform::getRotationAsQuat() { return _orientation; }
 glm::vec3 Transform::getScale() { return _scale; }
 void Transform::setPosition(const glm::vec3& position) { _position = position; _isDirty = true; }
 void Transform::setRotation(const glm::vec3& eulerDegrees) {

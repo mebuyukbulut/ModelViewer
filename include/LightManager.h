@@ -69,7 +69,7 @@ public:
 
     virtual void update();
     GPULight getGPULight() { 
-		update(); // return isDirty ? update(), blockData : blockData;
+		//update(); // return isDirty ? update(), blockData : blockData;
         return blockData;  
     }
 
@@ -86,6 +86,7 @@ public:
 
     PointLight();
     PointLight(GPULight data) : Light(data){}
+
     //void configShader(Shader& shader, std::string prefix) override;
     //YAML::Node serialize() override;
     void onInspect() override;
@@ -96,6 +97,9 @@ public:
 
     SpotLight();
     SpotLight(GPULight data) : Light(data) {}
+
+    void update() override;
+    
     //void configShader(Shader& shader, std::string prefix) override;
     //YAML::Node serialize() override;
     void onInspect() override;
@@ -108,6 +112,7 @@ public:
 
     DirectionalLight();
     DirectionalLight(GPULight data) : Light(data) {}
+    void update() override;
     //void configShader(Shader& shader, std::string prefix) override;
     //YAML::Node serialize() override;
     void onInspect() override;

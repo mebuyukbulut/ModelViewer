@@ -74,6 +74,29 @@ void Light::update()
     //isDirty = false; 
 }
 
+void SpotLight::update(){
+    Light::update(); //directional light ın positiona da ihtiyacı yok
+
+    // Set direction of spot light according to owners transform. 
+    glm::quat orientation = owner->transform->getRotationAsQuat();
+    glm::vec3 lightDirection = orientation * glm::vec3(0,-1, 0); 
+    blockData.setDirection(lightDirection);
+    //LOG_TRACE("spot light update() :" + std::to_string(lightDirection.x) + ", " 
+    //+ std::to_string(lightDirection.y) + ", " + std::to_string(lightDirection.z));
+
+}
+void DirectionalLight::update(){
+    Light::update(); //directional light ın positiona da ihtiyacı yok
+
+    // Set direction of spot light according to owners transform. 
+    glm::quat orientation = owner->transform->getRotationAsQuat();
+    glm::vec3 lightDirection = orientation * glm::vec3(0,-1, 0); 
+    blockData.setDirection(lightDirection);
+    //LOG_TRACE("spot light update() :" + std::to_string(lightDirection.x) + ", " 
+    //+ std::to_string(lightDirection.y) + ", " + std::to_string(lightDirection.z));
+
+}
+
 Light::Light() {
     name = "Light Component";
 
@@ -162,7 +185,7 @@ void SpotLight::onInspect()
 {
     ImGui::SeparatorText("SpotLight");
     Light::onInspect();
-    ImGui::DragFloat3("Direction", blockData.getDirectionPtr(), 0.1f);
+    //ImGui::DragFloat3("Direction", blockData.getDirectionPtr(), 0.1f);
     ImGui::DragFloat("Cutoff", blockData.getCutoffPtr(), 1.0f, 0.0f, 90.0f);
     ImGui::DragFloat("Attenuation", blockData.getAttenuationPtr(), 0.1f, 0.1f, FLT_MAX);
 }
@@ -170,7 +193,7 @@ void DirectionalLight::onInspect()
 {
     ImGui::SeparatorText("DirectionalLight");
     Light::onInspect();
-    ImGui::DragFloat3("Direction", blockData.getDirectionPtr(), 0.1f);
+    //ImGui::DragFloat3("Direction", blockData.getDirectionPtr(), 0.1f);
 }
 
 
@@ -242,6 +265,7 @@ void LightManager::queryLights(const std::vector<Light*> lights)
     blockData.numLights = static_cast<int>(lights.size());
 
     for (size_t i = 0; i < lights.size() && i < 8; i++) {
+        //LOG_TRACE(typeid(*lights[i]).name());
         lights[i]->update();
         blockData.lights[i] = lights[i]->getGPULight();
 	}

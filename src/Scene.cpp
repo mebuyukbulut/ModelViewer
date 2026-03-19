@@ -9,6 +9,7 @@ bool Scene::load(const std::string& path)
 
     name = root["Scene"]["name"].as<std::string>();
 
+    return false; // pseudo value TO-DO: change it later
     // pos, rot, scale, 
     // color 
     // use temperature? 

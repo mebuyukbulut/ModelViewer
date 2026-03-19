@@ -35,6 +35,7 @@ public:
 
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
+	glm::quat getRotationAsQuat();
 	glm::vec3 getScale();
 
 	void setPosition(const glm::vec3& position);
