@@ -35,7 +35,16 @@ struct ModelSettings : IAssetSettings {
     bool calcTangentSpace = true;
     float scale = 1.0f;
 };
+struct ShaderSettings : IAssetSettings
+{
+    ShaderSettings() = default;
+    ShaderSettings(std::string name, std::string vertexPath, std::string fragmentPath) 
+        : name{name}, vertexPath{vertexPath}, fragmentPath{fragmentPath}{}
 
+    std::string name{};
+    std::string vertexPath{};
+    std::string fragmentPath{};
+};
 
 class Asset : public Object{
 protected:
@@ -50,7 +59,7 @@ public:
     virtual ~Asset() = default;
 
     // --- Zorunlu Fonksiyonlar ---
-    virtual void load(std::filesystem::path path, IAssetSettings settings ) = 0;   // Diskten yükle
+    virtual void load(std::filesystem::path path, IAssetSettings* settings) = 0;   // Diskten yükle
     virtual void unload() = 0; // Belleği boşalt
     virtual void uploadToGPU() = 0; // cpu -> gpu yükleme işlemi main threadden çağrılmalı
 

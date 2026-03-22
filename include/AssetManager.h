@@ -38,7 +38,7 @@ public:
 	std::shared_ptr<T> get(uint64_t id);
 
 	template <class T>
-	std::shared_ptr<T> get(std::filesystem::path path, const IAssetSettings* settings = nullptr, bool async = false);
+	std::shared_ptr<T> get(std::filesystem::path path, IAssetSettings* settings = nullptr, bool async = false);
 
 	void update();
 
@@ -62,7 +62,7 @@ inline std::shared_ptr<T> AssetManager::get(uint64_t id)
 }
 
 template<class T>
-inline std::shared_ptr<T> AssetManager::get(std::filesystem::path path, const IAssetSettings* settings, bool async)
+inline std::shared_ptr<T> AssetManager::get(std::filesystem::path path, IAssetSettings* settings, bool async)
 {
 	// Asset varsa olanı döndür
 	if (uint64_t assetID = AR(path)) 
@@ -76,11 +76,11 @@ inline std::shared_ptr<T> AssetManager::get(std::filesystem::path path, const IA
 	AR.addRecord(asset->UUID, path);
 
 	if (async) {
-		_activeLoads.push_back(std::async(std::launch::async, &Asset::load, asset.get(), path, *settings));
+		_activeLoads.push_back(std::async(std::launch::async, &Asset::load, asset.get(), path, settings));
 		_pendingUploads.push_back(asset);
 	}
 	else {
-		asset->load(path, *settings);
+		asset->load(path, settings);
 		asset->uploadToGPU();
 	}
 

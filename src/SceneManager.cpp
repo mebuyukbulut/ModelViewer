@@ -98,6 +98,7 @@ void SceneManager::initDefaults()
     g_Assets.get<Model>("engine::models::plane");
     g_Assets.get<Model>("engine::models::torus");
 
+
     std::filesystem::path AssetRoot = std::filesystem::current_path().parent_path() / "assets";
     auto model = AssetRoot / "models/monkey/monkey.obj";
     

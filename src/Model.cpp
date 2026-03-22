@@ -198,7 +198,7 @@ void Model::loadDefault(DefaultShapes shape)
 	_loadStatus = AssetLoadStatus::Complete;
 }
 
-void Model::load(std::filesystem::path path, IAssetSettings settings)
+void Model::load(std::filesystem::path path, IAssetSettings* settings)
 {
     _path = path; // bunu Model::Load da yapabiliriz belki. 
     std::string pathStr = path.string(); 

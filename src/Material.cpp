@@ -77,7 +77,7 @@ void Material::use(Shader* shader) {
 	shader->setFloat("material.ao", ao);
 }
 
-void Material::load(std::filesystem::path path, IAssetSettings settings)
+void Material::load(std::filesystem::path path, IAssetSettings* settings)
 {
 	// dosyadan okuyup material oluştur. 
 }

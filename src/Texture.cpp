@@ -20,7 +20,7 @@ void Texture::use() {
 }
 
 
-void Texture::load(std::filesystem::path path, IAssetSettings settings)
+void Texture::load(std::filesystem::path path, IAssetSettings* settings)
 {
     _path = path.string();
     _type = GL_TEXTURE_2D;

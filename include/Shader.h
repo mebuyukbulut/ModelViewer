@@ -3,7 +3,9 @@
 #include <glm/glm.hpp>
 #include <unordered_map>
 
-class Shader
+#include "Asset.h"
+
+class Shader : public Asset
 {
 
 	unsigned int _shaderProgram;
@@ -14,12 +16,6 @@ class Shader
 	int getUniformLocation(const std::string& name);
 
 public:
-	enum class Type
-	{
-		Background,
-		Selection,
-		Foreground,
-	}_type = Type::Foreground;
 
 	void init(std::string vertexShaderSource, std::string fragmentShaderSource);
 	void use(); 
@@ -30,5 +26,12 @@ public:
 	void setVec4(const std::string& name, const glm::vec4& vec);
 	void setFloat(const std::string& name, float value);
 	void setInt(const std::string& name, float value);
+
+
+public:
+	// Inherited via Asset
+    void load(std::filesystem::path path, IAssetSettings* settings) override;
+    void unload() override;
+    void uploadToGPU() override;
 };
 

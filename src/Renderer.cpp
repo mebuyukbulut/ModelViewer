@@ -12,7 +12,6 @@
 #include "RenderComponent.h"
 #include "Transform.h"
 
-
 void Renderer::initMatcap() {
     //matcapTexture = TextureFactory::load("data/matcaps/basic_1.png", false);
 	
@@ -75,25 +74,25 @@ void Renderer::resizeRenderTarget(int newWidth, int newHeight)
 }
 
 void Renderer::setupMaterialPass(){
-    _materialShader = &_shaderManager.getShader("PBR0");
+    _materialShader = g_Assets.get<Shader>("engine::shaders::pbr").get();
 }
 void Renderer::setupMatcapPass(){
-	_matcapShader = &_shaderManager.getShader("matcap");
+	_matcapShader = g_Assets.get<Shader>("engine::shaders::matcap").get();
 }
 void Renderer::setupWireframePass()
 {
 }
 void Renderer::setupBackgroundPass(){
-	_backgroundShader = &_shaderManager.getShader("bg");
+	_backgroundShader = g_Assets.get<Shader>("engine::shaders::bg").get();
 }
 void Renderer::setupGridPass(){
-	_gridShader = &_shaderManager.getShader("grid");
+	_gridShader = g_Assets.get<Shader>("engine::shaders::grid").get();
 }
 void Renderer::setupLightPass(){
 	//ışık ögelerinin sahnede çizimi için olabilir. Şimdilik kullanmıyoruz.
 }
 void Renderer::setupSelectionPass(){
-	_selectionShader = &_shaderManager.getShader("selection");
+	_selectionShader = g_Assets.get<Shader>("engine::shaders::selection").get();
 }
 
 void Renderer::materialPass(const std::vector<RenderItem>& renderItems)
@@ -192,8 +191,25 @@ void Renderer::selectionPass(const std::vector<RenderItem>& renderItems)
 }
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
-	_shaderManager.init(); // load all shaders
-	//setShader("basic", ShaderType::Main); // set default shader
+    // Init all engine::shaders 
+    std::vector<ShaderSettings> shaders;
+    shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
+ 	shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});
+ 	shaders.push_back({"particle0", 	"../assets/shaders/particle_point.vert", 	"../assets/shaders/particle_point.frag"});
+ 	shaders.push_back({"blinn-phong", "../assets/shaders/blinn-phong.vert", 		"../assets/shaders/blinn-phong.frag"});
+ 	shaders.push_back({"basic", 		"../assets/shaders/basic_lighting.vert", 	"../assets/shaders/basic_lighting.frag"});
+ 	shaders.push_back({"pbr", 		"../assets/shaders/PBR0.vert", 				"../assets/shaders/PBR0.frag"});
+	shaders.push_back({"matcap", 		"../assets/shaders/matcap.vert", 			"../assets/shaders/matcap.frag"});
+ 	shaders.push_back({"bg", 			"../assets/shaders/bg_grad.vert", 			"../assets/shaders/bg_grad.frag"});
+ 	shaders.push_back({"skybox", 		"../assets/shaders/skybox.vert", 			"../assets/shaders/skybox.frag"});
+ 	shaders.push_back({"hdr2cubemap", "../assets/shaders/hdr2cubemap.vert", 		"../assets/shaders/hdr2cubemap.frag"});
+ 	shaders.push_back({"grid", 		"../assets/shaders/gridShader.vert", 		"../assets/shaders/gridShader.frag"});
+ 	shaders.push_back({"selection", 	"../assets/shaders/selection.vert", 		"../assets/shaders/selection.frag"});
+
+    for(auto& ss : shaders)
+        g_Assets.get<Shader>("engine::shaders::"+ss.name, &ss);
+    
+    
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
@@ -271,7 +287,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 
 }
 void Renderer::terminate() {
-    _shaderManager.terminate(); 
+    //_shaderManager.terminate(); 
 }
 
 void Renderer::beginFrame() {

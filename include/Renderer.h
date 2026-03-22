@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Model.h"
 #include "Entity.h"
-#include "ShaderManager.h"
 #include "RenderItem.h"
 #include <memory>
 
@@ -41,8 +40,6 @@ private:
 	RenderTarget _rt{};
 
 	ViewMode _viewMode{ ViewMode::Material };
-
-	ShaderManager _shaderManager; // burada olması gerçekten gerekli mi? 
 
 	Shader* _materialShader{};
 	Shader* _matcapShader{};
@@ -112,6 +109,5 @@ public:
 
 	void setCamera(std::shared_ptr<Camera> camera);
 
-	//void setShader(const std::string& name) { _shader = shader; }
 };
 

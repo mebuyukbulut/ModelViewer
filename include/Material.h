@@ -36,7 +36,7 @@ public:
 	void use(Shader* shader);
 
 	// Inherited via Asset
-	void load(std::filesystem::path path, IAssetSettings settings) override;
+	void load(std::filesystem::path path, IAssetSettings* settings) override;
 	void unload() override;
 	void uploadToGPU() override;
 
