@@ -91,6 +91,7 @@ private:
 
 	ViewMode _viewMode{ ViewMode::Material };
 
+	Shader* _shadowShader{};
 	Shader* _materialShader{};
 	Shader* _matcapShader{};
 	Shader* _wireframeShader{};
@@ -110,19 +111,8 @@ private:
 	void initMatcap();
 	//void initSkybox();
 
-	//void createRenderTarget(RenderTarget& rt, int width, int height);
-	//void resizeRenderTarget(int newWidth, int newHeight);
-
-	
-	void setupMaterialPass();
-	void setupMatcapPass();
-	void setupWireframePass();
-	void setupBackgroundPass();
-	void setupGridPass();
-	void setupLightPass();
-	void setupSelectionPass();
-
 public:
+	void shadowPass(const std::vector<RenderItem>& renderItems);
 	void materialPass(const std::vector<RenderItem>& renderItems);
 	void matcapPass(const std::vector<RenderItem>& renderItems);
 	void wireframePass(const std::vector<RenderItem>& renderItems);

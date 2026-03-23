@@ -28,39 +28,22 @@ void Renderer::initMatcap() {
 }
 
 
-void Renderer::setupMaterialPass(){
-    _materialShader = g_Assets.get<Shader>("engine::shaders::pbr").get();
-}
-void Renderer::setupMatcapPass(){
-	_matcapShader = g_Assets.get<Shader>("engine::shaders::matcap").get();
-}
-void Renderer::setupWireframePass()
+void Renderer::shadowPass(const std::vector<RenderItem> &renderItems)
 {
-}
-void Renderer::setupBackgroundPass(){
-	_backgroundShader = g_Assets.get<Shader>("engine::shaders::bg").get();
-}
-void Renderer::setupGridPass(){
-	_gridShader = g_Assets.get<Shader>("engine::shaders::grid").get();
-}
-void Renderer::setupLightPass(){
-	//ışık ögelerinin sahnede çizimi için olabilir. Şimdilik kullanmıyoruz.
-}
-void Renderer::setupSelectionPass(){
-	_selectionShader = g_Assets.get<Shader>("engine::shaders::selection").get();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    _shadowShader->use();
+
+    for (const RenderItem& item : renderItems) {
+        //drawModelAsShadow(item.model, item.transform);
+    }
 }
 
-void Renderer::materialPass(const std::vector<RenderItem>& renderItems)
+void Renderer::materialPass(const std::vector<RenderItem> &renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     _materialShader->use();
-    // //_materialShader->_type = Shader::Type::Foreground;
-    // for (const RenderItem& item : renderItems) {
-    //     _materialShader->setMat4("model", item.transform);    
-    //     item.model->draw(_materialShader);
-    // }
-
 
     for (const RenderItem& item : renderItems) {
         drawModelAsMaterial(item.model, item.transform);
@@ -165,6 +148,18 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
         g_Assets.get<Shader>("engine::shaders::"+ss.name, &ss);
     
     
+	// Setup rendering passes
+    //void Renderer::setupShadowPass()
+    _materialShader = g_Assets.get<Shader>("engine::shaders::pbr").get();
+	_matcapShader = g_Assets.get<Shader>("engine::shaders::matcap").get();
+    //void Renderer::setupWireframePass()
+	_backgroundShader = g_Assets.get<Shader>("engine::shaders::bg").get();
+	_gridShader = g_Assets.get<Shader>("engine::shaders::grid").get();
+    //void Renderer::setupLightPass() //ışık ögelerinin sahnede çizimi için olabilir. Şimdilik kullanmıyoruz.
+	_selectionShader = g_Assets.get<Shader>("engine::shaders::selection").get();
+
+
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
@@ -220,20 +215,6 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 	initMatcap();
 
     setCamera(camera);
-
-	// Setup rendering passes
-    setupMaterialPass();
-	setupMatcapPass();
-	setupBackgroundPass();
-	setupGridPass();
-    setupSelectionPass();
-
-    //setShader("PBR0", Renderer::ShaderType::Material);
-    //setShader("matcap", Renderer::ShaderType::Matcap);
-
-    //setShader("bg", Renderer::ShaderType::Background);
-    //setShader("grid", Renderer::ShaderType::Grid);
-    //setShader("selection", Renderer::ShaderType::Selection);
 
     setViewMode(ViewMode::Material);
 
@@ -425,10 +406,11 @@ void ShadowMapTarget::create(int width, int height)
                 width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); 
 
 
+    glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
     glDrawBuffer(GL_NONE);
