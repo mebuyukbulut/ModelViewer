@@ -45,9 +45,8 @@ void Renderer::materialPass(const std::vector<RenderItem> &renderItems)
 
     _materialShader->use();
 
-    for (const RenderItem& item : renderItems) {
-        drawModelAsMaterial(item.model, item.transform);
-    }
+    for (const RenderItem& item : renderItems) 
+        drawModelWithShader(item.model, item.transform, _materialShader);
 }
 
 void Renderer::matcapPass(const std::vector<RenderItem>& renderItems)
@@ -57,10 +56,9 @@ void Renderer::matcapPass(const std::vector<RenderItem>& renderItems)
     matcapTexture->use();
 
     _matcapShader->use();
-    for (const RenderItem& item : renderItems) {
-        _matcapShader->setMat4("model", item.transform);
-        item.model->draw(_matcapShader);
-    }
+
+    for (const RenderItem& item : renderItems) 
+        drawModelWithShader(item.model, item.transform, _matcapShader);
 }
 
 void Renderer::wireframePass(const std::vector<RenderItem>& renderItems)
@@ -70,10 +68,8 @@ void Renderer::wireframePass(const std::vector<RenderItem>& renderItems)
     matcapTexture->use();
 
     _matcapShader->use();
-    for (const RenderItem& item : renderItems) {
-        _matcapShader->setMat4("model", item.transform);
-        item.model->draw(_matcapShader);
-    }
+    for (const RenderItem& item : renderItems) 
+        drawModelWithShader(item.model, item.transform, _matcapShader);
 }
 
 void Renderer::backgroundPass()
@@ -111,21 +107,8 @@ void Renderer::selectionPass(const std::vector<RenderItem>& renderItems)
     glClearColor(0, 0, 0, 1);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	for (const RenderItem& item : renderItems) {
-        drawModelAsColor(item.model, item.transform, item.entityIndex + 1);
-    }
-    // // draw all entities with unique color
-    // for (uint32_t pickID = 0; pickID < entities.size(); pickID++) {
-    //     Entity* entity = entities[pickID].get();
-    //     if (!entity) continue;
-
-    //     if (RenderComponent* renderComponent = entity->getComponent<RenderComponent>())
-    //         drawModelAsColor(
-    //             renderComponent->_model.get(),
-    //             entity->transform->getGlobalMatrix(),
-    //             pickID + 1);
-
-    // }
+	for (const RenderItem& item : renderItems) 
+        drawModelWithShader(item.model, item.transform, _selectionShader, item.entityIndex + 1);
 }
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
@@ -280,26 +263,36 @@ void Renderer::resizeViewport(int width, int height)
         _camera->setWindowSize(width,height);
 }
 
-void Renderer::drawModelAsMaterial(Model *model, const glm::mat4 &transform)
-{
-    _materialShader->use();
-    _materialShader->setMat4("model", transform);
-    model->draw(_materialShader);
-}
+// void Renderer::drawModelAsMaterial(Model *model, const glm::mat4 &transform)
+// {
+//     _materialShader->use();
+//     _materialShader->setMat4("model", transform);
+//     model->draw(_materialShader);
+// }
 
-void Renderer::drawModelAsMatcap(Model* model, const glm::mat4& transform) {
-    _matcapShader->use();
-    _matcapShader->setMat4("model", transform);
-    model->draw(_matcapShader);
-}
+// void Renderer::drawModelAsMatcap(Model* model, const glm::mat4& transform) {
+//     _matcapShader->use();
+//     _matcapShader->setMat4("model", transform);
+//     model->draw(_matcapShader);
+// }
 
-void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID)
-{
-    _selectionShader->use();
-    _selectionShader->setMat4("model", transform);
-    _selectionShader->setInt("objectID", ID);
+// void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID)
+// {
+//     _selectionShader->use();
+//     _selectionShader->setMat4("model", transform);
+//     _selectionShader->setInt("objectID", ID);
 
-    model->draw(_selectionShader);
+//     model->draw(_selectionShader);
+// }
+
+void Renderer::drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID){
+
+    shader->use();
+    shader->setMat4("model", transform);
+    if(ID)
+        shader->setInt("objectID", ID);
+
+    model->draw(shader);
 }
 
 

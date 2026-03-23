@@ -136,11 +136,8 @@ public:
 	void resizeViewport(int width, int height);
 	GLuint getViewportImage() { return _rt.colorTexture(); }
 	
-	void drawRecursive(Entity* entity, bool isMaterialPass);
-	void drawModelAsMaterial(Model* model, const glm::mat4& transform);
-	void drawModelAsMatcap(Model* model, const glm::mat4& transform);
-	void drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID);
-	
+	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
+
 	uint32_t getSelection(glm::vec2 mousePos);
 
 	void setViewMode(ViewMode mode);
