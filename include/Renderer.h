@@ -15,12 +15,62 @@ enum class ViewMode {
 	Material,
 };
 
-struct RenderTarget {
+
+
+
+
+
+
+// A render buffer that can hold color and depth values 
+// For know we use it for render scene in 3D viewport 
+// and selection 
+class ColorRenderTarget {
 	GLuint fbo;
 	GLuint colorTex;
 	GLuint depthRbo;
 	int width, height;
+
+public:
+	void create(int width, int height);
+	void destroy();
+	bool resize(int width, int height);
+	void bind();
+	void unbind();
+
+	// Getters
+	GLuint framebuffer() const;
+    GLuint colorTexture() const;
+    GLuint depthBuffer() const;
 };
+
+
+
+
+
+
+
+// 
+class ShadowMapTarget {
+	GLuint fbo;
+	GLuint depthMap;
+	int width, height;
+
+public:
+	void create(int width, int height);
+	void destroy();
+	bool resize(int width, int height);
+	void bind();
+	void unbind();
+
+	// Getters
+	GLuint framebuffer() const;
+    GLuint depthBuffer() const;
+};
+
+
+
+
+
 
 
 class Renderer
@@ -37,7 +87,7 @@ public:
 		Material, 
 	};
 private:
-	RenderTarget _rt{};
+	ColorRenderTarget _rt{};
 
 	ViewMode _viewMode{ ViewMode::Material };
 
@@ -60,8 +110,8 @@ private:
 	void initMatcap();
 	//void initSkybox();
 
-	void createRenderTarget(RenderTarget& rt, int width, int height);
-	void resizeRenderTarget(int newWidth, int newHeight);
+	//void createRenderTarget(RenderTarget& rt, int width, int height);
+	//void resizeRenderTarget(int newWidth, int newHeight);
 
 	
 	void setupMaterialPass();
@@ -88,14 +138,13 @@ public:
 	void endFrame();
 
 	void bindViewportFBO() {
-		glBindFramebuffer(GL_FRAMEBUFFER, _rt.fbo);
-		glViewport(0, 0, _rt.width, _rt.height);
+		_rt.bind();
 	}
 	void bindDefaultFBO() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 	void clearBuffer() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
-	void resizeViewport(int width, int height) { resizeRenderTarget(width, height); }
-	GLuint getViewportImage() { return _rt.colorTex; }
+	void resizeViewport(int width, int height);
+	GLuint getViewportImage() { return _rt.colorTexture(); }
 	
 	void drawRecursive(Entity* entity, bool isMaterialPass);
 	void drawModelAsMaterial(Model* model, const glm::mat4& transform);
@@ -110,4 +159,3 @@ public:
 	void setCamera(std::shared_ptr<Camera> camera);
 
 };
-

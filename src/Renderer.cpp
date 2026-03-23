@@ -27,51 +27,6 @@ void Renderer::initMatcap() {
     matcapTexture = g_Assets.get<Texture>( matcapTexturePaths.front());
 }
 
-void Renderer::createRenderTarget(RenderTarget& rt, int width, int height)
-{
-    rt.width = width;
-    rt.height = height;
-
-    glGenTextures(1, &rt.colorTex);
-    glBindTexture(GL_TEXTURE_2D, rt.colorTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
-        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glGenRenderbuffers(1, &rt.depthRbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rt.depthRbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-
-    glGenFramebuffers(1, &rt.fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, rt.fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt.colorTex, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rt.depthRbo);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        LOG_ERROR("RenderTarget incomplete!");
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-void Renderer::resizeRenderTarget(int newWidth, int newHeight)
-{
-    if (newWidth == _rt.width && newHeight == _rt.height)
-        return; // boyut değişmemiş
-
-    _rt.width = newWidth;
-    _rt.height = newHeight;
-
-    if (_rt.width && _rt.height)
-        _camera->setWindowSize(_rt.width, _rt.height);
-
-    // Eski GPU kaynaklarını serbest bırak
-    glDeleteFramebuffers(1, &_rt.fbo);
-    glDeleteTextures(1, &_rt.colorTex);
-    glDeleteRenderbuffers(1, &_rt.depthRbo);
-
-    // Yeni boyutla tekrar oluştur
-    createRenderTarget(_rt, newWidth, newHeight);
-}
 
 void Renderer::setupMaterialPass(){
     _materialShader = g_Assets.get<Shader>("engine::shaders::pbr").get();
@@ -196,14 +151,14 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
  	shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});
  	shaders.push_back({"particle0", 	"../assets/shaders/particle_point.vert", 	"../assets/shaders/particle_point.frag"});
- 	shaders.push_back({"blinn-phong", "../assets/shaders/blinn-phong.vert", 		"../assets/shaders/blinn-phong.frag"});
+ 	shaders.push_back({"blinn-phong",   "../assets/shaders/blinn-phong.vert", 		"../assets/shaders/blinn-phong.frag"});
  	shaders.push_back({"basic", 		"../assets/shaders/basic_lighting.vert", 	"../assets/shaders/basic_lighting.frag"});
- 	shaders.push_back({"pbr", 		"../assets/shaders/PBR0.vert", 				"../assets/shaders/PBR0.frag"});
+ 	shaders.push_back({"pbr", 		    "../assets/shaders/PBR0.vert", 				"../assets/shaders/PBR0.frag"});
 	shaders.push_back({"matcap", 		"../assets/shaders/matcap.vert", 			"../assets/shaders/matcap.frag"});
  	shaders.push_back({"bg", 			"../assets/shaders/bg_grad.vert", 			"../assets/shaders/bg_grad.frag"});
  	shaders.push_back({"skybox", 		"../assets/shaders/skybox.vert", 			"../assets/shaders/skybox.frag"});
- 	shaders.push_back({"hdr2cubemap", "../assets/shaders/hdr2cubemap.vert", 		"../assets/shaders/hdr2cubemap.frag"});
- 	shaders.push_back({"grid", 		"../assets/shaders/gridShader.vert", 		"../assets/shaders/gridShader.frag"});
+ 	shaders.push_back({"hdr2cubemap",   "../assets/shaders/hdr2cubemap.vert", 		"../assets/shaders/hdr2cubemap.frag"});
+ 	shaders.push_back({"grid", 		    "../assets/shaders/gridShader.vert", 		"../assets/shaders/gridShader.frag"});
  	shaders.push_back({"selection", 	"../assets/shaders/selection.vert", 		"../assets/shaders/selection.frag"});
 
     for(auto& ss : shaders)
@@ -283,7 +238,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     setViewMode(ViewMode::Material);
 
 
-    createRenderTarget(_rt, 300, 300); // create default frame buffer for viewport
+    _rt.create(300,300); // create default frame buffer for viewport
 
 }
 void Renderer::terminate() {
@@ -336,7 +291,16 @@ void Renderer::endFrame() {
     
 }
 
-void Renderer::drawModelAsMaterial(Model* model, const glm::mat4& transform) {
+void Renderer::resizeViewport(int width, int height)
+{
+    bool isResized = _rt.resize(width, height); 
+
+    if(isResized)
+        _camera->setWindowSize(width,height);
+}
+
+void Renderer::drawModelAsMaterial(Model *model, const glm::mat4 &transform)
+{
     _materialShader->use();
     _materialShader->setMat4("model", transform);
     model->draw(_materialShader);
@@ -377,3 +341,135 @@ ViewMode Renderer::getViewMode(){
 
 void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
 
+
+
+
+
+
+void ColorRenderTarget::create(int width, int height)
+{
+    this->width = width; this->height = height; 
+
+    glGenTextures(1, &colorTex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenRenderbuffers(1, &depthRbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        LOG_ERROR("ColorRenderTarget incomplete!");
+
+
+    unbind(); // bu burada gereksiz gibi ama bakalım
+}
+
+void ColorRenderTarget::destroy()
+{    
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteTextures(1, &colorTex);
+    glDeleteRenderbuffers(1, &depthRbo);
+
+}
+
+bool ColorRenderTarget::resize(int width, int height)
+{    
+    if (width == this->width && height == this->height // if(newSize == oldSize) -> do not create new framebuffer
+        || (!width || !height) )// or if(newSize.x == 0 || newSize.y == 0) -> do not create new framebuffer
+        return false; 
+
+    // Eski GPU kaynaklarını serbest bırak
+    destroy();
+
+    // Yeni boyutla tekrar oluştur
+    create(width, height);
+    return true; 
+}
+
+void ColorRenderTarget::bind(){
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0, 0, width, height);
+}
+
+void ColorRenderTarget::unbind(){
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLuint ColorRenderTarget::framebuffer()  const { return fbo; }
+GLuint ColorRenderTarget::colorTexture() const { return colorTex; }
+GLuint ColorRenderTarget::depthBuffer()  const { return depthRbo; }
+
+
+
+
+
+
+
+// 
+void ShadowMapTarget::create(int width, int height)
+{
+    this->width = width; this->height = height;
+
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
+                width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    
+    unbind();
+}
+
+void ShadowMapTarget::destroy()
+{
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteTextures(1, &depthMap);
+}
+
+// width height !width !height !h&&!w expected !h||!w
+// 0       0       1     1       1       1       1
+// 0       1       1     0       0       1       1
+// 1       0       0     1       0       1       1
+// 1       1       0     0       0       0       0
+
+bool ShadowMapTarget::resize(int width, int height)
+{
+    if (width == this->width && height == this->height // if(newSize == oldSize) -> do not create new framebuffer
+        || (!width || !height) )// or if(newSize.x == 0 || newSize.y == 0) -> do not create new framebuffer
+        return false; 
+
+    // Eski GPU kaynaklarını serbest bırak
+    destroy();
+
+    // Yeni boyutla tekrar oluştur
+    create(width, height);
+    return true; 
+}
+
+void ShadowMapTarget::bind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0, 0, width, height);
+}
+
+void ShadowMapTarget::unbind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+}
