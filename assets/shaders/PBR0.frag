@@ -5,7 +5,8 @@ in vec3 fNormal;
 in vec2 fTexCoords;
 out vec4 FragColor;
 
-
+uniform sampler2D shadowMap;
+uniform mat4 lightSpaceMatrix;
 
 // PBR0.frag veya ilgili shader dosyası
 struct Light {
@@ -62,7 +63,6 @@ struct Material{
 };
 uniform Material material;
 
-uniform sampler2D texture_diffuse1;
 
 
 #define PI 3.1415926535897932384626433832795
@@ -305,7 +305,22 @@ void main(){
         if(lightType == 3) pLights += CalcSpotLight(ubo_data.lights[i]);
     }
 
-    vec3 result = pLights;// * material.color;
+    // Shadow calculations
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fPos, 1.0);
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float bias = 0.005;
+    float shadow = //currentDepth > closestDepth ? 1.0 : 0.0;
+        currentDepth - bias > closestDepth
+        ? 1.0
+        : 0.0;
+
+
+    vec3 result = pLights * (1.0 - shadow);// * material.color;
     //vec3 result = (pLights + ambient) * material.color;
 
 
@@ -318,6 +333,3 @@ void main(){
     //float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
     //FragColor = vec4(vec3(depth), 1.0);
 }	
-
-//FragColor = texture(texture_diffuse1, fTexCoords) * vec4(finalColor, 1);
-//FragColor = vec4(finalColor, 1);

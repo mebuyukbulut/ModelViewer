@@ -117,6 +117,7 @@ public:
 	};
 private:
 	ColorRenderTarget _rt{};
+	ShadowMapTarget _shadowMapTarget{};
 	FrameUniforms _frameUniforms{};
 
 	ViewMode _viewMode{ ViewMode::Material };
@@ -143,7 +144,7 @@ private:
 	void initMatcap();
 	//void initSkybox();
 
-	void shadowPass(const std::vector<RenderItem>& renderItems);
+	void shadowPass(const SceneRenderData &renderData);
 	void materialPass(const std::vector<RenderItem>& renderItems);
 	void matcapPass(const std::vector<RenderItem>& renderItems);
 	void wireframePass(const std::vector<RenderItem>& renderItems);
@@ -159,11 +160,12 @@ public:
 	void init(std::shared_ptr<Camera> camera);
 	void terminate();
 
-	void renderScene(const std::vector<RenderItem>& renderItems, bool isViewportSelect, glm::vec2 mousePos);
+	void renderScene(const SceneRenderData &renderData, bool isViewportSelect, glm::vec2 mousePos);
 	void clearBuffer();
 
 	void resizeViewport(int width, int height);
 	GLuint getViewportImage() { return _rt.colorTexture(); }
+	GLuint getDebugImage() { return _shadowMapTarget.depthBuffer(); }
 	
 
 	uint32_t getSelection(glm::vec2 mousePos);

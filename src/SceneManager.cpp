@@ -26,6 +26,38 @@
 
 ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 
+void SceneManager::collectRenderData(SceneRenderData &renderData)
+{
+    // collect lights 
+    // light toplama işlemi sadece viewmode material için çalışsa yeterli olabilir. Ama şuan emin değilim.
+	
+    for (const auto& entity : _entities) 
+        if (Light* light = entity->getComponent<Light>()) 
+			renderData.lights.push_back(light);
+            
+    //LOG_ERROR("lights.size(): " + std::to_string(lights.size()));
+    _lightMng->queryLights(renderData.lights);
+
+
+    // collect render items respect to their index 
+    for (uint32_t pickID = 0; pickID < _entities.size(); pickID++) 
+    {
+		Entity* entity = _entities[pickID].get();
+
+        if (!entity->isActive()) continue;
+
+        RenderComponent* renderComponent = entity->getComponent<RenderComponent>();
+        if(!renderComponent)continue;
+        if (Model* model = renderComponent->_model.get()) {
+            RenderItem item;
+            item.model = model;
+            item.transform = entity->transform->getGlobalMatrix();
+			item.entityIndex = pickID;
+            renderData.renderItems.push_back(item);
+        }
+
+    }
+}
 
 void SceneManager::initCommands()
 {
@@ -131,31 +163,9 @@ void SceneManager::draw() {
     for (const auto& entity : _entities) 
         if (entity->transform->isRoot()) // && entity->getComponent<Model>()
             updateMatrixRecursive(entity.get());
-
-    // Çizim işlemine başlamadan önce ışık verilerini güncelliyoruz. 
-    if (viewMode == ViewMode::Material)
-        sceneQuery();
         
-
-	std::vector<RenderItem> renderItems;
-    
-    for (uint32_t pickID = 0; pickID < _entities.size(); pickID++) 
-    {
-		Entity* entity = _entities[pickID].get();
-
-        if (!entity->isActive()) continue;
-
-        RenderComponent* renderComponent = entity->getComponent<RenderComponent>();
-        if(!renderComponent)continue;
-        if (Model* model = renderComponent->_model.get()) {
-            RenderItem item;
-            item.model = model;
-            item.transform = entity->transform->getGlobalMatrix();
-			item.entityIndex = pickID;
-            renderItems.push_back(item);
-        }
-
-    }
+    SceneRenderData renderData{};
+    collectRenderData(renderData);
 
 
 
@@ -171,7 +181,7 @@ void SceneManager::draw() {
     mPos = mPos - panelPos;
     mPos.y = panelSize.y - mPos.y;
 
-    _renderer->renderScene(renderItems,isViewportSelect, mPos);
+    _renderer->renderScene(renderData, isViewportSelect, mPos);
 
     if (isViewportSelect) {
 		// get ID from framebuffer and object selection: 
@@ -411,6 +421,13 @@ void SceneManager::onInspect()
     ImGui::Begin("Properties");
     if(_selectedEntity)
 		_selectedEntity->onInspect();
+    ImGui::End();
+
+    ImGui::Begin("Debug Window");
+
+    ImVec2 debugPanelSize = ImGui::GetContentRegionAvail();
+    ImGui::Image((ImTextureID)(intptr_t)_renderer->getDebugImage(),
+        debugPanelSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 
 
@@ -655,13 +672,7 @@ void SceneManager::addLight(LightType lightType)
 
 void SceneManager::sceneQuery()//(Shader& shader)
 {
-	std::vector<Light*> lights;
-    for (const auto& entity : _entities) 
-        if (Light* light = entity->getComponent<Light>()) 
-			lights.push_back(light);
-            
-    //LOG_ERROR("lights.size(): " + std::to_string(lights.size()));
-    _lightMng->queryLights(lights);
+
 }
 
 void SceneManager::addModel(std::string path, std::string entityName, bool loadAsync)

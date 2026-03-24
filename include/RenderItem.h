@@ -9,3 +9,8 @@ struct RenderItem
 	uint32_t entityIndex{}; // for selection pass
 };
 
+
+struct SceneRenderData{
+    std::vector<RenderItem> renderItems;
+    std::vector<class Light*> lights;
+};

@@ -11,6 +11,8 @@
 #include "AssetManager.h"
 #include "RenderComponent.h"
 #include "Transform.h"
+#include "LightManager.h"
+
 
 void Renderer::initMatcap() {
     //matcapTexture = TextureFactory::load("data/matcaps/basic_1.png", false);
@@ -28,14 +30,22 @@ void Renderer::initMatcap() {
 }
 
 
-void Renderer::shadowPass(const std::vector<RenderItem> &renderItems)
+void Renderer::shadowPass(const SceneRenderData &renderData) 
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    _shadowShader->use();
+    float near_plane = 1.0f, far_plane = 7.5f;
+    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane); 
+    glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), 
+                                  glm::vec3( 0.0f, 0.0f,  0.0f), 
+                                  glm::vec3( 0.0f, 1.0f,  0.0f));  
+    glm::mat4 lightSpaceMatrix = lightProjection * lightView; 
 
-    for (const RenderItem& item : renderItems) {
-        //drawModelAsShadow(item.model, item.transform);
+    _materialShader->use(); _materialShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    _shadowShader->use();
+    _shadowShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    for (const RenderItem& item : renderData.renderItems) {
+        drawModelWithShader(item.model, item.transform, _shadowShader);
     }
 }
 
@@ -44,6 +54,11 @@ void Renderer::materialPass(const std::vector<RenderItem> &renderItems)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     _materialShader->use();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _shadowMapTarget.depthBuffer());
+    _materialShader->use();
+    _materialShader->setInt("shadowMap", 0);
 
     for (const RenderItem& item : renderItems) 
         drawModelWithShader(item.model, item.transform, _materialShader);
@@ -134,13 +149,14 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
  	shaders.push_back({"hdr2cubemap",   "../assets/shaders/hdr2cubemap.vert", 		"../assets/shaders/hdr2cubemap.frag"});
  	shaders.push_back({"grid", 		    "../assets/shaders/gridShader.vert", 		"../assets/shaders/gridShader.frag"});
  	shaders.push_back({"selection", 	"../assets/shaders/selection.vert", 		"../assets/shaders/selection.frag"});
+ 	shaders.push_back({"shadow",    	"../assets/shaders/simpleShadow.vert", 		"../assets/shaders/simpleShadow.frag"});
 
     for(auto& ss : shaders)
         g_Assets.get<Shader>("engine::shaders::"+ss.name, &ss);
     
     
 	// Setup rendering passes
-    //void Renderer::setupShadowPass()
+    _shadowShader = g_Assets.get<Shader>("engine::shaders::shadow").get();
     _materialShader = g_Assets.get<Shader>("engine::shaders::pbr").get();
 	_matcapShader = g_Assets.get<Shader>("engine::shaders::matcap").get();
     _wireframeShader = g_Assets.get<Shader>("engine::shaders::wireframe").get();
@@ -192,14 +208,23 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 
 
     _rt.create(300,300); // create default frame buffer for viewport
+    _shadowMapTarget.create(1024,1024);
 
 }
 void Renderer::terminate() {
     //_shaderManager.terminate(); 
 }
 
-void Renderer::renderScene(const std::vector<RenderItem> &renderItems, bool isViewportSelect, glm::vec2 mousePos)
+void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSelect, glm::vec2 mousePos)
 {
+    _shadowMapTarget.bind();
+    clearBuffer();
+    shadowPass(renderData);
+    _shadowMapTarget.unbind();
+
+
+
+
     _frameUniforms.update(_camera->getViewMatrix(), _camera->getProjectionMatrix(), _camera->getPosition());
     _rt.bind();
 
@@ -207,7 +232,7 @@ void Renderer::renderScene(const std::vector<RenderItem> &renderItems, bool isVi
     clearBuffer();
 
     if(isViewportSelect){
-        selectionPass(renderItems);
+        selectionPass(renderData.renderItems);
         
         unsigned char data[4];
         glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -218,9 +243,9 @@ void Renderer::renderScene(const std::vector<RenderItem> &renderItems, bool isVi
     clearBuffer();
 
     backgroundPass();
-    if      (_viewMode == ViewMode::Material)   materialPass(renderItems);
-    else if (_viewMode == ViewMode::Matcap)     matcapPass(renderItems);
-    else if (_viewMode == ViewMode::Wireframe)  wireframePass(renderItems);
+    if      (_viewMode == ViewMode::Material)   materialPass(renderData.renderItems);
+    else if (_viewMode == ViewMode::Matcap)     matcapPass(renderData.renderItems);
+    else if (_viewMode == ViewMode::Wireframe)  wireframePass(renderData.renderItems);
     gridPass();
 
     _rt.unbind();
@@ -397,3 +422,6 @@ void ShadowMapTarget::unbind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 }
+
+GLuint ShadowMapTarget::framebuffer() const { return fbo; }
+GLuint ShadowMapTarget::depthBuffer() const { return depthMap; }
