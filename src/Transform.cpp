@@ -146,11 +146,23 @@ void Transform::setParent(Transform* newParent)
 
 void Transform::onInspect()
 {
+    bool p{false}, r{false}, s{false}, pr{false}, rr{false}, sr{false};
     ImGui::SeparatorText("Transform");
-    bool p = ImGui::DragFloat3("Position:", &_position[0], 0.01);
-    bool r = ImGui::DragFloat3("Rotation:", &_eulerRotation[0], 0.01);
-    bool s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
-    if (p || r || s) _isDirty = true;
+    
+    if (ImGui::SmallButton("R##pos")){ _position = glm::vec3(0,0,0); pr = true; } ImGui::SameLine();
+    p = ImGui::DragFloat3("Position:", &_position[0], 0.01);
+
+    if (ImGui::SmallButton("R##rot")) { _eulerRotation = glm::vec3(0,0,0); rr = true; } ImGui::SameLine();
+    r = ImGui::DragFloat3("Rotation:", &_eulerRotation[0], 1.00);
+
+    if (ImGui::SmallButton("R##scale")) { _scale = glm::vec3(1,1,1); sr = true; } ImGui::SameLine();
+    s = ImGui::DragFloat3("Scale:", &_scale[0], 0.01);
+    
+    if ( p || r || s || pr || rr || sr ) _isDirty = true;
+
+    if(r || rr)
+        _orientation = glm::quat(glm::radians(_eulerRotation));
+
 
     //Light* light = owner->getComponent<Light>();
     //if (p && light)
