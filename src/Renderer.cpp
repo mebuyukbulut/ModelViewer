@@ -80,7 +80,7 @@ void Renderer::backgroundPass()
 
     glDisable(GL_DEPTH_TEST);
     _backgroundShader->use();
-    _bgMesh->draw(_backgroundShader);
+    _bgModel->draw(_backgroundShader);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -92,7 +92,7 @@ void Renderer::gridPass()
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
     _gridShader->use();
-    _gridMesh->draw(_gridShader);
+    _gridModel->draw(_gridShader);
     glEnable(GL_CULL_FACE);
     glDisable(GL_BLEND);
 }
@@ -115,6 +115,9 @@ void Renderer::selectionPass(const std::vector<RenderItem>& renderItems)
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
     _frameUniforms.init(); 
+
+    // Biz bu değişkenleri hardcoded yazıyoruz ama bunları dosyadan okumak yada klasör taraması yapmak daha mantıklı olabilir
+    // Ayrıca CWD path olayını da daha net bir hale getirmemiz gerekecek
 
     // Init all engine::shaders 
     std::vector<ShaderSettings> shaders;
@@ -172,30 +175,11 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     // _bgMesh = new Mesh(tmp);
     
 
-    // Initialize background
-    _bgMesh = new Mesh();
-    std::vector<Vertex> bgVertices{
-        {{-1,-1, 0}, {0,0,0}, {0,0}},
-        {{ 3,-1, 0}, {0,0,0}, {2,0}},
-        {{-1, 3, 0}, {0,0,0}, {0,2}},
-    };
-    std::vector<unsigned int> bgIndices{ 0, 1, 2 };
-    _bgMesh->init(bgVertices, bgIndices);
-    _bgMesh->upload2GPU();
+
+    _bgModel = g_Assets.get<Model>("engine::models::bgPlane").get();
+    _gridModel = g_Assets.get<Model>("engine::models::gridPlane").get();
 
 
-
-    // Initialize grid 
-    _gridMesh = new Mesh();
-    std::vector<Vertex> gridVertices{
-        {{ -10, 0, -10}, {0,0,0}, {0,0}}, // a 0
-        {{ -10, 0,  10}, {0,0,0}, {0,0}}, // b 1    d-c
-        {{  10, 0,  10}, {0,0,0}, {0,0}}, // c 2    a-b
-        {{  10, 0, -10}, {0,0,0}, {0,0}}, // d 3
-    };
-    std::vector<unsigned int> gridIndices{ 0, 1, 2, 0, 2, 3 };
-    _gridMesh->init(gridVertices, gridIndices);
-    _gridMesh->upload2GPU();
     //glDisable(GL_FRAMEBUFFER_SRGB);
     //GLboolean srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
     //std::cout << "Framebuffer sRGB: " << (srgbEnabled ? "ENABLED" : "DISABLED") << std::endl;
@@ -253,28 +237,6 @@ void Renderer::resizeViewport(int width, int height)
         _camera->setWindowSize(width,height);
 }
 
-// void Renderer::drawModelAsMaterial(Model *model, const glm::mat4 &transform)
-// {
-//     _materialShader->use();
-//     _materialShader->setMat4("model", transform);
-//     model->draw(_materialShader);
-// }
-
-// void Renderer::drawModelAsMatcap(Model* model, const glm::mat4& transform) {
-//     _matcapShader->use();
-//     _matcapShader->setMat4("model", transform);
-//     model->draw(_matcapShader);
-// }
-
-// void Renderer::drawModelAsColor(Model* model, const glm::mat4& transform, uint32_t ID)
-// {
-//     _selectionShader->use();
-//     _selectionShader->setMat4("model", transform);
-//     _selectionShader->setInt("objectID", ID);
-
-//     model->draw(_selectionShader);
-// }
-
 void Renderer::drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID){
 
     shader->use();
@@ -297,12 +259,8 @@ uint32_t Renderer::getSelection(glm::vec2 mousePos)
     return lastSelectedID;
 }
 
-void Renderer::setViewMode(ViewMode mode){
-	_viewMode = mode;
-}
-ViewMode Renderer::getViewMode(){
-    return _viewMode;
-}
+void Renderer::setViewMode(ViewMode mode) {_viewMode = mode; }
+ViewMode Renderer::getViewMode()          {return _viewMode; }
 
 void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
 

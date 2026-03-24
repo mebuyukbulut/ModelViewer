@@ -7,6 +7,7 @@
 class Camera;
 class Shader;
 class Mesh; 
+class Model;
 class Texture; 
 
 enum class ViewMode {
@@ -132,8 +133,9 @@ private:
 	std::shared_ptr<Camera> _camera;
 	uint32_t lastSelectedID{};
 
-	Mesh* _bgMesh{};
-	Mesh* _gridMesh{};
+    Model* _bgModel{};
+    Model* _gridModel{};
+
 	Texture* cubemapTexture;
 	//std::vector<Texture*> loadedMatcapTextures; 
 	std::shared_ptr<Texture> matcapTexture;

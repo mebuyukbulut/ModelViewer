@@ -45,6 +45,8 @@ enum class DefaultShapes
 	Sphere,
 	Plane, // Quad
 	Torus,
+	BgPlane,
+	GridPlane,
 };
 
 
@@ -54,6 +56,9 @@ class MeshFactory {
 	static OMesh createCylinder();
 	static OMesh createPlane();
 	static OMesh createTorus();
+
+	static Mesh createBgPlane();
+	static Mesh createGridPlane();
 
 public:
 	static Mesh create(DefaultShapes shape);

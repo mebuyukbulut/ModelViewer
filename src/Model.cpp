@@ -210,7 +210,10 @@ void Model::load(std::filesystem::path path, IAssetSettings* settings)
         else if (pathStr == "engine::models::cylinder") loadDefault(DefaultShapes::Cylinder);        
         else if (pathStr == "engine::models::plane") loadDefault(DefaultShapes::Plane);        
         else if (pathStr == "engine::models::sphere") loadDefault(DefaultShapes::Sphere);        
-        else if (pathStr == "engine::models::torus") loadDefault(DefaultShapes::Torus);        
+        else if (pathStr == "engine::models::torus") loadDefault(DefaultShapes::Torus);   
+
+        else if (pathStr == "engine::models::bgPlane") loadDefault(DefaultShapes::BgPlane);          
+        else if (pathStr == "engine::models::gridPlane") loadDefault(DefaultShapes::GridPlane);        
         else LOG_ERROR("The given path for shape is unknown!");        
         // ... diğer shape'ler
 

@@ -307,8 +307,45 @@ OMesh MeshFactory::createTorus()
     return mesh;
 }
 
+Mesh MeshFactory::createBgPlane()
+{
+    // Initialize background
+    Mesh _bgMesh;
+    std::vector<Vertex> bgVertices{
+        {{-1,-1, 0}, {0,0,0}, {0,0}},
+        {{ 3,-1, 0}, {0,0,0}, {2,0}},
+        {{-1, 3, 0}, {0,0,0}, {0,2}},
+    };
+    std::vector<unsigned int> bgIndices{ 0, 1, 2 };
+    _bgMesh.init(bgVertices, bgIndices);
+    _bgMesh.upload2GPU();
+    return _bgMesh;
+}
+
+Mesh MeshFactory::createGridPlane()
+{
+    // Initialize grid 
+    Mesh _gridMesh;
+    std::vector<Vertex> gridVertices{
+        {{ -10, 0, -10}, {0,0,0}, {0,0}}, // a 0
+        {{ -10, 0,  10}, {0,0,0}, {0,0}}, // b 1    d-c
+        {{  10, 0,  10}, {0,0,0}, {0,0}}, // c 2    a-b
+        {{  10, 0, -10}, {0,0,0}, {0,0}}, // d 3
+    };
+    std::vector<unsigned int> gridIndices{ 0, 1, 2, 0, 2, 3 };
+    _gridMesh.init(gridVertices, gridIndices);
+    _gridMesh.upload2GPU();
+    return _gridMesh;
+}
+
 Mesh MeshFactory::create(DefaultShapes shape)
 {
+    if(shape == DefaultShapes::BgPlane)
+        return createBgPlane();
+    else if(shape == DefaultShapes::GridPlane)
+        return createGridPlane();
+
+
     OMesh mesh;
 
     // 🔹 Geometrik şekil seçimi
