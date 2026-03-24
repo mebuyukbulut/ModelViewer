@@ -64,12 +64,14 @@ void Renderer::matcapPass(const std::vector<RenderItem>& renderItems)
 void Renderer::wireframePass(const std::vector<RenderItem>& renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glActiveTexture(GL_TEXTURE2);
-    matcapTexture->use();
+    glDisable(GL_CULL_FACE);
+    //glLineWidth(1.5f);
 
-    _matcapShader->use();
+    _wireframeShader->use();
     for (const RenderItem& item : renderItems) 
-        drawModelWithShader(item.model, item.transform, _matcapShader);
+        drawModelWithShader(item.model, item.transform, _wireframeShader);
+
+    glEnable(GL_CULL_FACE);
 }
 
 void Renderer::backgroundPass()
@@ -121,6 +123,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
  	shaders.push_back({"basic", 		"../assets/shaders/basic_lighting.vert", 	"../assets/shaders/basic_lighting.frag"});
  	shaders.push_back({"pbr", 		    "../assets/shaders/PBR0.vert", 				"../assets/shaders/PBR0.frag"});
 	shaders.push_back({"matcap", 		"../assets/shaders/matcap.vert", 			"../assets/shaders/matcap.frag"});
+	shaders.push_back({"wireframe", 	"../assets/shaders/wireframe.vert", 		"../assets/shaders/wireframe.frag"});
  	shaders.push_back({"bg", 			"../assets/shaders/bg_grad.vert", 			"../assets/shaders/bg_grad.frag"});
  	shaders.push_back({"skybox", 		"../assets/shaders/skybox.vert", 			"../assets/shaders/skybox.frag"});
  	shaders.push_back({"hdr2cubemap",   "../assets/shaders/hdr2cubemap.vert", 		"../assets/shaders/hdr2cubemap.frag"});
@@ -135,7 +138,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     //void Renderer::setupShadowPass()
     _materialShader = g_Assets.get<Shader>("engine::shaders::pbr").get();
 	_matcapShader = g_Assets.get<Shader>("engine::shaders::matcap").get();
-    //void Renderer::setupWireframePass()
+    _wireframeShader = g_Assets.get<Shader>("engine::shaders::wireframe").get();
 	_backgroundShader = g_Assets.get<Shader>("engine::shaders::bg").get();
 	_gridShader = g_Assets.get<Shader>("engine::shaders::grid").get();
     //void Renderer::setupLightPass() //ışık ögelerinin sahnede çizimi için olabilir. Şimdilik kullanmıyoruz.
@@ -228,6 +231,12 @@ void Renderer::setGlobalShaderUniforms() {
     _matcapShader->setMat4("projection", projMatrix);
     _matcapShader->setMat4("model", glm::mat4(1.0f));
     _matcapShader->setVec3("viewPos", _camera->getPosition());
+
+    _wireframeShader->use();
+    _wireframeShader->setMat4("view", viewMatrix);
+    _wireframeShader->setMat4("projection", projMatrix);
+    _wireframeShader->setMat4("model", glm::mat4(1.0f));
+    _wireframeShader->setVec3("viewPos", _camera->getPosition());
 
 
     _selectionShader->use();
