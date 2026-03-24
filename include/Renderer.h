@@ -16,7 +16,35 @@ enum class ViewMode {
 };
 
 
+class FrameUniforms{
+    struct GPUFrameUniforms {
+        glm::mat4 view;
+		glm::mat4 projection;
+		glm::vec3 viewPos; float padding; // 16 byte'a tamamlamak için
+    }blockData;
 
+	GLuint uboID; // Uniform Buffer Object ID
+public:
+	void init(){
+		glGenBuffers(1, &uboID);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboID);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(GPUFrameUniforms), nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboID); // 0 numaralı binding point
+	}
+	~FrameUniforms(){
+		glDeleteBuffers(1, &uboID);
+	}
+
+	void update(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
+		blockData.view = view;
+		blockData.projection = projection;
+		blockData.viewPos = viewPos; 
+
+		glBindBuffer(GL_UNIFORM_BUFFER, uboID);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GPUFrameUniforms), &blockData);
+	}
+
+};
 
 
 
@@ -88,6 +116,7 @@ public:
 	};
 private:
 	ColorRenderTarget _rt{};
+	FrameUniforms _frameUniforms{};
 
 	ViewMode _viewMode{ ViewMode::Material };
 
@@ -123,7 +152,6 @@ private:
 
 	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
 
-	void setGlobalShaderUniforms();
 public:
 	
 	void init(std::shared_ptr<Camera> camera);

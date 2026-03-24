@@ -81,20 +81,20 @@ void Renderer::backgroundPass()
     glDisable(GL_DEPTH_TEST);
     _backgroundShader->use();
     _bgMesh->draw(_backgroundShader);
-
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
     glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::gridPass()
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
+    glEnable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
     _gridShader->use();
     _gridMesh->draw(_gridShader);
-    glDisable(GL_CULL_FACE);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glEnable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
 }
 
 void Renderer::lightPass()
@@ -114,6 +114,8 @@ void Renderer::selectionPass(const std::vector<RenderItem>& renderItems)
 }
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
+    _frameUniforms.init(); 
+
     // Init all engine::shaders 
     std::vector<ShaderSettings> shaders;
     shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
@@ -212,55 +214,9 @@ void Renderer::terminate() {
     //_shaderManager.terminate(); 
 }
 
-void Renderer::setGlobalShaderUniforms() {
-
-    glm::mat4 viewMatrix = _camera->getViewMatrix();
-    glm::mat4 projMatrix = _camera->getProjectionMatrix();
-
-    // TO-DO: tüm shaderlarda ortak olan uniformları UBO veya benzeri bir yapı ile yönetmek daha kolay olabilir. 
-
-	// set view and projection matrices
-    _materialShader->use();
-    _materialShader->setMat4("view", viewMatrix);
-    _materialShader->setMat4("projection", projMatrix);
-    _materialShader->setMat4("model", glm::mat4(1.0f));
-    _materialShader->setVec3("viewPos", _camera->getPosition());
-
-    _matcapShader->use();
-    _matcapShader->setMat4("view", viewMatrix);
-    _matcapShader->setMat4("projection", projMatrix);
-    _matcapShader->setMat4("model", glm::mat4(1.0f));
-    _matcapShader->setVec3("viewPos", _camera->getPosition());
-
-    _wireframeShader->use();
-    _wireframeShader->setMat4("view", viewMatrix);
-    _wireframeShader->setMat4("projection", projMatrix);
-    _wireframeShader->setMat4("model", glm::mat4(1.0f));
-    _wireframeShader->setVec3("viewPos", _camera->getPosition());
-
-
-    _selectionShader->use();
-    _selectionShader->setMat4("view", viewMatrix);
-    _selectionShader->setMat4("projection", projMatrix);
-
-    // skybox için
-    _backgroundShader->use(); 
-    glm::mat4 viewSkybox = glm::mat4(glm::mat3(viewMatrix));
-    _backgroundShader->setMat4("view", viewSkybox);
-    _backgroundShader->setMat4("projection", projMatrix);
-
-
-    _gridShader->use();
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND); // ???
-    _gridShader->setMat4("view", viewMatrix);
-    _gridShader->setMat4("projection", projMatrix);
-
-}
-
 void Renderer::renderScene(const std::vector<RenderItem> &renderItems, bool isViewportSelect, glm::vec2 mousePos)
 {
-    setGlobalShaderUniforms();
-
+    _frameUniforms.update(_camera->getViewMatrix(), _camera->getProjectionMatrix(), _camera->getPosition());
     _rt.bind();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);    

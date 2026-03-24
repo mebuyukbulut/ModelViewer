@@ -8,11 +8,19 @@ out vec3 fNormal;
 out vec2 fTexCoords;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+
+layout(std140, binding = 0) uniform FrameUniforms
+{
+    mat4 view;
+    mat4 projection;
+
+    vec3 viewPos;
+    float _pad0;
+};
 
 void main()
 {
+	
 	fPos = vec3(model * vec4(vPos, 1.0));
 	fNormal = mat3(transpose(inverse(model))) * vNormal;
 

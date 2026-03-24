@@ -251,7 +251,7 @@ LightManager::LightManager()
     glGenBuffers(1, &uboLights);
     glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(GPULightBlock), nullptr, GL_DYNAMIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboLights); // 0 numaralı binding point
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLights); // 1 numaralı binding point
 
 }
 

@@ -5,6 +5,8 @@ in vec3 fNormal;
 in vec2 fTexCoords;
 out vec4 FragColor;
 
+
+
 // PBR0.frag veya ilgili shader dosyası
 struct Light {
     vec4 position;  // xyz + 1 float padding
@@ -13,10 +15,21 @@ struct Light {
     vec4 direction; // xyz + 1 float padding
 };
 
-layout (std140, binding = 0) uniform LightBlock {
+layout (std140, binding = 1) uniform LightBlock {
     Light lights[8];  // Maksimum ışık sayısı (NR_LIGHTS)
     int numLights;    // Aktif ışık sayısı
 } ubo_data;
+
+
+
+layout(std140, binding = 0) uniform FrameUniforms
+{
+    mat4 view;
+    mat4 projection;
+
+    vec3 viewPos;
+    float _pad0;
+};
 
 
 
@@ -38,7 +51,6 @@ layout (std140, binding = 0) uniform LightBlock {
 uniform float ambientIntensity;
 uniform vec3 ambientColor;
 
-uniform vec3 viewPos;
 
 struct Material{
 	vec4 baseColor;
