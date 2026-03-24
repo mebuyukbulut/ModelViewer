@@ -132,12 +132,10 @@ void SceneManager::draw() {
     // Çizim işlemine başlamadan önce ışık verilerini güncelliyoruz. 
     if (viewMode == ViewMode::Material)
         sceneQuery();
-    //_renderer->materialPass({});
+        
 
 	std::vector<RenderItem> renderItems;
-    //for (const auto& entity : _entities)
-    //    if (entity->transform->isRoot() && entity->getComponent<RenderComponent>())
-	   //     drawRecursive(entity.get(), renderItems);
+    
     for (uint32_t pickID = 0; pickID < _entities.size(); pickID++) 
     {
 		Entity* entity = _entities[pickID].get();
@@ -159,25 +157,20 @@ void SceneManager::draw() {
 
 
 
-
-    // FBO’ya çiz
-    _renderer->bindViewportFBO();
-    //glClearColor(1, 0, 0, 1); // error check
-
-
     // mouse click ile ekranda öge yakalama
     if (isViewportSelect && ImGuizmo::IsOver())
         isViewportSelect = false;
+
+    // calculate mouse position relative to viewport
+    glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
+    glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
+    glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
+    mPos = mPos - panelPos;
+    mPos.y = panelSize.y - mPos.y;
+
+    _renderer->renderScene(renderItems,isViewportSelect, mPos);
+
     if (isViewportSelect) {
-		_renderer->selectionPass(renderItems);
-
-		// calculate mouse position relative to viewport
-        glm::vec2 mPos = glm::vec2(mousePos.x, mousePos.y);
-        glm::vec2 panelPos = glm::vec2(viewportPos.x, viewportPos.y);
-        glm::vec2 panelSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
-        mPos = mPos - panelPos;
-        mPos.y = panelSize.y - mPos.y;
-
 		// get ID from framebuffer and object selection: 
         uint32_t selectedID = _renderer->getSelection(mPos);
         LOG_TRACE("selection UUID: " + std::to_string(selectedID));
@@ -195,27 +188,10 @@ void SceneManager::draw() {
         isViewportSelect = false;
     }
 
-    _renderer->clearBuffer();
-    
-
-    _renderer->backgroundPass();
-
-    if (viewMode == ViewMode::Material) 
-        _renderer->materialPass(renderItems);
-    else if (viewMode == ViewMode::Matcap)
-        _renderer->matcapPass(renderItems);
-    else if (viewMode == ViewMode::Wireframe)
-        _renderer->wireframePass(renderItems);
-
-    _renderer->gridPass();
-
-    // bg ve grid matcap ve material pass ile iyi gidiyor ama wireframe  de sırıtıyor. 
-    // bu sebeple wireframe için ayrı bir pass yapabiliriz. 
 
 
     
 
-    _renderer->bindDefaultFBO();
 }
 
 

@@ -126,7 +126,7 @@ void Engine::mainLoop()
     while (!glfwWindowShouldClose(_window))
     {
         processInput(_window);
-        _renderer.beginFrame();
+        //_renderer.beginFrame();
 
         time.update();
         double deltaTime = time.deltaTime();

@@ -209,10 +209,7 @@ void Renderer::terminate() {
     //_shaderManager.terminate(); 
 }
 
-void Renderer::beginFrame() {
-	// clear the color buffer
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void Renderer::setGlobalShaderUniforms() {
 
     glm::mat4 viewMatrix = _camera->getViewMatrix();
     glm::mat4 projMatrix = _camera->getProjectionMatrix();
@@ -245,15 +242,43 @@ void Renderer::beginFrame() {
 
 
     _gridShader->use();
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable(GL_BLEND); // ???
     _gridShader->setMat4("view", viewMatrix);
     _gridShader->setMat4("projection", projMatrix);
 
 }
 
-void Renderer::endFrame() {
-    
+void Renderer::renderScene(const std::vector<RenderItem> &renderItems, bool isViewportSelect, glm::vec2 mousePos)
+{
+    setGlobalShaderUniforms();
+
+    _rt.bind();
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);    
+    clearBuffer();
+
+    if(isViewportSelect){
+        selectionPass(renderItems);
+        
+        unsigned char data[4];
+        glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        uint32_t pickedID = data[0] + (data[1] << 8) + (data[2] << 16);
+        //LOG_TRACE(std::to_string(pickedID));
+        lastSelectedID = pickedID;
+    }   
+    clearBuffer();
+
+    backgroundPass();
+    if      (_viewMode == ViewMode::Material)   materialPass(renderItems);
+    else if (_viewMode == ViewMode::Matcap)     matcapPass(renderItems);
+    else if (_viewMode == ViewMode::Wireframe)  wireframePass(renderItems);
+    gridPass();
+
+    _rt.unbind();
+
 }
+
+void Renderer::clearBuffer(){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
 void Renderer::resizeViewport(int width, int height)
 {
@@ -298,12 +323,13 @@ void Renderer::drawModelWithShader(Model* model, const glm::mat4& transform, Sha
 
 uint32_t Renderer::getSelection(glm::vec2 mousePos)
 {
-    unsigned char data[4];
-    glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    uint32_t pickedID = data[0] + (data[1] << 8) + (data[2] << 16);
-    //LOG_TRACE(std::to_string(pickedID));
+    // unsigned char data[4];
+    // glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    // uint32_t pickedID = data[0] + (data[1] << 8) + (data[2] << 16);
+    // //LOG_TRACE(std::to_string(pickedID));
 
-    return pickedID;
+    // return pickedID;
+    return lastSelectedID;
 }
 
 void Renderer::setViewMode(ViewMode mode){

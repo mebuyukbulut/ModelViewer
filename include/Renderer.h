@@ -101,6 +101,7 @@ private:
 	Shader* _selectionShader{};
 
 	std::shared_ptr<Camera> _camera;
+	uint32_t lastSelectedID{};
 
 	Mesh* _bgMesh{};
 	Mesh* _gridMesh{};
@@ -111,7 +112,6 @@ private:
 	void initMatcap();
 	//void initSkybox();
 
-public:
 	void shadowPass(const std::vector<RenderItem>& renderItems);
 	void materialPass(const std::vector<RenderItem>& renderItems);
 	void matcapPass(const std::vector<RenderItem>& renderItems);
@@ -120,23 +120,21 @@ public:
 	void gridPass();
 	void lightPass();
 	void selectionPass(const std::vector<RenderItem>& renderItems);
+
+	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
+
+	void setGlobalShaderUniforms();
+public:
 	
 	void init(std::shared_ptr<Camera> camera);
 	void terminate();
 
-	void beginFrame();
-	void endFrame();
-
-	void bindViewportFBO() {
-		_rt.bind();
-	}
-	void bindDefaultFBO() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
-	void clearBuffer() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
+	void renderScene(const std::vector<RenderItem>& renderItems, bool isViewportSelect, glm::vec2 mousePos);
+	void clearBuffer();
 
 	void resizeViewport(int width, int height);
 	GLuint getViewportImage() { return _rt.colorTexture(); }
 	
-	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
 
 	uint32_t getSelection(glm::vec2 mousePos);
 
