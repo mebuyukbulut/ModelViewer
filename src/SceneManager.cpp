@@ -22,6 +22,7 @@
 #include "Logger.h"
 #include "AssetManager.h"
 #include "RenderComponent.h"
+#include "Builtin.h"
 
 
 ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -72,19 +73,19 @@ void SceneManager::initCommands()
         });
 
     dispatcher.subscribe(EventType::AddCube, [&](const Event& e) {
-        addModel("engine::models::cube", "Cube");
+        addModel(Builtin::Model::Cube, "Cube");
         });
     dispatcher.subscribe(EventType::AddCone, [&](const Event& e) {
-        addModel("engine::models::cone", "Cone");
+        addModel(Builtin::Model::Cone, "Cone");
         });
     dispatcher.subscribe(EventType::AddCylinder, [&](const Event& e) {
-        addModel("engine::models::cylinder", "Cylinder");
+        addModel(Builtin::Model::Cylinder, "Cylinder");
         });
     dispatcher.subscribe(EventType::AddPlane, [&](const Event& e) {
-        addModel("engine::models::plane", "Plane");
+        addModel(Builtin::Model::Plane, "Plane");
         });
     dispatcher.subscribe(EventType::AddTorus, [&](const Event& e) {
-        addModel("engine::models::torus", "Torus");
+        addModel(Builtin::Model::Torus, "Torus");
         });
     dispatcher.subscribe(EventType::AddMonkey, [&](const Event& e) {
 
@@ -121,18 +122,11 @@ void SceneManager::initCommands()
 void SceneManager::initDefaults()
 {
     // Load default Material
-    g_Assets.get<Material>("engine::materials::defaultMaterial"); 
+    g_Assets.get<Material>(Builtin::Material::DefaultMaterial); 
 
     // Load default Models
-    g_Assets.get<Model>("engine::models::cube");
-    g_Assets.get<Model>("engine::models::cone");
-    g_Assets.get<Model>("engine::models::cylinder");
-    g_Assets.get<Model>("engine::models::plane");
-    g_Assets.get<Model>("engine::models::torus");
-
-    g_Assets.get<Model>("engine::models::bgPlane");
-    g_Assets.get<Model>("engine::models::gridPlane");
-
+    for(const char* key : Builtin::Model::All)
+        g_Assets.get<Model>(key);
 
     std::filesystem::path AssetRoot = std::filesystem::current_path().parent_path() / "assets";
     auto model = AssetRoot / "models/monkey/monkey.obj";

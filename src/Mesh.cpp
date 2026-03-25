@@ -1,7 +1,8 @@
 ﻿#include "Mesh.h"
 #include <glad/gl.h>
 #include <iostream>
-
+#include "Builtin.h"
+#include "Logger.h"
 
 
 
@@ -338,38 +339,34 @@ Mesh MeshFactory::createGridPlane()
     return _gridMesh;
 }
 
-Mesh MeshFactory::create(DefaultShapes shape)
+Mesh MeshFactory::create(std::string pathStr)
 {
-    if(shape == DefaultShapes::BgPlane)
+    if(pathStr == Builtin::Model::BgPlane)
         return createBgPlane();
-    else if(shape == DefaultShapes::GridPlane)
+    else if(pathStr == Builtin::Model::GridPlane)
         return createGridPlane();
 
+    //typedef OMesh(*BuiltinLoader)(void);
+    using BuiltinLoader = OMesh(*)(void);
+
+    static const std::unordered_map<std::string, BuiltinLoader> builtinLoaders = {
+        {Builtin::Model::Cube, &MeshFactory::createCube},
+        {Builtin::Model::Cone, &MeshFactory::createCone},
+        {Builtin::Model::Cylinder, &MeshFactory::createCylinder},
+        {Builtin::Model::Plane, &MeshFactory::createPlane},
+        //{Builtin::Model::Sphere, &MeshFactory::createSphere},
+        {Builtin::Model::Torus, &MeshFactory::createTorus},
+    };
 
     OMesh mesh;
 
-    // 🔹 Geometrik şekil seçimi
-    switch (shape)
-    {
-    case DefaultShapes::Cube:
-        mesh = createCube();
-        break;
-    case DefaultShapes::Cone:
-        mesh = createCone();
-        break;
-    case DefaultShapes::Cylinder:
-        mesh = createCylinder();
-        break;
-    case DefaultShapes::Plane:
-        mesh = createPlane();
-        break;
-    case DefaultShapes::Torus:
-        mesh = createTorus();
-        break;
+    auto it = builtinLoaders.find(pathStr);
+    if (it != builtinLoaders.end()) 
+        mesh = it->second();
+    else
+        LOG_ERROR( pathStr + " not found in MeshFactory create()!" );
+    
 
-    default:
-        break;
-    }
 
 
 

@@ -118,7 +118,7 @@ void Shader::load(std::filesystem::path path, IAssetSettings* settings)
     std::string fragmentShaderName{};
 
     std::string pathStr = path.string(); 
-    if (pathStr.starts_with("engine::shaders::")){
+    if (pathStr.starts_with("engine::shaders::")){ // TO-DO: builtin
         ShaderSettings* a  = dynamic_cast<ShaderSettings*>(settings);
         vertexShaderName = a->vertexPath;
         fragmentShaderName = a->fragmentPath;

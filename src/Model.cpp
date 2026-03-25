@@ -5,7 +5,7 @@
 #include "Logger.h"
 #include <filesystem>
 #include "AssetManager.h"
-
+#include "Builtin.h"
 
 
 
@@ -175,7 +175,7 @@ void Model::draw(Shader* shader) {
         if (_materials.size())
             _materials[0]->use(shader);
         else
-            g_Assets.get<Material>("engine::materials::defaultMaterial")->use(shader);  // her seferinde bunu sormasına gerek yok. initialization kısmında bunu default olarak alması lazım. 
+            g_Assets.get<Material>(Builtin::Material::DefaultMaterial)->use(shader);  // her seferinde bunu sormasına gerek yok. initialization kısmında bunu default olarak alması lazım. 
 
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].draw(shader);
@@ -185,15 +185,15 @@ void Model::draw(Shader* shader) {
 // TO-DO: Load fonksiyonlarını standartlaştırıp tek bir isme topla 
 // Neden her şeyi ayrı bir isim ve fonksiyon gerekli olsun ki? 
 
-void Model::loadDefault(DefaultShapes shape)
+void Model::loadDefault(std::string pathStr)
 {
     _loadStatus = AssetLoadStatus::LoadingToCPU;
 
     // For simplicity, we will just load a default mesh here
-    Mesh mesh = MeshFactory::create(shape);
+    Mesh mesh = MeshFactory::create(pathStr);
     meshes.push_back(mesh);
 
-    _materials.push_back(g_Assets.get<Material>("engine::materials::defaultMaterial"));
+    _materials.push_back(g_Assets.get<Material>(Builtin::Material::DefaultMaterial));
 
 	_loadStatus = AssetLoadStatus::Complete;
 }
@@ -203,23 +203,15 @@ void Model::load(std::filesystem::path path, IAssetSettings* settings)
     _path = path; // bunu Model::Load da yapabiliriz belki. 
     std::string pathStr = path.string(); 
 
-    // 1. Sanal Yol Kontrolü (Internal Primitives)
-    if (pathStr.starts_with("engine::models::")) {
-        if (pathStr == "engine::models::cube") loadDefault(DefaultShapes::Cube);        
-        else if (pathStr == "engine::models::cone") loadDefault(DefaultShapes::Cone);        
-        else if (pathStr == "engine::models::cylinder") loadDefault(DefaultShapes::Cylinder);        
-        else if (pathStr == "engine::models::plane") loadDefault(DefaultShapes::Plane);        
-        else if (pathStr == "engine::models::sphere") loadDefault(DefaultShapes::Sphere);        
-        else if (pathStr == "engine::models::torus") loadDefault(DefaultShapes::Torus);   
-
-        else if (pathStr == "engine::models::bgPlane") loadDefault(DefaultShapes::BgPlane);          
-        else if (pathStr == "engine::models::gridPlane") loadDefault(DefaultShapes::GridPlane);        
-        else LOG_ERROR("The given path for shape is unknown!");        
-        // ... diğer shape'ler
-
-        return;
+    // Sanal yolla model yükleme
+    for(const char* key : Builtin::Model::All){
+        if(key == pathStr){
+            loadDefault(pathStr);
+            return;
+        }
     }
 
+    // Fiziksel yolla model yükleme
     loadModel(pathStr);
 }
 

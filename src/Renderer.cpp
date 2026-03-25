@@ -12,7 +12,7 @@
 #include "RenderComponent.h"
 #include "Transform.h"
 #include "LightManager.h"
-
+#include "Builtin.h"
 
 void Renderer::initMatcap() {
     //matcapTexture = TextureFactory::load("data/matcaps/basic_1.png", false);
@@ -156,35 +156,36 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     // Ayrıca CWD path olayını da daha net bir hale getirmemiz gerekecek
 
     // Init all engine::shaders 
-    std::vector<ShaderSettings> shaders;
-    shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
- 	shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});
- 	shaders.push_back({"particle0", 	"../assets/shaders/particle_point.vert", 	"../assets/shaders/particle_point.frag"});
- 	shaders.push_back({"blinn-phong",   "../assets/shaders/blinn-phong.vert", 		"../assets/shaders/blinn-phong.frag"});
- 	shaders.push_back({"basic", 		"../assets/shaders/basic_lighting.vert", 	"../assets/shaders/basic_lighting.frag"});
- 	shaders.push_back({"pbr", 		    "../assets/shaders/PBR0.vert", 				"../assets/shaders/PBR0.frag"});
-	shaders.push_back({"matcap", 		"../assets/shaders/matcap.vert", 			"../assets/shaders/matcap.frag"});
-	shaders.push_back({"wireframe", 	"../assets/shaders/wireframe.vert", 		"../assets/shaders/wireframe.frag"});
- 	shaders.push_back({"bg", 			"../assets/shaders/bg_grad.vert", 			"../assets/shaders/bg_grad.frag"});
- 	shaders.push_back({"skybox", 		"../assets/shaders/skybox.vert", 			"../assets/shaders/skybox.frag"});
- 	shaders.push_back({"hdr2cubemap",   "../assets/shaders/hdr2cubemap.vert", 		"../assets/shaders/hdr2cubemap.frag"});
- 	shaders.push_back({"grid", 		    "../assets/shaders/gridShader.vert", 		"../assets/shaders/gridShader.frag"});
- 	shaders.push_back({"selection", 	"../assets/shaders/selection.vert", 		"../assets/shaders/selection.frag"});
- 	shaders.push_back({"shadow",    	"../assets/shaders/simpleShadow.vert", 		"../assets/shaders/simpleShadow.frag"});
-
+    std::vector<ShaderSettings> shaders{
+        {Builtin::Shader::PBR, 		    "../assets/shaders/PBR0.vert", 			"../assets/shaders/PBR0.frag"},
+        {Builtin::Shader::Matcap, 	    "../assets/shaders/matcap.vert", 		"../assets/shaders/matcap.frag"},
+        {Builtin::Shader::Wireframe, 	"../assets/shaders/wireframe.vert", 	"../assets/shaders/wireframe.frag"},
+        {Builtin::Shader::Background,   "../assets/shaders/bg_grad.vert", 		"../assets/shaders/bg_grad.frag"},
+        {Builtin::Shader::Grid, 		"../assets/shaders/gridShader.vert", 	"../assets/shaders/gridShader.frag"},
+        {Builtin::Shader::Selection, 	"../assets/shaders/selection.vert", 	"../assets/shaders/selection.frag"},
+        {Builtin::Shader::Shadow,    	"../assets/shaders/simpleShadow.vert", 	"../assets/shaders/simpleShadow.frag"},
+    };
+    //shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
+ 	//shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});
+ 	//shaders.push_back({"particle0", 	"../assets/shaders/particle_point.vert", 	"../assets/shaders/particle_point.frag"});
+ 	//shaders.push_back({"blinn-phong",   "../assets/shaders/blinn-phong.vert", 		"../assets/shaders/blinn-phong.frag"});
+ 	//shaders.push_back({"basic", 		"../assets/shaders/basic_lighting.vert", 	"../assets/shaders/basic_lighting.frag"});
+ 	//shaders.push_back({"skybox", 		"../assets/shaders/skybox.vert", 			"../assets/shaders/skybox.frag"});
+ 	//shaders.push_back({"hdr2cubemap",   "../assets/shaders/hdr2cubemap.vert", 		"../assets/shaders/hdr2cubemap.frag"});
+ 	
     for(auto& ss : shaders)
-        g_Assets.get<Shader>("engine::shaders::"+ss.name, &ss);
+        g_Assets.get<Shader>(ss.name, &ss);
     
     
 	// Setup rendering passes
-    _shadowShader = g_Assets.get<Shader>("engine::shaders::shadow").get();
-    _materialShader = g_Assets.get<Shader>("engine::shaders::pbr").get();
-	_matcapShader = g_Assets.get<Shader>("engine::shaders::matcap").get();
-    _wireframeShader = g_Assets.get<Shader>("engine::shaders::wireframe").get();
-	_backgroundShader = g_Assets.get<Shader>("engine::shaders::bg").get();
-	_gridShader = g_Assets.get<Shader>("engine::shaders::grid").get();
+    _shadowShader       = g_Assets.get<Shader>(Builtin::Shader::Shadow).get();
+    _materialShader     = g_Assets.get<Shader>(Builtin::Shader::PBR).get();
+	_matcapShader       = g_Assets.get<Shader>(Builtin::Shader::Matcap).get();
+    _wireframeShader    = g_Assets.get<Shader>(Builtin::Shader::Wireframe).get();
+	_backgroundShader   = g_Assets.get<Shader>(Builtin::Shader::Background).get();
+	_gridShader         = g_Assets.get<Shader>(Builtin::Shader::Grid).get();
     //void Renderer::setupLightPass() //ışık ögelerinin sahnede çizimi için olabilir. Şimdilik kullanmıyoruz.
-	_selectionShader = g_Assets.get<Shader>("engine::shaders::selection").get();
+	_selectionShader    = g_Assets.get<Shader>(Builtin::Shader::Selection).get();
 
 
 
@@ -213,8 +214,12 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     
 
 
-    _bgModel = g_Assets.get<Model>("engine::models::bgPlane").get();
-    _gridModel = g_Assets.get<Model>("engine::models::gridPlane").get();
+    _bgModel    = g_Assets.get<Model>(Builtin::Model::BgPlane).get();
+    _gridModel  = g_Assets.get<Model>(Builtin::Model::GridPlane).get();
+
+	_directionLightGizmo    = g_Assets.get<Model>(Builtin::Model::LightArrow).get();
+	_pointLightGizmo        = g_Assets.get<Model>(Builtin::Model::LightSphere).get();
+	_spotLightGizmo         = g_Assets.get<Model>(Builtin::Model::LightCone).get();
 
 
     //glDisable(GL_FRAMEBUFFER_SRGB);

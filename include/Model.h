@@ -25,10 +25,8 @@ class Model : public Asset{
     std::vector<std::shared_ptr<Material>> _materials{};
 	
     std::vector<Mesh> meshes;
-	//std::string _directory;
-	//DefaultShapes _shape{ DefaultShapes::Cube };
 
-    void loadDefault(DefaultShapes shape);
+    void loadDefault(std::string pathStr);
 
     //unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = 1);
     void loadModel(const std::string& path);

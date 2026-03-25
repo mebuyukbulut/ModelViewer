@@ -33,23 +33,6 @@ public:
 	void terminate();
 };
 
-
-
-// Use factory for model and mesh and create primitive objects 
-
-enum class DefaultShapes
-{
-	Cube,
-	Cylinder,
-	Cone,
-	Sphere,
-	Plane, // Quad
-	Torus,
-	BgPlane,
-	GridPlane,
-};
-
-
 class MeshFactory {
 	static OMesh createCube();
 	static OMesh createCone();
@@ -61,5 +44,5 @@ class MeshFactory {
 	static Mesh createGridPlane();
 
 public:
-	static Mesh create(DefaultShapes shape);
+	static Mesh create(std::string shape);
 };

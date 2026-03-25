@@ -137,6 +137,10 @@ private:
     Model* _bgModel{};
     Model* _gridModel{};
 
+	Model* _directionLightGizmo{};
+	Model* _pointLightGizmo{};
+	Model* _spotLightGizmo{};
+
 	Texture* cubemapTexture;
 	//std::vector<Texture*> loadedMatcapTextures; 
 	std::shared_ptr<Texture> matcapTexture;
