@@ -423,13 +423,14 @@ void SceneManager::onInspect()
 		_selectedEntity->onInspect();
     ImGui::End();
 
+
+    // DEBUG PANEL
     ImGui::Begin("Debug Window");
 
     ImVec2 debugPanelSize = ImGui::GetContentRegionAvail();
     ImGui::Image((ImTextureID)(intptr_t)_renderer->getDebugImage(),
         debugPanelSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
-
 
 
     // VIEWPORT PANEL

@@ -218,7 +218,7 @@ vec3 CalcDirectionalLight(Light light){
 
 
 vec3 CalcSpotLight(Light light){
-    vec3 lightDir = normalize(fPos - light.position.xyz);
+    vec3 lightDir =  normalize(fPos - light.position.xyz);
     float theta = dot(lightDir, normalize(light.direction.xyz));
     float phi = cos(radians(light.params.z));
 
@@ -313,7 +313,7 @@ void main(){
     float closestDepth = texture(shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
 
-    float bias = 0.005;
+    float bias = 0.01; //0.005;
     float shadow = //currentDepth > closestDepth ? 1.0 : 0.0;
         currentDepth - bias > closestDepth
         ? 1.0
