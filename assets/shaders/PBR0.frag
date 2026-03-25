@@ -213,7 +213,31 @@ vec3 CalcDirectionalLight(Light light){
     //float window = 1.0f - (distance2 * distance2 / pow(attRad, 4.0)) ; 
     //E *= pow(clamp(window, 0.0, 1.0), 2.0); 
 
-    return (Fd + Fr) * light.color.w * light.color.xyz * NoL;// * E;
+
+
+
+
+    // Shadow calculations
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fPos, 1.0);
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    //vec3 n = normalize(fNormal); // Surface normal vector
+    //vec3 l = lightDir; //normalize(ubo_data.lights[0].position.xyz - fPos ); // Incident light vector
+    float bias = 0.005 * tan(acos(NoL));
+
+    float shadow = //currentDepth > closestDepth ? 1.0 : 0.0;
+        currentDepth - bias > closestDepth
+        ? 1.0
+        : 0.0;
+
+
+    //vec3 result = pLights * (1.0 - shadow);// * material.color;
+
+    return (Fd + Fr) * light.color.w * light.color.xyz * NoL * (1.0 - shadow); // * E;
 } 
 
 
@@ -272,6 +296,10 @@ vec3 CalcSpotLight(Light light){
     float angleWindow = 1 - (pow (1 - theta, 4) / pow(1 - phi, 4)); 
     E*= angleWindow; 
 
+
+
+
+
     return (Fd + Fr) * light.color.w * light.color.xyz * NoL * E;
 } 
 
@@ -305,22 +333,30 @@ void main(){
         if(lightType == 3) pLights += CalcSpotLight(ubo_data.lights[i]);
     }
 
-    // Shadow calculations
-    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fPos, 1.0);
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
+//    // Shadow calculations
+//    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fPos, 1.0);
+//    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+//    projCoords = projCoords * 0.5 + 0.5;
+//
+//    float closestDepth = texture(shadowMap, projCoords.xy).r;
+//    float currentDepth = projCoords.z;
+//
+//   float bias = 0.01; //0.005;
+//
+//    if(ubo_data.numLights>0){
+//        vec3 n = normalize(fNormal); // Surface normal vector
+//        vec3 l = normalize(ubo_data.lights[0].position.xyz - fPos ); // Incident light vector
+//        bias = 0.005*tan(acos(dot(n,l)));
+//    }
 
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
-    float currentDepth = projCoords.z;
 
-    float bias = 0.01; //0.005;
-    float shadow = //currentDepth > closestDepth ? 1.0 : 0.0;
-        currentDepth - bias > closestDepth
-        ? 1.0
-        : 0.0;
+//    float shadow = //currentDepth > closestDepth ? 1.0 : 0.0;
+//        currentDepth - bias > closestDepth
+//        ? 1.0
+//        : 0.0;
 
 
-    vec3 result = pLights * (1.0 - shadow);// * material.color;
+    vec3 result = pLights;//* (1.0 - shadow);// * material.color;
     //vec3 result = (pLights + ambient) * material.color;
 
 
