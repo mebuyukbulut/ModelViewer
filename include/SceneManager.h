@@ -47,7 +47,6 @@ public:
 
     void init(Renderer* renderer, Camera* camera, UIManager* UI);
     void draw();
-    void drawRecursive(Entity* entity, std::vector<RenderItem>& renderItems);
     void updateMatrixRecursive(Entity* entity);
 
 

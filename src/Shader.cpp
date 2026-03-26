@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include "FileUtils.h"
+#include "Builtin.h"
 
 
 
@@ -118,7 +119,18 @@ void Shader::load(std::filesystem::path path, IAssetSettings* settings)
     std::string fragmentShaderName{};
 
     std::string pathStr = path.string(); 
-    if (pathStr.starts_with("engine::shaders::")){ // TO-DO: builtin
+
+    bool isVirtual = false;
+
+    // Sanal yolla model yükleme
+    for(const char* key : Builtin::Shader::All){
+        if(key == pathStr){        
+            isVirtual = true;
+            break;
+        }
+    }
+
+    if (isVirtual){
         ShaderSettings* a  = dynamic_cast<ShaderSettings*>(settings);
         vertexShaderName = a->vertexPath;
         fragmentShaderName = a->fragmentPath;

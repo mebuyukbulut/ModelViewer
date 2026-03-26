@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Component.h"
 #include "Logger.h"
+#include "RenderItem.h"
 
 class Camera; 
 
@@ -142,7 +143,7 @@ public:
 	LightManager();  // initialize UBO for lights 
     ~LightManager(); // cleanup UBO
 
-	void queryLights(const std::vector<Light*> lights);
+	void queryLights(const std::vector<LightItem>& lights);
 
 	std::unique_ptr<Light> createLight(LightType type);
 

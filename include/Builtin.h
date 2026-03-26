@@ -46,5 +46,17 @@ namespace Builtin
         inline constexpr const char* Background = "builtin::shaders::bg";
         inline constexpr const char* Selection  = "builtin::shaders::selection";
         inline constexpr const char* Shadow     = "builtin::shaders::shadow";
+        inline constexpr const char* Light     = "builtin::shaders::light";
+        
+        inline constexpr const char* All[] = {
+            PBR,
+            Matcap,
+            Wireframe,
+            Grid,
+            Background,
+            Selection,
+            Shadow,
+            Light,
+        };
     }
 }

@@ -260,14 +260,14 @@ LightManager::~LightManager()
 	glDeleteBuffers(1, &uboLights);
 }
 
-void LightManager::queryLights(const std::vector<Light*> lights)
+void LightManager::queryLights(const std::vector<LightItem>& lightItems)
 {
-    blockData.numLights = static_cast<int>(lights.size());
+    blockData.numLights = static_cast<int>(lightItems.size());
 
-    for (size_t i = 0; i < lights.size() && i < 8; i++) {
+    for (size_t i = 0; i < lightItems.size() && i < 8; i++) {
         //LOG_TRACE(typeid(*lights[i]).name());
-        lights[i]->update();
-        blockData.lights[i] = lights[i]->getGPULight();
+        lightItems[i].light->update();
+        blockData.lights[i] = lightItems[i].light->getGPULight();
 	}
 
     // activeLights verilerini GPULightBlock'a kopyala...

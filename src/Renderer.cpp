@@ -38,8 +38,8 @@ void Renderer::shadowPass(const SceneRenderData &renderData)
     glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane); 
     glm::mat4 lightView;
 
-    if(renderData.lights.size()){
-        glm::quat rot = renderData.lights[0]->owner->transform->getRotationAsQuat();
+    if(renderData.lightItems.size()){
+        glm::quat rot = renderData.lightItems[0].light->owner->transform->getRotationAsQuat();
         glm::vec3 lightDir =
             glm::normalize(
                 rot * glm::vec3(0, 1, 0)
@@ -133,9 +133,33 @@ void Renderer::gridPass()
     glDisable(GL_BLEND);
 }
 
-void Renderer::lightPass()
+void Renderer::lightPass(const std::vector<LightItem> &lightItems)
 {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    _lightShader->use();
+
+    for (const LightItem & item : lightItems) {
+        glm::mat4 newTransform;
+        glm::vec3 newScale(0.1); 
+        newTransform[0] = glm::normalize(item.transform[0]) * newScale.x;
+        newTransform[1] = glm::normalize(item.transform[1]) * newScale.y;
+        newTransform[2] = glm::normalize(item.transform[2]) * newScale.z;
+        newTransform[3] = item.transform[3];
+
+        _lightShader->setVec3("lightColor", item.light->getGPULight().getColor());
+        
+
+        if(item.light->type == ComponentType::DirectionalLight)
+            drawModelWithShader(_directionLightGizmo, newTransform, _lightShader);
+        else if(item.light->type == ComponentType::PointLight)
+            drawModelWithShader(_pointLightGizmo, newTransform, _lightShader);
+        else if(item.light->type == ComponentType::SpotLight)
+            drawModelWithShader(_spotLightGizmo, newTransform, _lightShader);
+        else
+            LOG_ERROR("Renderer::lightPass() -> UNKNOW LIGHT TYPE");
+    }
+        
 }
 
 void Renderer::selectionPass(const std::vector<RenderItem>& renderItems)
@@ -164,6 +188,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
         {Builtin::Shader::Grid, 		"../assets/shaders/gridShader.vert", 	"../assets/shaders/gridShader.frag"},
         {Builtin::Shader::Selection, 	"../assets/shaders/selection.vert", 	"../assets/shaders/selection.frag"},
         {Builtin::Shader::Shadow,    	"../assets/shaders/simpleShadow.vert", 	"../assets/shaders/simpleShadow.frag"},
+        {Builtin::Shader::Light,    	"../assets/shaders/light.vert", 	    "../assets/shaders/light.frag"},
     };
     //shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
  	//shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});
@@ -184,7 +209,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     _wireframeShader    = g_Assets.get<Shader>(Builtin::Shader::Wireframe).get();
 	_backgroundShader   = g_Assets.get<Shader>(Builtin::Shader::Background).get();
 	_gridShader         = g_Assets.get<Shader>(Builtin::Shader::Grid).get();
-    //void Renderer::setupLightPass() //ışık ögelerinin sahnede çizimi için olabilir. Şimdilik kullanmıyoruz.
+    _lightShader        = g_Assets.get<Shader>(Builtin::Shader::Light).get();
 	_selectionShader    = g_Assets.get<Shader>(Builtin::Shader::Selection).get();
 
 
@@ -217,9 +242,9 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     _bgModel    = g_Assets.get<Model>(Builtin::Model::BgPlane).get();
     _gridModel  = g_Assets.get<Model>(Builtin::Model::GridPlane).get();
 
-	_directionLightGizmo    = g_Assets.get<Model>(Builtin::Model::LightArrow).get();
-	_pointLightGizmo        = g_Assets.get<Model>(Builtin::Model::LightSphere).get();
-	_spotLightGizmo         = g_Assets.get<Model>(Builtin::Model::LightCone).get();
+	_directionLightGizmo    = g_Assets.get<Model>(Builtin::Model::Cone).get();
+	_pointLightGizmo        = g_Assets.get<Model>(Builtin::Model::Cube).get();
+	_spotLightGizmo         = g_Assets.get<Model>(Builtin::Model::Cone).get();
 
 
     //glDisable(GL_FRAMEBUFFER_SRGB);
@@ -272,6 +297,7 @@ void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSel
     if      (_viewMode == ViewMode::Material)   materialPass(renderData.renderItems);
     else if (_viewMode == ViewMode::Matcap)     matcapPass(renderData.renderItems);
     else if (_viewMode == ViewMode::Wireframe)  wireframePass(renderData.renderItems);
+    lightPass(renderData.lightItems);
     gridPass();
 
     _rt.unbind();
