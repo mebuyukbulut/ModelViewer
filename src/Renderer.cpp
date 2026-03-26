@@ -162,15 +162,35 @@ void Renderer::lightPass(const std::vector<LightItem> &lightItems)
         
 }
 
-void Renderer::selectionPass(const std::vector<RenderItem>& renderItems)
+void Renderer::selectionPass(const SceneRenderData &renderData)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glClearColor(0, 0, 0, 1);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	for (const RenderItem& item : renderItems) 
+    // Selection pass for Models
+	for (const RenderItem& item : renderData.renderItems) 
         drawModelWithShader(item.model, item.transform, _selectionShader, item.entityIndex + 1);
+
+    // Selection pass for Lights
+	for (const LightItem& item : renderData.lightItems){
+        glm::mat4 newTransform;
+        glm::vec3 newScale(0.1); 
+        newTransform[0] = glm::normalize(item.transform[0]) * newScale.x;
+        newTransform[1] = glm::normalize(item.transform[1]) * newScale.y;
+        newTransform[2] = glm::normalize(item.transform[2]) * newScale.z;
+        newTransform[3] = item.transform[3];
+
+        if(item.light->type == ComponentType::DirectionalLight)
+            drawModelWithShader(_directionLightGizmo, newTransform, _selectionShader, item.entityIndex + 1);
+        else if(item.light->type == ComponentType::PointLight)
+            drawModelWithShader(_pointLightGizmo, newTransform, _selectionShader, item.entityIndex + 1);
+        else if(item.light->type == ComponentType::SpotLight)
+            drawModelWithShader(_spotLightGizmo, newTransform, _selectionShader, item.entityIndex + 1);
+        else
+            LOG_ERROR("Renderer::lightPass() -> UNKNOW LIGHT TYPE");
+    }
 }
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
@@ -283,7 +303,7 @@ void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSel
     clearBuffer();
 
     if(isViewportSelect){
-        selectionPass(renderData.renderItems);
+        selectionPass(renderData);
         
         unsigned char data[4];
         glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);

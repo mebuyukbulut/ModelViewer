@@ -155,7 +155,7 @@ private:
 	void backgroundPass();
 	void gridPass();
 	void lightPass(const std::vector<LightItem>& lightItems);
-	void selectionPass(const std::vector<RenderItem>& renderItems);
+	void selectionPass(const SceneRenderData &renderData);
 
 	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
 
