@@ -219,15 +219,17 @@ void Renderer::outlinePass(const SceneRenderData &renderData)
 
 }
 
-void Renderer::postProcessPass(const ColorRenderTarget& sceneTarget, Shader* shader)
+void Renderer::postProcessPass(const ColorRenderTarget& sourceTarget, ColorRenderTarget& destinationTarget, Shader* shader)
 {
+    destinationTarget.bind();
+    clearBuffer();
     shader->use();
     shader->setInt("frameTex", 0); 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sceneTarget.colorTexture());
+    glBindTexture(GL_TEXTURE_2D, sourceTarget.colorTexture());
     drawModelWithShader(_bgModel, glm::mat4(1.0), shader); // ???
 
-
+    destinationTarget.unbind();
 }
 
 void Renderer::init(std::shared_ptr<Camera> camera) {
@@ -246,7 +248,15 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
         {Builtin::Shader::Selection, 	"../assets/shaders/selection.vert", 	"../assets/shaders/selection.frag"},
         {Builtin::Shader::Shadow,    	"../assets/shaders/simpleShadow.vert", 	"../assets/shaders/simpleShadow.frag"},
         {Builtin::Shader::Light,    	"../assets/shaders/light.vert", 	    "../assets/shaders/light.frag"},
-        {Builtin::Shader::PostProcess,  "../assets/shaders/postProc.vert", 	    "../assets/shaders/postProc.frag"},
+
+        {Builtin::Shader::FX_Grayscale,     "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/grayscale.frag"},
+        {Builtin::Shader::FX_PassThrough,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/passthrough.frag"},
+        {Builtin::Shader::FX_Invert,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/invert.frag"},
+        {Builtin::Shader::FX_Sepia,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/sepia.frag"},
+        {Builtin::Shader::FX_Vignette,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/vignette.frag"},
+        {Builtin::Shader::FX_GammaCorrection,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/gamma_correction.frag"},
+        {Builtin::Shader::FX_Posterize,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/posterize.frag"},
+        {Builtin::Shader::FX_Pixelate,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/pixelate.frag"},
     };
     //shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
  	//shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});
@@ -269,7 +279,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 	_gridShader         = g_Assets.get<Shader>(Builtin::Shader::Grid).get();
     _lightShader        = g_Assets.get<Shader>(Builtin::Shader::Light).get();
 	_selectionShader    = g_Assets.get<Shader>(Builtin::Shader::Selection).get();
-    _postProcessShader  =  g_Assets.get<Shader>(Builtin::Shader::PostProcess).get();
+    //_postProcessShader  =  g_Assets.get<Shader>(Builtin::Shader::PostProcess).get();
 
 
 	glEnable(GL_DEPTH_TEST);
@@ -317,7 +327,8 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 
 
     _rt.create(300,300); // create default frame buffer for viewport
-    _postProc.create(300,300); // create default frame buffer for viewport
+    _postProcA.create(300,300); // create default frame buffer for viewport
+    _postProcB.create(300,300);
     _shadowMapTarget.create(1024,1024);
 
 }
@@ -360,21 +371,21 @@ void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSel
     // World-space Overlay Effects
     lightPass(renderData.lightItems);
     gridPass();
-    
+
     outlinePass(renderData); 
 
     _rt.unbind();
 
 
-    _postProc.bind();
+    // Post Processing START
     glDisable(GL_DEPTH_TEST);
-    clearBuffer();
-    postProcessPass(_rt,_postProcessShader);
+    postProcessPass(_rt, _postProcA, g_Assets.get<Shader>(Builtin::Shader::FX_Grayscale).get());
+    postProcessPass(_postProcA, _postProcB, g_Assets.get<Shader>(Builtin::Shader::FX_Pixelate).get());
+
+    
+
     glEnable(GL_DEPTH_TEST);
-
-
-
-    _postProc.unbind();
+    // Post Processing END
 
 }
 
@@ -383,7 +394,8 @@ void Renderer::clearBuffer(){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 void Renderer::resizeViewport(int width, int height)
 {
     bool isResized = _rt.resize(width, height); 
-    _postProc.resize(width,height); 
+    _postProcA.resize(width,height); 
+    _postProcB.resize(width,height); 
 
     if(isResized)
         _camera->setWindowSize(width,height);

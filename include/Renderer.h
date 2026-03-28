@@ -117,7 +117,7 @@ public:
 	};
 private:
 	ColorRenderTarget _rt{};
-	ColorRenderTarget _postProc{};
+	ColorRenderTarget _postProcA{}, _postProcB{};
 	ShadowMapTarget _shadowMapTarget{};
 	FrameUniforms _frameUniforms{};
 
@@ -160,7 +160,7 @@ private:
 	void lightPass(const std::vector<LightItem>& lightItems);
 	void selectionPass(const SceneRenderData &renderData);
 	void outlinePass(const SceneRenderData &renderData);
-	void postProcessPass(const ColorRenderTarget& sceneTarget, Shader* shader);
+	void postProcessPass(const ColorRenderTarget& sourceTarget, ColorRenderTarget& destinationTarget, Shader* shader);
 
 	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
 
@@ -173,7 +173,7 @@ public:
 	void clearBuffer();
 
 	void resizeViewport(int width, int height);
-	GLuint getViewportImage() { return _postProc.colorTexture(); }
+	GLuint getViewportImage() { return _postProcB.colorTexture(); }
 	GLuint getDebugImage() { return _shadowMapTarget.depthBuffer(); }
 	
 

@@ -47,7 +47,16 @@ namespace Builtin
         inline constexpr const char* Selection  = "builtin::shaders::selection";
         inline constexpr const char* Shadow     = "builtin::shaders::shadow";
         inline constexpr const char* Light      = "builtin::shaders::light";
-        inline constexpr const char* PostProcess= "builtin::shaders::postProcess";
+
+
+        inline constexpr const char* FX_Grayscale       = "builtin::shaders::fx_grayscale";
+        inline constexpr const char* FX_PassThrough     = "builtin::shaders::fx_passThrough";
+        inline constexpr const char* FX_Invert          = "builtin::shaders::fx_invert";
+        inline constexpr const char* FX_Sepia           = "builtin::shaders::fx_sepia";
+        inline constexpr const char* FX_Vignette        = "builtin::shaders::fx_vignette";
+        inline constexpr const char* FX_GammaCorrection = "builtin::shaders::gammaCorrection";
+        inline constexpr const char* FX_Posterize       = "builtin::shaders::posterize";
+        inline constexpr const char* FX_Pixelate        = "builtin::shaders::pixelate";
         
         inline constexpr const char* All[] = {
             PBR,
@@ -58,7 +67,14 @@ namespace Builtin
             Selection,
             Shadow,
             Light,
-            PostProcess,
+            FX_Grayscale,
+            FX_PassThrough,
+            FX_Invert,
+            FX_Sepia,
+            FX_Vignette,
+            FX_GammaCorrection,
+            FX_Posterize,
+            FX_Pixelate
         };
     }
 }
