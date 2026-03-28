@@ -193,6 +193,32 @@ void Renderer::selectionPass(const SceneRenderData &renderData)
     }
 }
 
+void Renderer::outlinePass(const SceneRenderData &renderData)
+{
+    // https://www.youtube.com/watch?v=bzEkWtY0zIY
+    // Nuclear's graphics tricks #1: simple outline rendering    
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glLineWidth(5.f);
+    glCullFace(GL_FRONT);
+    _wireframeShader->use();
+    for (const RenderItem& item : renderData.renderItems) 
+        if(item.isSelected)
+            drawModelWithShader(item.model, item.transform, _wireframeShader);
+
+
+    glCullFace(GL_BACK);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+
+    _materialShader->use();
+    for (const RenderItem& item : renderData.renderItems) 
+        if(item.isSelected)
+            drawModelWithShader(item.model, item.transform, _wireframeShader);
+
+
+
+}
+
 void Renderer::init(std::shared_ptr<Camera> camera) {
     _frameUniforms.init(); 
 
@@ -317,6 +343,7 @@ void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSel
     if      (_viewMode == ViewMode::Material)   materialPass(renderData.renderItems);
     else if (_viewMode == ViewMode::Matcap)     matcapPass(renderData.renderItems);
     else if (_viewMode == ViewMode::Wireframe)  wireframePass(renderData.renderItems);
+    outlinePass(renderData);
     lightPass(renderData.lightItems);
     gridPass();
 

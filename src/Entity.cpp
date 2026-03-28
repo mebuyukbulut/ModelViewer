@@ -4,7 +4,6 @@
 #include "Logger.h"
 
 #include "YAMLHelper.h"
-#include "Material.h" // bu burada olmamali
 
 Entity::Entity()
 {

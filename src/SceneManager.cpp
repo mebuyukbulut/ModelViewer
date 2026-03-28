@@ -50,6 +50,7 @@ void SceneManager::collectRenderData(SceneRenderData &renderData)
                 item.model = model;
                 item.transform = entity->transform->getGlobalMatrix();
                 item.entityIndex = pickID;
+                item.isSelected = entity->isSelected();
                 renderData.renderItems.push_back(item);
             }
         }
@@ -58,6 +59,7 @@ void SceneManager::collectRenderData(SceneRenderData &renderData)
             item.light = lightComponent;
             item.transform = entity->transform->getGlobalMatrix();
             item.entityIndex = pickID;
+            item.isSelected = entity->isSelected();
             renderData.lightItems.push_back(item);
         }
 
@@ -229,6 +231,7 @@ void SceneManager::select(Entity* entity){
         _selectedEntities.push_back(entity);
 
     _selectedEntity = entity;
+    entity->select(); 
 }
 void SceneManager::deselect(Entity* entity)
 {
@@ -236,12 +239,15 @@ void SceneManager::deselect(Entity* entity)
         return; 
     _selectedEntities.erase(std::find(_selectedEntities.begin(), _selectedEntities.end(), entity));
     _selectedEntity = nullptr;
+    entity->deselect();
 
     if (!_selectedEntities.empty())
         _selectedEntity = _selectedEntities.back();
 
 }
 void SceneManager::deselectAll(){
+    for(auto& i : _selectedEntities)
+        i->deselect();
     _selectedEntities.clear();
     _selectedEntity = nullptr;
 }

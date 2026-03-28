@@ -10,6 +10,7 @@
 class Entity : public Object
 {
 	bool active{ true };
+	bool selected { false };
 public:
 
 	std::unique_ptr <class Transform> transform{};
@@ -20,6 +21,10 @@ public:
 
 	void setActive(bool active) { this->active = active; }
 	bool isActive() const { return active; }
+
+	void select(){ selected = true; }
+	void deselect(){ selected = false; }
+	bool isSelected(){ return selected; }
 
 	void addComponent(std::unique_ptr <Component> component);
 	template<typename T>
