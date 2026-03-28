@@ -213,8 +213,19 @@ void Renderer::outlinePass(const SceneRenderData &renderData)
     _materialShader->use();
     for (const RenderItem& item : renderData.renderItems) 
         if(item.isSelected)
-            drawModelWithShader(item.model, item.transform, _wireframeShader);
+            drawModelWithShader(item.model, item.transform, _materialShader); // ???
 
+
+
+}
+
+void Renderer::postProcessPass(const ColorRenderTarget& sceneTarget, Shader* shader)
+{
+    shader->use();
+    shader->setInt("frameTex", 0); 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, sceneTarget.colorTexture());
+    drawModelWithShader(_bgModel, glm::mat4(1.0), shader); // ???
 
 
 }
@@ -235,6 +246,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
         {Builtin::Shader::Selection, 	"../assets/shaders/selection.vert", 	"../assets/shaders/selection.frag"},
         {Builtin::Shader::Shadow,    	"../assets/shaders/simpleShadow.vert", 	"../assets/shaders/simpleShadow.frag"},
         {Builtin::Shader::Light,    	"../assets/shaders/light.vert", 	    "../assets/shaders/light.frag"},
+        {Builtin::Shader::PostProcess,  "../assets/shaders/postProc.vert", 	    "../assets/shaders/postProc.frag"},
     };
     //shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
  	//shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});
@@ -257,7 +269,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 	_gridShader         = g_Assets.get<Shader>(Builtin::Shader::Grid).get();
     _lightShader        = g_Assets.get<Shader>(Builtin::Shader::Light).get();
 	_selectionShader    = g_Assets.get<Shader>(Builtin::Shader::Selection).get();
-
+    _postProcessShader  =  g_Assets.get<Shader>(Builtin::Shader::PostProcess).get();
 
 
 	glEnable(GL_DEPTH_TEST);
@@ -305,6 +317,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
 
 
     _rt.create(300,300); // create default frame buffer for viewport
+    _postProc.create(300,300); // create default frame buffer for viewport
     _shadowMapTarget.create(1024,1024);
 
 }
@@ -343,11 +356,25 @@ void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSel
     if      (_viewMode == ViewMode::Material)   materialPass(renderData.renderItems);
     else if (_viewMode == ViewMode::Matcap)     matcapPass(renderData.renderItems);
     else if (_viewMode == ViewMode::Wireframe)  wireframePass(renderData.renderItems);
-    outlinePass(renderData);
+    
+    // World-space Overlay Effects
     lightPass(renderData.lightItems);
     gridPass();
+    
+    outlinePass(renderData); 
 
     _rt.unbind();
+
+
+    _postProc.bind();
+    glDisable(GL_DEPTH_TEST);
+    clearBuffer();
+    postProcessPass(_rt,_postProcessShader);
+    glEnable(GL_DEPTH_TEST);
+
+
+
+    _postProc.unbind();
 
 }
 
@@ -356,6 +383,7 @@ void Renderer::clearBuffer(){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 void Renderer::resizeViewport(int width, int height)
 {
     bool isResized = _rt.resize(width, height); 
+    _postProc.resize(width,height); 
 
     if(isResized)
         _camera->setWindowSize(width,height);
