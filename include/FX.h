@@ -3,42 +3,77 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <glm/glm.hpp>
 #include "Builtin.h"
+#include "IInspectable.h"
 
 class Shader;
 
-enum class FXParamType
+using FXValue = std::variant<
+    float,
+    int,
+    glm::vec2,
+    glm::vec3,
+    glm::vec4,
+    bool
+>;
+
+enum class FXParamKind
 {
     Float,
     Int,
+    Bool,
     Vec2,
     Vec3,
     Vec4,
-    Bool
 };
 
-class FXParam{
+struct FXParamDefinition{
     std::string uniformName{};
     std::string label{};
-    std::variant<FXParamType> value; 
-    std::variant<FXParamType> min, max, defaultVal; // requires for UI 
+    std::string tooltip{};
+    FXParamKind type;
+
+    FXValue min;
+    FXValue max;
+    FXValue defaultVal; 
+
+    template<typename T>
+    FXParamDefinition(std::string uniformName, std::string label, std::string tooltip, T min, T max, T defaultVal)
+    :uniformName{uniformName}, label{label}, tooltip{tooltip}, min{min}, max{max}, defaultVal{defaultVal}{}
 };
 
-class FXInstanceDefinition{
+struct FXParam{
+    const FXParamDefinition* definition = nullptr;
+    std::string label{};
+    FXValue value; 
+
+    FXParam() = default;
+
+    void update(Shader* shader);
+
+    void setLabel(std::string newLabel){ label = newLabel; }
+
+    std::string getLabel(){ return label; }
+    std::string getTooltip(){ return definition->tooltip; }
+
+
+};
+
+struct FXInstanceDefinition{
     std::string builtinID{};    // builtin::fx::grayscale 
     std::string label{}; 
     std::string vertexPath{};   // ./assets/fx/...
     std::string fragmentPath{}; // ./assets/fx/...
     std::vector<FXParam> parameters{};
 
-public:
     FXInstanceDefinition() = default;
     FXInstanceDefinition(std::string builtinID, std::string vertexPath, std::string fragmentPath, std::vector<FXParam> parameters)
         :builtinID{builtinID}, vertexPath{vertexPath}, fragmentPath{fragmentPath}, parameters{parameters}{}
 };
 
-class FXInstance{
-    bool enabled;
+class FXInstance : public IInspectable{
+    bool enabled{};
     float opacity{1.0f};
     std::string builtinID{};
     std::string label{}; 
@@ -50,7 +85,10 @@ class FXInstance{
     FXInstance() = default;
     FXInstance(FXInstanceDefinition definition);
 
+    void update();
 
+    void onInspect();
+    
 };
 
 class FXRegistry{
@@ -66,7 +104,7 @@ class FXRegistry{
 };
 
 std::vector<FXInstanceDefinition> FXRegistry::FXDefinitionStack{
-    {Builtin::FX::Grayscale, "fullscreen_tris.vert", "grayscale.frag", 
+    FXInstanceDefinition{Builtin::FX::Grayscale, "fullscreen_tris.vert", "grayscale.frag", 
         {}},
 
 };
