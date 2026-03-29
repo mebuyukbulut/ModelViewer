@@ -62,9 +62,9 @@ void Renderer::shadowPass(const SceneRenderData &renderData)
     }
     glm::mat4 lightSpaceMatrix = lightProjection * lightView; 
 
-    _materialShader->use(); _materialShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    _materialShader->use(); _materialShader->set("lightSpaceMatrix", lightSpaceMatrix);
     _shadowShader->use();
-    _shadowShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    _shadowShader->set("lightSpaceMatrix", lightSpaceMatrix);
     for (const RenderItem& item : renderData.renderItems) {
         drawModelWithShader(item.model, item.transform, _shadowShader);
     }
@@ -79,7 +79,7 @@ void Renderer::materialPass(const std::vector<RenderItem> &renderItems)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _shadowMapTarget.depthBuffer());
     _materialShader->use();
-    _materialShader->setInt("shadowMap", 0);
+    _materialShader->set("shadowMap", 0);
 
     for (const RenderItem& item : renderItems) 
         drawModelWithShader(item.model, item.transform, _materialShader);
@@ -147,7 +147,7 @@ void Renderer::lightPass(const std::vector<LightItem> &lightItems)
         newTransform[2] = glm::normalize(item.transform[2]) * newScale.z;
         newTransform[3] = item.transform[3];
 
-        _lightShader->setVec3("lightColor", item.light->getGPULight().getColor());
+        _lightShader->set("lightColor", item.light->getGPULight().getColor());
         
 
         if(item.light->type == ComponentType::DirectionalLight)
@@ -224,7 +224,7 @@ void Renderer::postProcessPass(const ColorRenderTarget& sourceTarget, ColorRende
     destinationTarget.bind();
     clearBuffer();
     shader->use();
-    shader->setInt("frameTex", 0); 
+    shader->set("frameTex", 0); 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sourceTarget.colorTexture());
     drawModelWithShader(_bgModel, glm::mat4(1.0), shader); // ???
@@ -404,9 +404,9 @@ void Renderer::resizeViewport(int width, int height)
 void Renderer::drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID){
 
     shader->use();
-    shader->setMat4("model", transform);
+    shader->set("model", transform);
     if(ID)
-        shader->setInt("objectID", ID);
+        shader->set("objectID", (int)ID);
 
     model->draw(shader);
 }

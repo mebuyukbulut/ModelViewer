@@ -25,56 +25,56 @@ void Material::use(Shader* shader) {
 	if (baseColorTexture) {
 		//LOG_TRACE("base");
 		glActiveTexture(GL_TEXTURE0);
-		shader->setInt("baseColorTexture", 0); // Bu eksik!
-		shader->setVec4("material.is_BaseColorTex", glm::vec4(1, 1, 1, 1)); // rgba -> r
+		shader->set("baseColorTexture", 0); // Bu eksik!
+		shader->set("material.is_BaseColorTex", glm::vec4(1, 1, 1, 1)); // rgba -> r
 		baseColorTexture->use();
 	}
 	else {
-		shader->setVec4("material.is_BaseColorTex", glm::vec4(0, 0, 0, 0)); // reset
+		shader->set("material.is_BaseColorTex", glm::vec4(0, 0, 0, 0)); // reset
 	}
 	if (emissiveTexture) {
 		glActiveTexture(GL_TEXTURE1);
 		emissiveTexture->use();
 		//shader->setInt("emissiveTexture", 0); // Bu eksik!
-		shader->setVec4("material.is_EmissiveTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
+		shader->set("material.is_EmissiveTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
 	}
 	else {
-		shader->setVec4("material.is_EmissiveTex", glm::vec4(0, 0, 0, 0)); // reset
+		shader->set("material.is_EmissiveTex", glm::vec4(0, 0, 0, 0)); // reset
 	}
 	if (metallicTexture) {
 		glActiveTexture(GL_TEXTURE2);
 		metallicTexture->use();
 		//shader->setInt("metallicTexture", 0); // Bu eksik!
-		shader->setVec4("material.is_MetallicTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
+		shader->set("material.is_MetallicTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
 	}
 	else {
-		shader->setVec4("material.is_MetallicTex", glm::vec4(0, 0, 0, 0)); // reset
+		shader->set("material.is_MetallicTex", glm::vec4(0, 0, 0, 0)); // reset
 	}
 	if (roughnessTexture) {
 		glActiveTexture(GL_TEXTURE3);
 		roughnessTexture->use();
 		//shader->setInt("roughnessTexture", 0); // Bu eksik!
-		shader->setVec4("material.is_RoughnessTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
+		shader->set("material.is_RoughnessTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
 	}
 	else {
-		shader->setVec4("material.is_RoughnessTex", glm::vec4(0, 0, 0, 0)); // reset
+		shader->set("material.is_RoughnessTex", glm::vec4(0, 0, 0, 0)); // reset
 	}
 	if (aoTexture) {
 		glActiveTexture(GL_TEXTURE4);
 		aoTexture->use();
 		//shader->setInt("aoTexture", 0); // Bu eksik!
-		shader->setVec4("material.is_AoTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
+		shader->set("material.is_AoTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
 	}
 	else {
-		shader->setVec4("material.is_AoTex", glm::vec4(0, 0, 0, 0)); // reset
+		shader->set("material.is_AoTex", glm::vec4(0, 0, 0, 0)); // reset
 	}
 
-	shader->setVec4("material.baseColor", baseColor);
-	shader->setVec4("material.emissive", emissive);
-	shader->setFloat("material.metallic", metallic);
-	shader->setFloat("material.roughness", roughness);
-	shader->setFloat("material.reflectance", reflectance);
-	shader->setFloat("material.ao", ao);
+	shader->set("material.baseColor", baseColor);
+	shader->set("material.emissive", emissive);
+	shader->set("material.metallic", metallic);
+	shader->set("material.roughness", roughness);
+	shader->set("material.reflectance", reflectance);
+	shader->set("material.ao", ao);
 }
 
 void Material::load(std::filesystem::path path, IAssetSettings* settings)
