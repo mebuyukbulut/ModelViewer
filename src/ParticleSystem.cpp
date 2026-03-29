@@ -90,7 +90,7 @@ void Particle::update(const ParticleUpdateContext& ctx) {
 
 
 
-void EmitterInfo::drawUI() {
+void EmitterInfo::onInspect() {
     ImGui::SeparatorText("Emitter Info");
     ImGui::DragInt("spawn rate: ", &spawnRate, 1, 0, 300);
 
@@ -115,9 +115,10 @@ void EmitterInfo::drawUI() {
             break;
         }
     }
-    shape->drawUI();
+    shape->onInspect();
 }
-void ParticleUpdateContext::drawUI()
+
+void ParticleUpdateContext::onInspect()
 {
     ImGui::SeparatorText("Color");
 
@@ -142,7 +143,7 @@ void ParticleUpdateContext::drawUI()
             break;
         }
     }
-    colorProvider->drawUI();
+    colorProvider->onInspect();
 
 
     ImGui::SeparatorText("Force");
@@ -214,15 +215,15 @@ void ParticleUpdateContext::drawUI()
         selectedIndex = -1;
         return;
     }
-    forces[selectedIndex]->drawUI();
+    forces[selectedIndex]->onInspect();
 }
-void ParticleSystem::drawUI() {
+void ParticleSystem::onInspect() {
     ImGui::Begin("Particle System");
 
     //ImGui::SeparatorText("Particle System");
-    info.drawUI();
+    info.onInspect();
 
-    _particleCtx.drawUI();
+    _particleCtx.onInspect();
 
     ImGui::End();
 }

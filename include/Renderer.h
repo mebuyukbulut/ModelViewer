@@ -132,8 +132,6 @@ private:
 	Shader* _lightShader{};
 	Shader* _selectionShader{};
 
-	Shader* _postProcessShader{};
-
 	std::shared_ptr<Camera> _camera;
 	uint32_t lastSelectedID{};
 

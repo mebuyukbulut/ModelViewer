@@ -13,7 +13,7 @@
 #include "Camera.h"
 #include "Transform.h"
 #include "EventDispatcher.h"
-#include "Inspectable.h"
+#include "IInspectable.h"
 #include "LightManager.h"
 #include "Renderer.h"
 #include "Shader.h"

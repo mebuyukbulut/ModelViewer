@@ -121,7 +121,7 @@ void Shader::load(std::filesystem::path path, IAssetSettings* settings)
     std::string pathStr = path.string(); 
 
     bool isVirtual = false;
-
+    bool isFX = false;
     // Sanal yolla model yükleme
     for(const char* key : Builtin::Shader::All){
         if(key == pathStr){        
@@ -129,8 +129,19 @@ void Shader::load(std::filesystem::path path, IAssetSettings* settings)
             break;
         }
     }
+    for(const char* key : Builtin::FX::All){
+        if(key == pathStr){        
+            isFX = true;
+            break;
+        }
+    }
 
     if (isVirtual){
+        ShaderSettings* a  = dynamic_cast<ShaderSettings*>(settings);
+        vertexShaderName = a->vertexPath;
+        fragmentShaderName = a->fragmentPath;
+    }
+    else if(isFX){
         ShaderSettings* a  = dynamic_cast<ShaderSettings*>(settings);
         vertexShaderName = a->vertexPath;
         fragmentShaderName = a->fragmentPath;

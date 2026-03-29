@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <memory>
 
-#include "Inspectable.h"
+#include "IInspectable.h"
 #include "Camera.h"
 #include "ColorProvider.h"
 #include "Force.h"
@@ -25,12 +25,11 @@ struct ParticleUpdateContext : IInspectable {
     std::unique_ptr<IColorProvider> colorProvider{new ConstantColorProvider()};
 
     // Inherited via IInspectable
-    void drawUI() override;
+    void onInspect() override;
 
 private:
     void addForce();
     //void setColorProvider();
-    // drawUI
 };
 
 struct Particle {
@@ -52,7 +51,7 @@ struct EmitterInfo : public IInspectable{
     EmitterInfo() : spawnRate{ 100 }, shape{new PointShape} {}
     EmitterInfo(int spawnRate, std::unique_ptr<IEmitterShape> shape) 
         : spawnRate{ spawnRate }, shape{ std::move(shape) } {}
-    void drawUI();
+    void onInspect();
 };
 
 
@@ -200,6 +199,6 @@ public:
 
     }
 
-    void drawUI();
+    void onInspect();
 };
 

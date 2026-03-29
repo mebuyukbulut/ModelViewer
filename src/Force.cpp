@@ -7,7 +7,7 @@
 glm::vec3 GravityForce::apply(Particle& p, float dt){
        return glm::vec3(0.0f, gravityScale, 0.0f);
 }
-void GravityForce::drawUI()
+void GravityForce::onInspect()
 {
     ImGui::DragFloat("Gravity scale", &gravityScale, 0.1);
 }
@@ -15,7 +15,7 @@ void GravityForce::drawUI()
 glm::vec3 WindForce::apply(Particle& p, float dt) {
     return direction;
 }
-void WindForce::drawUI()
+void WindForce::onInspect()
 {
     ImGui::DragFloat3("Direction", &direction[0], 0.1);
 }
@@ -26,7 +26,7 @@ glm::vec3 NoiseForce::apply(Particle& p, float dt) {
     //f *= /*glm::perlin(glm::vec3{ p.age }) **/ strength;
     return f;
 }
-void NoiseForce::drawUI()
+void NoiseForce::onInspect()
 {
     ImGui::DragFloat("Noise strength", &strength, 0.1, 0.1, FLT_MAX, "%.3f", ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp);
 }
@@ -34,7 +34,7 @@ void NoiseForce::drawUI()
 glm::vec3 DragForce::apply(Particle& p, float dt) {
     return p.velocity * -strength;
 }
-void DragForce::drawUI()
+void DragForce::onInspect()
 {
     ImGui::DragFloat("Drag strength", &strength, 0.1, 0.1, FLT_MAX, "%.3f", ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp);
 }
@@ -42,7 +42,7 @@ void DragForce::drawUI()
 glm::vec3 QuadraticDragForce::apply(Particle& p, float dt) {
     return p.velocity * glm::length(p.velocity) * -strength;
 }
-void QuadraticDragForce::drawUI()
+void QuadraticDragForce::onInspect()
 {
     ImGui::DragFloat("Quadratic Drag strength", &strength, 0.1, 0.1, FLT_MAX,"%.3f",ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp);
 }

@@ -10,14 +10,14 @@
 glm::vec3 PointShape::samplePosition() {
     return glm::vec3();
 }
-void PointShape::drawUI()
+void PointShape::onInspect()
 {
     //ImGui::SeparatorText("Point");
 }
 glm::vec3 SphereShape::samplePosition() {
     return glm::ballRand(radius);
 }
-void SphereShape::drawUI()
+void SphereShape::onInspect()
 {
     ImGui::SeparatorText("Sphere");
     ImGui::DragFloat("Radius", &radius, 0.1, 0.1, FLT_MAX);
@@ -31,7 +31,7 @@ glm::vec3 TorusShape::samplePosition() {
     //return glm::sphericalRand(radius);
 }
 
-void TorusShape::drawUI()
+void TorusShape::onInspect()
 {
     ImGui::SeparatorText("Torus");
     ImGui::DragFloat("Radius", &radius, 0.1, 0.1, FLT_MAX);

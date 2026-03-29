@@ -70,7 +70,7 @@ void UIManager::draw(SceneManager* sm ) {
 	beginFrame();
 
 	mainMenu();
-    ps->drawUI();
+    ps->onInspect();
 	if(isShaderPanelOpen) shaderPanel();
 	if(isCreditsPanelOpen) creditsPanel();
 

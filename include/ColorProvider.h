@@ -2,12 +2,14 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <algorithm>
-#include "Inspectable.h"
+#include "IInspectable.h"
 #include <imgui.h>
 
-class IColorProvider : public IInspectable {
+class IColorProvider : public IInspectable{
 public:
 	virtual glm::vec4 evaluate(float t) const = 0;
+
+	virtual void onInspect() override {};
 };
 
 
@@ -64,7 +66,7 @@ public:
 	}
 
 	// Inherited via IColorProvider
-	void drawUI() override;
+	void onInspect() override;
 };
 
 class ConstantColorProvider : public IColorProvider {
@@ -75,7 +77,7 @@ public:
 	}
 
 	// Inherited via IColorProvider
-	void drawUI() override;
+	void onInspect() override;
 };
 
 class ColorOverLifeProvider : public IColorProvider {
@@ -87,5 +89,5 @@ public:
 	}
 
 	// Inherited via IColorProvider
-	void drawUI() override;
+	void onInspect() override;
 };

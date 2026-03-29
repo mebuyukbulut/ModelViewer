@@ -5,7 +5,7 @@
 
 
 // https://github.com/epezent/implot
-void GradientProvider::drawUI()
+void GradientProvider::onInspect()
 {
     GradientEditor(_stops);
     ImGui::ColorEdit4("Color Edit", &_stops[_selectedStop].color[0],
@@ -136,13 +136,13 @@ bool GradientProvider::GradientEditor(std::vector<GradientStop>& stops, ImVec2 s
 }
 
 
-void ConstantColorProvider::drawUI()
+void ConstantColorProvider::onInspect()
 {
 	//ImGui::SeparatorText("Constant");
 	ImGui::ColorEdit4("color", &rgba[0]);
 }
 
-void ColorOverLifeProvider::drawUI()
+void ColorOverLifeProvider::onInspect()
 {
 	//ImGui::SeparatorText("Color lifetime");
 	ImGui::ColorEdit4("start color", &start[0]);
