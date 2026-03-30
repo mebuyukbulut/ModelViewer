@@ -107,10 +107,11 @@ public:
     FXInstance() = default;
     FXInstance(const FXInstanceDefinition& definition);
 
-    Shader* getShader();
+    Shader* getShader() const;
+    std::vector<FXParam>& getParameters(){ return parameters; }
 
+    bool isActive(){return enabled;}
     void update();
-
     void onInspect() override;
     
 };
@@ -125,8 +126,9 @@ class FXRegistry : public IInspectable{
     std::vector<std::string> getDefinitionList();
 public:
     void init(); // init all shaders 
-
     void onInspect() override;
+
+    const std::vector<FXInstance> getActiveFXStack();
     
 };
 

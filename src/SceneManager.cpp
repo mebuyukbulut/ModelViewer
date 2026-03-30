@@ -150,6 +150,7 @@ void SceneManager::init(Renderer* renderer, Camera* camera, UIManager* UI) {
 	MWD = std::filesystem::current_path().string();
     
     _renderer = renderer;
+    _renderer->fxReg = &fxReg;
     _camera = camera;
     _UI = UI;
 

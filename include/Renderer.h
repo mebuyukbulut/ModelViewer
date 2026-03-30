@@ -118,6 +118,7 @@ public:
 private:
 	ColorRenderTarget _rt{};
 	ColorRenderTarget _postProcA{}, _postProcB{};
+	ColorRenderTarget* _finalTarget{};
 	ShadowMapTarget _shadowMapTarget{};
 	FrameUniforms _frameUniforms{};
 
@@ -163,6 +164,7 @@ private:
 	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
 
 public:
+	class FXRegistry* fxReg{};
 	
 	void init(std::shared_ptr<Camera> camera);
 	void terminate();
@@ -171,7 +173,7 @@ public:
 	void clearBuffer();
 
 	void resizeViewport(int width, int height);
-	GLuint getViewportImage() { return _postProcB.colorTexture(); }
+	GLuint getViewportImage() { return _finalTarget->colorTexture(); }
 	GLuint getDebugImage() { return _shadowMapTarget.depthBuffer(); }
 	
 

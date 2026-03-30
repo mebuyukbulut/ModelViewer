@@ -13,6 +13,7 @@
 #include "Transform.h"
 #include "LightManager.h"
 #include "Builtin.h"
+#include "FX.h"
 
 void Renderer::initMatcap() {
     //matcapTexture = TextureFactory::load("data/matcaps/basic_1.png", false);
@@ -370,8 +371,33 @@ void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSel
 
     // Post Processing START
     glDisable(GL_DEPTH_TEST);
-    postProcessPass(_rt, _postProcA, g_Assets.get<Shader>(Builtin::FX::Grayscale).get());
-    postProcessPass(_postProcA, _postProcB, g_Assets.get<Shader>(Builtin::FX::Pixelate).get());
+
+    const std::vector<FXInstance>& postProcessStack = fxReg->getActiveFXStack();
+    if(postProcessStack.size() == 0) {
+        _finalTarget = &_rt; 
+    }
+    else if(postProcessStack.size() == 1) {
+        postProcessPass(_rt, _postProcA, postProcessStack[0].getShader());
+        _finalTarget = &_postProcA; 
+    }
+    else{
+        postProcessPass(_rt, _postProcA, postProcessStack[0].getShader());
+        int i ;
+        for(i = 1; i < postProcessStack.size(); i++){
+            if(i%2)
+                postProcessPass(_postProcA, _postProcB, postProcessStack[i].getShader());
+            else
+                postProcessPass(_postProcB, _postProcA, postProcessStack[i].getShader());      
+        }
+
+        if(i%2)
+            _finalTarget = &_postProcA; 
+        else
+            _finalTarget = &_postProcB; 
+
+    }
+    // postProcessPass(_rt, _postProcA, g_Assets.get<Shader>(Builtin::FX::Grayscale).get());
+    // postProcessPass(_postProcA, _postProcB, g_Assets.get<Shader>(Builtin::FX::Pixelate).get());
 
     
 

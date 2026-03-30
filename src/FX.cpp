@@ -52,7 +52,7 @@ FXInstance::FXInstance(const FXInstanceDefinition& definition)
     }
 }
 
-Shader* FXInstance::getShader(){
+Shader* FXInstance::getShader() const {
     return g_Assets.get<Shader>(builtinID).get();
 }
 void FXInstance::update()
@@ -127,13 +127,13 @@ void FXRegistry::onInspect()
 
     ImGui::Begin("FX Stack");
 
-    static int selectedDef = 0;
+    static int selectedDef = -1;
     std::vector<std::string> fxNames = getDefinitionList();
 
     // combo
     ImGui::SetNextItemWidth(200);
 
-    if (ImGui::BeginCombo("##fxcombo", fxNames[selectedDef].c_str()))
+    if (ImGui::BeginCombo("##fxcombo", selectedDef == -1 ? "Select an Effect" : fxNames[selectedDef].c_str()))
     {
         for (int i = 0; i < fxNames.size(); i++)
         {
@@ -154,12 +154,14 @@ void FXRegistry::onInspect()
     // add button
     if (ImGui::Button("+ Add Effect"))
     {
-        addInstance(selectedDef);
+        if(selectedDef >= 0)
+            addInstance(selectedDef);
     }
 
 
     ImGui::Separator();
 
+    static int selectedIndex = -1;
 
     // scrollable area
     ImGui::BeginChild("fx_list", ImVec2(0, 200), true);
@@ -168,7 +170,6 @@ void FXRegistry::onInspect()
         ImGui::PushID(i);
 
         FXInstance& fx = FXStack[i];
-        static int selectedIndex = -1;
         // select row
         bool selected = (selectedIndex == i);
 
@@ -180,7 +181,8 @@ void FXRegistry::onInspect()
         fx.onInspect();
 
         if (ImGui::SmallButton("X"))
-        {
+        {   
+            if(selectedIndex == i) selectedIndex--;
             FXStack.erase(FXStack.begin() + i);
             ImGui::PopID();
             break;
@@ -196,22 +198,36 @@ void FXRegistry::onInspect()
     ImGui::EndChild();
 
 
-    // // selected effect parameters
-    // if (selectedIndex >= 0 && selectedIndex < FXStack.size())
-    // {
-    //     ImGui::Separator();
+    // selected effect parameters
+    if (selectedIndex >= 0 && selectedIndex < FXStack.size())
+    {
+        ImGui::Separator();
 
-    //     auto& fx = FXStack[selectedIndex];
+        auto& fx = FXStack[selectedIndex];
+        fx.update();
 
-    //     ImGui::Text("Parameters");
-
-    //     ImGui::DragFloat("Intensity", &fx.intensity, 0.01f, 0.0f, 2.0f);
-    // }
+        auto& paramVec = fx.getParameters();
+        ImGui::Text("Parameters");
+        for(auto& param : paramVec)
+            param.onInspect();
+    }
 
     ImGui::End();
 
 }
 
+const std::vector<FXInstance> FXRegistry::getActiveFXStack()
+{
+    std::vector<FXInstance> activeStack{};
+    
+    for (FXInstance instance : FXStack){
+        instance.update();
+        if(instance.isActive())
+            activeStack.push_back(instance);
+    }
+    
+    return activeStack;
+}
 
 /////////////////////////////////////////////////
 //          Instance Definition Stack          //
