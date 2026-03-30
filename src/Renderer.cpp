@@ -248,15 +248,6 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
         {Builtin::Shader::Selection, 	"../assets/shaders/selection.vert", 	"../assets/shaders/selection.frag"},
         {Builtin::Shader::Shadow,    	"../assets/shaders/simpleShadow.vert", 	"../assets/shaders/simpleShadow.frag"},
         {Builtin::Shader::Light,    	"../assets/shaders/light.vert", 	    "../assets/shaders/light.frag"},
-
-        {Builtin::FX::Grayscale,     "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/grayscale.frag"},
-        {Builtin::FX::PassThrough,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/passthrough.frag"},
-        {Builtin::FX::Invert,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/invert.frag"},
-        {Builtin::FX::Sepia,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/sepia.frag"},
-        {Builtin::FX::Vignette,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/vignette.frag"},
-        {Builtin::FX::GammaCorrection,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/gamma_correction.frag"},
-        {Builtin::FX::Posterize,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/posterize.frag"},
-        {Builtin::FX::Pixelate,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/pixelate.frag"},
     };
     //shaders.push_back({"lambertian", 	"../assets/shaders/lambertian.vert", 		"../assets/shaders/lambertian.frag"});
  	//shaders.push_back({"normal", 		"../assets/shaders/normal.vert", 			"../assets/shaders/normal.frag"});

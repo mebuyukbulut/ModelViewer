@@ -18,7 +18,7 @@ using FXValue = std::variant<
     bool
 >;
 
-enum class FXParamKind
+enum class FXParamType
 {
     Float,
     Int,
@@ -32,90 +32,124 @@ struct FXParamDefinition{
     std::string uniformName{};
     std::string label{};
     std::string tooltip{};
-    FXParamKind type;
+    FXParamType type;
 
     FXValue min;
     FXValue max;
     FXValue defaultVal; 
 
     template<typename T>
-    FXParamDefinition(std::string uniformName, std::string label, std::string tooltip, T min, T max, T defaultVal)
-    :uniformName{uniformName}, label{label}, tooltip{tooltip}, min{min}, max{max}, defaultVal{defaultVal}{}
+    FXParamDefinition(std::string uniformName, std::string label, std::string tooltip, FXParamType type, T min, T max, T defaultVal)
+    :uniformName{uniformName}, label{label}, tooltip{tooltip}, type{type}, min{min}, max{max}, defaultVal{defaultVal}{}
 };
 
-struct FXParam{
+struct FXParam : public IInspectable{
     const FXParamDefinition* definition = nullptr;
-    std::string label{};
+    bool dirty{true};
     FXValue value; 
 
     FXParam() = default;
+    FXParam(const FXParamDefinition* definition);
 
     void update(Shader* shader);
 
-    void setLabel(std::string newLabel){ label = newLabel; }
+    template<typename T> 
+    void setValue(T newValue){ value = newValue; dirty = true; }
 
-    std::string getLabel(){ return label; }
+
+    std::string getUniformName(){ return definition->uniformName; }
+    std::string getLabel(){ return definition->label; }
     std::string getTooltip(){ return definition->tooltip; }
 
+    FXParamType getType(){ return definition->type; }
+
+    FXValue getValue(){ return value; }
+    FXValue getMin(){ return definition->min; }
+    FXValue getMax(){ return definition->max; }
+    FXValue getDefaultValue(){ return definition->defaultVal; }
+
+    void onInspect() override;
 
 };
 
 struct FXInstanceDefinition{
     std::string builtinID{};    // builtin::fx::grayscale 
     std::string label{}; 
+    std::string tooltip{};
     std::string vertexPath{};   // ./assets/fx/...
     std::string fragmentPath{}; // ./assets/fx/...
-    std::vector<FXParam> parameters{};
+    std::vector<const FXParamDefinition*> parameters{};
 
     FXInstanceDefinition() = default;
-    FXInstanceDefinition(std::string builtinID, std::string vertexPath, std::string fragmentPath, std::vector<FXParam> parameters)
-        :builtinID{builtinID}, vertexPath{vertexPath}, fragmentPath{fragmentPath}, parameters{parameters}{}
+    FXInstanceDefinition(
+        std::string builtinID, 
+        std::string label,
+        std::string tooltip,
+        std::string vertexPath, std::string fragmentPath, 
+        std::vector<const FXParamDefinition*> parameters)
+        :
+        builtinID{builtinID}, 
+        label{label},
+        tooltip{tooltip},
+        vertexPath{vertexPath}, fragmentPath{fragmentPath}, 
+        parameters{parameters}{}
 };
 
 class FXInstance : public IInspectable{
-    bool enabled{};
+    bool enabled{true};
     float opacity{1.0f};
     std::string builtinID{};
     std::string label{}; 
     std::vector<FXParam> parameters{}; 
 
-    Shader* getShader();
     // onInspect(); 
-
+public:
     FXInstance() = default;
-    FXInstance(FXInstanceDefinition definition);
+    FXInstance(const FXInstanceDefinition& definition);
+
+    Shader* getShader();
 
     void update();
 
-    void onInspect();
+    void onInspect() override;
     
 };
 
-class FXRegistry{
-    static std::vector<FXInstanceDefinition> FXDefinitionStack;
+class FXRegistry : public IInspectable{
+    static std::vector<FXInstanceDefinition> FXInstanceDefinitionStack;
     std::vector<FXInstance> FXStack{};
 
+    void addInstance(int definitionIndex);
+    void addInstance(std::string builtinID);
+
+    std::vector<std::string> getDefinitionList();
+public:
     void init(); // init all shaders 
 
-    void addShader();
-    
-    // void onInspect();
+    void onInspect() override;
     
 };
 
-std::vector<FXInstanceDefinition> FXRegistry::FXDefinitionStack{
-    FXInstanceDefinition{Builtin::FX::Grayscale, "fullscreen_tris.vert", "grayscale.frag", 
-        {}},
+namespace Builtin
+{
+    namespace FX
+    {
+        namespace Params{
+            inline const FXParamDefinition MyFloat {"u_float", "my float:", "This is a float", FXParamType::Float,  0.0f, 1.0f, 0.5f};
 
-};
 
+        }
+    }
+}
 
 
 // {Builtin::FX::Grayscale,     "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/grayscale.frag"},
 // {Builtin::FX::PassThrough,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/passthrough.frag"},
 // {Builtin::FX::Invert,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/invert.frag"},
+
 // {Builtin::FX::Sepia,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/sepia.frag"},
 // {Builtin::FX::Vignette,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/vignette.frag"},
 // {Builtin::FX::GammaCorrection,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/gamma_correction.frag"},
+
 // {Builtin::FX::Posterize,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/posterize.frag"},
 // {Builtin::FX::Pixelate,   "../assets/shaders/postfx/fullscreen_tris.vert", "../assets/shaders/postfx/pixelate.frag"},

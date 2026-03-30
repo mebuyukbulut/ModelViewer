@@ -24,6 +24,9 @@
 #include "RenderComponent.h"
 #include "Builtin.h"
 
+#include "FX.h"
+
+FXRegistry fxReg{};
 
 ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 
@@ -143,6 +146,7 @@ void SceneManager::initDefaults()
     //g_Assets.get<Model>(MWD + "/../assets/models/monkey/monkey.obj", nullptr, true);
 }
 void SceneManager::init(Renderer* renderer, Camera* camera, UIManager* UI) {
+    fxReg.init();
 	MWD = std::filesystem::current_path().string();
     
     _renderer = renderer;
@@ -397,6 +401,8 @@ void SceneManager::onInspect()
     ImGui::End();
 
 
+    // FX
+    fxReg.onInspect();
 
     // PROPERTIES PANEL
 

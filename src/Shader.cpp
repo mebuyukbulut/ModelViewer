@@ -84,32 +84,33 @@ void Shader::terminate(){
     glDeleteProgram(_shaderProgram);
 }
 
-void Shader::set(const std::string& name, const glm::mat4& mat){
+void Shader::set(const std::string& name, const glm::mat4& mat) {
     if(getUniformLocation(name)<0) return;
     glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }
 
+void Shader::set(const std::string &name, const glm::vec2 &vec) {
+    if(getUniformLocation(name)<0) return;
+    glUniform2fv(getUniformLocation(name), 1, &vec[0]);
+}
+
 void Shader::set(const std::string& name, const glm::vec3& vec) {
     if(getUniformLocation(name)<0) return;
-
     glUniform3fv(getUniformLocation(name), 1, &vec[0]);
 }
 
 void Shader::set(const std::string& name, const glm::vec4& vec) {
     if(getUniformLocation(name)<0) return;
-
     glUniform4fv(getUniformLocation(name), 1, &vec[0]);
 }
 
 void Shader::set(const std::string& name, float value){
     if(getUniformLocation(name)<0) return;
-
     glUniform1f(getUniformLocation(name), value);
 }
 
 void Shader::set(const std::string& name, int value){
     if(getUniformLocation(name)<0) return;
-
     glUniform1i(getUniformLocation(name), value);
 }
 

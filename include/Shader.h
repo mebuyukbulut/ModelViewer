@@ -22,6 +22,7 @@ public:
 	void terminate(); 
 
 	void set(const std::string& name, const glm::mat4& mat);
+	void set(const std::string& name, const glm::vec2& vec);
 	void set(const std::string& name, const glm::vec3& vec);
 	void set(const std::string& name, const glm::vec4& vec);
 	void set(const std::string& name, float value);
