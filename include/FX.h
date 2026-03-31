@@ -102,7 +102,6 @@ class FXInstance : public IInspectable{
     std::string label{}; 
     std::vector<FXParam> parameters{}; 
 
-    // onInspect(); 
 public:
     FXInstance() = default;
     FXInstance(const FXInstanceDefinition& definition);
@@ -137,8 +136,40 @@ namespace Builtin
     namespace FX
     {
         namespace Params{
-            inline const FXParamDefinition MyFloat {"u_float", "my float:", "This is a float", FXParamType::Float,  0.0f, 1.0f, 0.5f};
+            // uniformName, labelName, tooltip, type, min, max, default
+            //inline const FXParamDefinition MyFloat {"u_float", "value:", "This is a float", FXParamType::Float,  0.0f, 1.0f, 0.5f};
+            inline const FXParamDefinition Pixelate_Values {
+                "u_value2D", 
+                "Pixel Count", 
+                "Total pixel count in a row and column.", 
+                FXParamType::Vec2,  
+                glm::vec2(0, 0), glm::vec2(2048, 2048), glm::vec2(320,180)};
 
+            inline const FXParamDefinition Posterize_Values {
+                "u_value", 
+                "Levels", 
+                "Step count between absolute min value to absolute max value for each color channel.", 
+                FXParamType::Float,  
+                2.0f, 255.0f , 5.0f};
+
+            inline const FXParamDefinition Vignette_Amount {
+                "u_amount", 
+                "Amount", 
+                "Amount of darkness.", 
+                FXParamType::Float,  
+                0.0f, 1.0f , 0.5f};
+            inline const FXParamDefinition Vignette_Distance {
+                "u_distance", 
+                "Distance", 
+                "Where to start.", 
+                FXParamType::Float,  
+                0.0f, 1.0f , 0.5f};
+            inline const FXParamDefinition Vignette_Feather {
+                "u_feather", 
+                "Feathering", 
+                "Smoothness between light and dark areas.", 
+                FXParamType::Float,  
+                0.0f, 1.0f , 0.5f};
 
         }
     }

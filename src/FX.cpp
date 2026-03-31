@@ -3,6 +3,8 @@
 #include "AssetManager.h"
 #include "Logger.h"
 #include <imgui.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 FXParam::FXParam(const FXParamDefinition* definition)
 {
@@ -33,10 +35,18 @@ void FXParam::onInspect()
         float max = std::get<float>(getMax());
         //float defaultVal = std::get<float>(getDefaultValue());
 
-        if(ImGui::DragFloat(getLabel().c_str(), std::get_if<float>(&value), 1.0f, min, max))
+        if(ImGui::DragFloat(getLabel().c_str(), std::get_if<float>(&value), 0.025f, min, max))
             dirty = true;
-
     }
+    else if(getType() == FXParamType::Vec2){
+        glm::vec2* val = std::get_if<glm::vec2>(&value);
+        float min = std::get<glm::vec2>(getMin()).x;
+        float max = std::get<glm::vec2>(getMax()).x;
+
+        if (ImGui::DragFloat2(getLabel().c_str(), glm::value_ptr(*std::get_if<glm::vec2>(&value)) , 1.0f, min, max))
+            dirty = true;
+    }
+    
 }
 
 
@@ -57,14 +67,13 @@ Shader* FXInstance::getShader() const {
 }
 void FXInstance::update()
 {
+    g_Assets.get<Shader>(builtinID).get()->use();
     for(FXParam& param : parameters)
         param.update(g_Assets.get<Shader>(builtinID).get());
 }
 
 void FXInstance::onInspect()
 {
-
-    // draw widgets on same line
     ImGui::SameLine();
 
     ImGui::Checkbox("##enabled", &enabled);
@@ -73,14 +82,12 @@ void FXInstance::onInspect()
 
     ImGui::Text("%s", label.c_str());
 
-    ImGui::SameLine(200);
+    ImGui::SameLine(280);//(200);
 
-    ImGui::SetNextItemWidth(80);
-    ImGui::DragFloat("##opacity", &opacity, 0.01f, 0.0f, 1.0f);
+    // ImGui::SetNextItemWidth(80);
+    // ImGui::DragFloat("##opacity", &opacity, 0.01f, 0.0f, 1.0f);
 
-    ImGui::SameLine();
-
-
+    // ImGui::SameLine();
 }
 
 /////////////////////////////////////////////////
@@ -220,8 +227,10 @@ const std::vector<FXInstance> FXRegistry::getActiveFXStack()
 {
     std::vector<FXInstance> activeStack{};
     
+    // for (FXInstance& instance : FXStack)
+    //     instance.update();
+
     for (FXInstance instance : FXStack){
-        instance.update();
         if(instance.isActive())
             activeStack.push_back(instance);
     }
@@ -239,21 +248,21 @@ std::vector<FXInstanceDefinition> FXRegistry::FXInstanceDefinitionStack{
         "Grayscale", 
         "This is grayscale", 
         "fullscreen_tris.vert", "grayscale.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {}},
 
     FXInstanceDefinition{
         Builtin::FX::PassThrough, 
         "Pass Through", 
         "tooltip", 
         "fullscreen_tris.vert", "passthrough.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {}},
 
     FXInstanceDefinition{
         Builtin::FX::Invert,      
         "Invert", 
         "tooltip",  
         "fullscreen_tris.vert", "invert.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {}},
 
 
 
@@ -262,21 +271,26 @@ std::vector<FXInstanceDefinition> FXRegistry::FXInstanceDefinitionStack{
         "Sepia", 
         "tooltip",   
         "fullscreen_tris.vert", "sepia.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {}},
 
     FXInstanceDefinition{
         Builtin::FX::Vignette,    
         "Vignette", 
         "tooltip",  
         "fullscreen_tris.vert", "vignette.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {
+        {&Builtin::FX::Params::Vignette_Amount}, 
+        {&Builtin::FX::Params::Vignette_Distance}, 
+        {&Builtin::FX::Params::Vignette_Feather}, 
+        }
+    },
 
     FXInstanceDefinition{
         Builtin::FX::GammaCorrection,
         "GammaCorrection", 
         "tooltip", 
         "fullscreen_tris.vert", "gamma_correction.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {}}, // bunu da paremetreye bağlayabiliriz
 
 
 
@@ -285,13 +299,13 @@ std::vector<FXInstanceDefinition> FXRegistry::FXInstanceDefinitionStack{
         "Posterize", 
         "tooltip",  
         "fullscreen_tris.vert", "posterize.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {{&Builtin::FX::Params::Posterize_Values}}},
 
     FXInstanceDefinition{
         Builtin::FX::Pixelate,     
         "Pixelate", 
         "tooltip", 
         "fullscreen_tris.vert", "pixelate.frag", 
-        {{&Builtin::FX::Params::MyFloat}}},
+        {{&Builtin::FX::Params::Pixelate_Values}}},
 
 };

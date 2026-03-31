@@ -3,10 +3,12 @@
 in vec2 fTexCoords;
 out vec4 FragColor;
 
+uniform vec2 u_value2D = vec2(320.0, 180.0);
+
 layout(binding = 0) uniform sampler2D frameTex;
 
 void main(){
-    vec2 size = vec2(320.0, 180.0); 
+    vec2 size = u_value2D; //vec2(320.0, 180.0); 
     vec2 uv2 = floor(fTexCoords * size) / size;
 
     vec3 color = texture(frameTex, uv2).rgb;
