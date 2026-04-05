@@ -229,12 +229,22 @@ vec3 CalcDirectionalLight(Light light){
     //vec3 l = lightDir; //normalize(ubo_data.lights[0].position.xyz - fPos ); // Incident light vector
     float bias = 0.005 * tan(acos(NoL));
 
-    float shadow = //currentDepth > closestDepth ? 1.0 : 0.0;
-        currentDepth - bias > closestDepth
+    float shadow = 0.0;
+    if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
+    projCoords.y < 0.0 || projCoords.y > 1.0 ||
+    projCoords.z < 0.0 || projCoords.z > 1.0)
+    {
+        shadow = 0.0;
+    }
+    else{
+        shadow =
+        currentDepth - bias >= closestDepth
         ? 1.0
         : 0.0;
+    }
+    
 
-
+    
     //vec3 result = pLights * (1.0 - shadow);// * material.color;
 
     return (Fd + Fr) * light.color.w * light.color.xyz * NoL * (1.0 - shadow); // * E;

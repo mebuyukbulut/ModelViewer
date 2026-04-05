@@ -5,8 +5,13 @@ layout (location = 2) in vec2 vTexCoords;
 
 uniform mat4 lightSpaceMatrix;
 uniform mat4 model;
+//uniform mat4 lightView;
+//uniform mat4 lightProjection;
+//uniform float near_plane;
+//uniform float far_plane;
 
 void main()
 {
+    // try LinearizeDepth for perspective projection  
     gl_Position = lightSpaceMatrix * model * vec4(vPos, 1.0);
 }  

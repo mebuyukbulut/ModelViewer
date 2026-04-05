@@ -66,6 +66,10 @@ void Renderer::shadowPass(const SceneRenderData &renderData)
     _materialShader->use(); _materialShader->set("lightSpaceMatrix", lightSpaceMatrix);
     _shadowShader->use();
     _shadowShader->set("lightSpaceMatrix", lightSpaceMatrix);
+    //_shadowShader->set("lightProjection", lightProjection);
+    //_shadowShader->set("lightView", lightView);
+    //_shadowShader->set("near_plane", near_plane);
+    //_shadowShader->set("far_plane", far_plane);
     for (const RenderItem& item : renderData.renderItems) {
         drawModelWithShader(item.model, item.transform, _shadowShader);
     }
@@ -527,11 +531,13 @@ void ShadowMapTarget::create(int width, int height)
     glBindTexture(GL_TEXTURE_2D, depthMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
                 width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); 
 
+    float ones[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ones);
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
