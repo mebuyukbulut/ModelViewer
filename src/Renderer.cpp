@@ -35,7 +35,7 @@ void Renderer::shadowPass(const SceneRenderData &renderData)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    float near_plane = 1.0f, far_plane = 10.0f;
+    float near_plane = 1.0f, far_plane = 20.0f;
     glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane); 
     glm::mat4 lightView;
 
@@ -47,7 +47,7 @@ void Renderer::shadowPass(const SceneRenderData &renderData)
             );
 
         glm::vec3 sceneCenter = {0,0,0};
-        glm::vec3 lightPos = sceneCenter - lightDir * 5.0f;
+        glm::vec3 lightPos = sceneCenter - lightDir * 10.0f;
 
         lightView =
             glm::lookAt(
@@ -325,7 +325,7 @@ void Renderer::init(std::shared_ptr<Camera> camera) {
     _rt.create(300,300); // create default frame buffer for viewport
     _postProcA.create(300,300); // create default frame buffer for viewport
     _postProcB.create(300,300);
-    _shadowMapTarget.create(1024,1024);
+    _shadowMapTarget.create(2048,2048);
 
 }
 void Renderer::terminate() {

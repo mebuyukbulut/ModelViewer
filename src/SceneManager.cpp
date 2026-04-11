@@ -687,7 +687,7 @@ void SceneManager::addModel(std::string path, std::string entityName, bool loadA
     _entities.push_back(std::move(entity));
 }
 
-	
+
 
 
 void SceneManager::deleteSelected()
