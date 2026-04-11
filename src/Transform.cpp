@@ -92,6 +92,10 @@ void Transform::setRotation(const glm::vec3& eulerDegrees) {
 void Transform::setOrientation(const glm::quat& orientation){ _orientation = orientation; _isDirty = true; }
 void Transform::setScale(const glm::vec3& scale) { _scale = scale; _isDirty = true; }
 
+void Transform::move(const glm::vec3 &deltaPosition)
+{
+    setPosition(getPosition()+deltaPosition);
+}
 
 /// <summary>
 /// Set local matrix of the transform according to world matrix

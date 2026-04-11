@@ -43,6 +43,7 @@ public:
 	void setOrientation(const glm::quat& orientation);
 	void setScale(const glm::vec3& scale);
 
+	void move(const glm::vec3& deltaPosition);
 
 
 	void setLocalMatrix(const glm::mat4& worldMatrix);
@@ -57,6 +58,8 @@ public:
 	std::vector<Transform*>& getChildren() { return children; }
 
 	bool isRoot() { return parent == nullptr; }
+
+
 
 	void onInspect() override;
 	void serialize(YAML::Emitter& out) override;

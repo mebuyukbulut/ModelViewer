@@ -632,6 +632,7 @@ void SceneManager::drawGizmo()
 
 
     glm::mat4 modelMatrix = _selectedEntity->transform->getGlobalMatrix();
+    glm::vec3 selectedPos = _selectedEntity->transform->getPosition();
 
     bool gizmoUsed = ImGuizmo::Manipulate(
         glm::value_ptr(_camera->getViewMatrix()),
@@ -641,8 +642,20 @@ void SceneManager::drawGizmo()
         glm::value_ptr(modelMatrix)
     );
 
-    if (gizmoUsed)
+    if (gizmoUsed){
         _selectedEntity->transform->setLocalMatrix(modelMatrix);
+
+        if(mCurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE){
+            glm::vec3 deltaPos = _selectedEntity->transform->getPosition() - selectedPos;
+            for(Entity* e : _selectedEntities){
+                if(e == _selectedEntity) continue;
+                    e->transform->move(deltaPos);
+            }
+
+        }
+        
+
+    }
 
 }
 
