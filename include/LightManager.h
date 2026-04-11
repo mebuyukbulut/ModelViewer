@@ -69,10 +69,11 @@ public:
 	Light(GPULight data) : blockData(data) {}
 
     virtual void update();
-    GPULight getGPULight() { 
-		//update(); // return isDirty ? update(), blockData : blockData;
-        return blockData;  
-    }
+    GPULight getGPULight();
+
+    virtual glm::mat4 getProjection();
+    virtual glm::mat4 getView();
+
 
     //virtual void configShader(Shader& shader, std::string prefix);
     void serialize(YAML::Emitter& out) override;
@@ -114,6 +115,10 @@ public:
     DirectionalLight();
     DirectionalLight(GPULight data) : Light(data) {}
     void update() override;
+
+    glm::mat4 getProjection() override;
+    glm::mat4 getView() override;
+
     //void configShader(Shader& shader, std::string prefix) override;
     //YAML::Node serialize() override;
     void onInspect() override;

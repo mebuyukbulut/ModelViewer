@@ -74,6 +74,21 @@ void Light::update()
     //isDirty = false; 
 }
 
+GPULight Light::getGPULight(){ 
+    //update(); // return isDirty ? update(), blockData : blockData;
+    return blockData;      
+}
+
+glm::mat4 Light::getProjection()
+{
+    return glm::mat4();
+}
+
+glm::mat4 Light::getView()
+{
+    return glm::mat4();
+}
+
 void SpotLight::update(){
     Light::update(); //directional light ın positiona da ihtiyacı yok
 
@@ -95,6 +110,32 @@ void DirectionalLight::update(){
     //LOG_TRACE("spot light update() :" + std::to_string(lightDirection.x) + ", " 
     //+ std::to_string(lightDirection.y) + ", " + std::to_string(lightDirection.z));
 
+}
+
+glm::mat4 DirectionalLight::getProjection()
+{
+    float near_plane = 1.0f, far_plane = 20.0f;
+    return glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane); 
+}
+
+glm::mat4 DirectionalLight::getView()
+{
+    glm::quat rot = owner->transform->getRotationAsQuat();
+    glm::vec3 lightDir =
+        glm::normalize(
+            rot * glm::vec3(0, 1, 0)
+        );
+
+    glm::vec3 sceneCenter = {0,0,0};
+    glm::vec3 lightPos = sceneCenter - lightDir * 10.0f;
+
+    return
+        glm::lookAt(
+            lightPos,
+            sceneCenter,
+            glm::vec3(0, 1,0)
+        );
+    
 }
 
 Light::Light() {

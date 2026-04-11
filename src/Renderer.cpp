@@ -35,44 +35,34 @@ void Renderer::shadowPass(const SceneRenderData &renderData)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    float near_plane = 1.0f, far_plane = 20.0f;
-    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane); 
-    glm::mat4 lightView;
+    if(renderData.lightItems.size() == 0) return; 
 
-    if(renderData.lightItems.size()){
-        glm::quat rot = renderData.lightItems[0].light->owner->transform->getRotationAsQuat();
-        glm::vec3 lightDir =
-            glm::normalize(
-                rot * glm::vec3(0, 1, 0)
-            );
+    for(const LightItem& l :renderData.lightItems){
+        Light* light = l.light;
+        if(light->type != ComponentType::DirectionalLight) return;
 
-        glm::vec3 sceneCenter = {0,0,0};
-        glm::vec3 lightPos = sceneCenter - lightDir * 10.0f;
+        if(light->type == ComponentType::DirectionalLight){
 
-        lightView =
-            glm::lookAt(
-                lightPos,
-                sceneCenter,
-                glm::vec3(0, 1,0)
-            );
+            glm::mat4 lightProjection = light->getProjection();
+            glm::mat4 lightView = light->getView();
+
+            glm::mat4 lightSpaceMatrix = lightProjection * lightView; 
+
+            _materialShader->use(); _materialShader->set("lightSpaceMatrix", lightSpaceMatrix);
+            _shadowShader->use();
+            _shadowShader->set("lightSpaceMatrix", lightSpaceMatrix);
+            //_shadowShader->set("lightProjection", lightProjection);
+            //_shadowShader->set("lightView", lightView);
+            //_shadowShader->set("near_plane", near_plane);
+            //_shadowShader->set("far_plane", far_plane);
+            for (const RenderItem& item : renderData.renderItems) {
+                drawModelWithShader(item.model, item.transform, _shadowShader);
+            }
+        }
     }
-    else{
-        lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), 
-                                glm::vec3( 0.0f, 0.0f,  0.0f), 
-                                glm::vec3( 0.0f, 1.0f,  0.0f));  
-    }
-    glm::mat4 lightSpaceMatrix = lightProjection * lightView; 
+    
+    
 
-    _materialShader->use(); _materialShader->set("lightSpaceMatrix", lightSpaceMatrix);
-    _shadowShader->use();
-    _shadowShader->set("lightSpaceMatrix", lightSpaceMatrix);
-    //_shadowShader->set("lightProjection", lightProjection);
-    //_shadowShader->set("lightView", lightView);
-    //_shadowShader->set("near_plane", near_plane);
-    //_shadowShader->set("far_plane", far_plane);
-    for (const RenderItem& item : renderData.renderItems) {
-        drawModelWithShader(item.model, item.transform, _shadowShader);
-    }
 }
 
 void Renderer::materialPass(const std::vector<RenderItem> &renderItems)
