@@ -426,54 +426,84 @@ void SceneManager::onInspect()
 
     // TERMINAL PANEL
     ImGui::Begin("TERMINAL");
+    //static bool terminalButton_state_all = true;
+    static bool states[7]{true,true,true,true,true,true,true};
+    static std::string state_strs[7]{"Trace","Debug","Info","Warning","Error","Success","Critical"};
+    bool& terminalButton_state_trace    = states[0];
+    bool& terminalButton_state_debug    = states[1];
+    bool& terminalButton_state_info     = states[2];
+    bool& terminalButton_state_warning  = states[3];
+    bool& terminalButton_state_error    = states[4];
+    bool& terminalButton_state_success  = states[5];
+    bool& terminalButton_state_critical = states[6];
+
+    for(int i = 0; i < 7; i++){
+        if (states[i]) {
+            // Buton seçiliyken Lime olsun
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.2f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.2f, 0.8f, 0.2f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.3f, 1.0f));
+        } else{
+            // Buton seçili değilken Gray olsun
+            ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,        ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+        }
+
+        if (ImGui::Button(state_strs[i].c_str())) states[i] = !states[i];       
+        if (i != 6) ImGui::SameLine();
+                
+        ImGui::PopStyleColor(3);
+    }
+
 
     // Kaydırma alanı için bir Child Window açıyoruz
     ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
     
     auto& logs = Logger::get().getMessages();
     
+    // ekranda gösterilmeyecek olan mesajları filtreliyoruz.   
+    static std::vector<int> filteredIndices;
+    filteredIndices.clear();
+    filteredIndices.reserve(logs.capacity());
+
+    for (int i = 0; i < logs.size(); i++) {
+        char prefix = logs[i][1]; // [T], [D], [I] gibi...
+        
+        // Filtreleme mantığı
+        if (prefix == 'T' && !states[0]) continue;
+        if (prefix == 'D' && !states[1]) continue;
+        if (prefix == 'I' && !states[2]) continue;
+        if (prefix == 'W' && !states[3]) continue;
+        if (prefix == 'E' && !states[4]) continue;
+        if (prefix == 'S' && !states[5]) continue;
+        if (prefix == 'C' && !states[6]) continue;
+        
+        filteredIndices.push_back(i);
+    }
+
     // Clipper nesnesini oluşturuyoruz
     ImGuiListClipper clipper;
-    clipper.Begin(logs.size()); // Toplam log sayısı
+    clipper.Begin(filteredIndices.size()); // Toplam log sayısı
 
     while (clipper.Step()) {
         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-            // Sadece şu an ekranda görünen 'i' indekslerini çiziyoruz
-            const auto& message = logs[i];
+            int logIndex = filteredIndices[i];
+            const auto& message = logs[logIndex];
             
             // Renklendirme (Daha önceki LogEntry yapısını kullandığını varsayıyorum)
             ImVec4 color = ImColor(255, 0, 0, 255).Value;
-            char messagePrefix = message[1];
-            switch (messagePrefix)
-            {
-            case 'T': // Trace
-                color = ImColor(128, 128, 128, 255).Value;
-                break;
-            case 'D': // Debug
-                color = ImColor(  0, 255, 255, 255).Value;
-                break;
-            case 'I': // Info
-                color = ImColor(255, 255, 255, 255).Value;
-                break;
-
-            case 'W': // Warning
-                color = ImColor(255, 255,   0, 255).Value;
-                break;
-            case 'E': // Error 
-                color = ImColor(255,   0,   0, 255).Value;
-                break;
-            case 'S': // Success
-                color = ImColor( 50, 205,  50, 255).Value;
-                break;
-
-            case 'C': // Critical
-                color = ImColor(255,   0, 255, 255).Value;
-                break;
-            default:
-                break;
-            }
-
             
+            char prefix = message[1];
+            if      (prefix == 'T') color = ImColor(128, 128, 128).Value;
+            else if (prefix == 'D') color = ImColor(  0, 255, 255).Value;
+            else if (prefix == 'I') color = ImColor(255, 255, 255).Value;
+            else if (prefix == 'W') color = ImColor(255, 255,   0).Value;
+            else if (prefix == 'E') color = ImColor(255,   0,   0).Value;
+            else if (prefix == 'S') color = ImColor( 50, 205,  50).Value;
+            else if (prefix == 'C') color = ImColor(255,   0, 255).Value;
+            else                    color = ImColor(  0,   0,   0).Value; // fallback
+
             ImGui::PushStyleColor(ImGuiCol_Text, color);
             ImGui::TextUnformatted(message.c_str());
             ImGui::PopStyleColor();
