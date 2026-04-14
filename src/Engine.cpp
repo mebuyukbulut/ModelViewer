@@ -77,6 +77,14 @@ void Engine::initOpenGL()
         LOG_ERROR("Failed to initialize OpenGL context\n");
 		//return -1;
 	}
+    
+    if (!GL_ARB_bindless_texture) {
+        LOG_ERROR("Bindless textures is not supported! (GL_ARB_bindless_texture)");
+        // Geriye dönük (fallback) çözüm: Texture Array veya standart slot yönetimi
+        exit(EXIT_FAILURE);
+    }else{
+        LOG_SUCCESS("Bindless textures is supported! (GL_ARB_bindless_texture)");
+    }
 
 }
 
@@ -113,7 +121,7 @@ void Engine::init(){
 
 	initUI();
 
-    LOG_INFO("engine was initialized");
+    LOG_SUCCESS("Engine was initialized");
 }
 void Engine::mainLoop()
 {
@@ -166,7 +174,7 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
     // Retrieve the instance pointer
     Engine* app = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (app) {
-        LOG_TRACE(std::format("Window resized to: {} x {}",width,height));
+        LOG_TRACE("Window resized to: {} x {}",width,height);
         app->_renderer.resizeViewport(width, height);
     }
 }

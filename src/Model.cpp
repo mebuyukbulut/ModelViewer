@@ -20,7 +20,7 @@ void Model::loadModel(const std::string& path)
     // check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
-        LOG_ERROR( "ASSIMP: " + std::string(importer.GetErrorString()) );
+        LOG_ERROR( "ASSIMP: {}", std::string(importer.GetErrorString()) );
         _loadStatus = AssetLoadStatus::Error;
         return;
     }

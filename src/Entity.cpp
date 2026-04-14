@@ -67,7 +67,7 @@ void Entity::deserialize(const YAML::Node& node)
     auto componentsNode = node["components"];
 
     if (!componentsNode || !componentsNode.IsDefined()) {
-        LOG_ERROR(name + " has no component!");
+        LOG_ERROR("{} has no component!", name);
     }   
     
     for (const auto& componentNode : componentsNode) {

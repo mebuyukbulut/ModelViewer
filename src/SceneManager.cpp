@@ -194,7 +194,7 @@ void SceneManager::draw() {
     if (isViewportSelect) {
 		// get ID from framebuffer and object selection: 
         uint32_t selectedID = _renderer->getSelection(mPos);
-        LOG_TRACE("selection UUID: " + std::to_string(selectedID));
+        LOG_TRACE("selection UUID: {}", std::to_string(selectedID));
 
         if (selectedID != 0)
         {
@@ -420,6 +420,77 @@ void SceneManager::onInspect()
     ImGui::Image((ImTextureID)(intptr_t)_renderer->getDebugImage(),
         debugPanelSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
+
+
+
+
+    // TERMINAL PANEL
+    ImGui::Begin("TERMINAL");
+
+    // Kaydırma alanı için bir Child Window açıyoruz
+    ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+    
+    auto& logs = Logger::get().getMessages();
+    
+    // Clipper nesnesini oluşturuyoruz
+    ImGuiListClipper clipper;
+    clipper.Begin(logs.size()); // Toplam log sayısı
+
+    while (clipper.Step()) {
+        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+            // Sadece şu an ekranda görünen 'i' indekslerini çiziyoruz
+            const auto& message = logs[i];
+            
+            // Renklendirme (Daha önceki LogEntry yapısını kullandığını varsayıyorum)
+            ImVec4 color = ImColor(255, 0, 0, 255).Value;
+            char messagePrefix = message[1];
+            switch (messagePrefix)
+            {
+            case 'T': // Trace
+                color = ImColor(128, 128, 128, 255).Value;
+                break;
+            case 'D': // Debug
+                color = ImColor(  0, 255, 255, 255).Value;
+                break;
+            case 'I': // Info
+                color = ImColor(255, 255, 255, 255).Value;
+                break;
+
+            case 'W': // Warning
+                color = ImColor(255, 255,   0, 255).Value;
+                break;
+            case 'E': // Error 
+                color = ImColor(255,   0,   0, 255).Value;
+                break;
+            case 'S': // Success
+                color = ImColor( 50, 205,  50, 255).Value;
+                break;
+
+            case 'C': // Critical
+                color = ImColor(255,   0, 255, 255).Value;
+                break;
+            default:
+                break;
+            }
+
+            
+            ImGui::PushStyleColor(ImGuiCol_Text, color);
+            ImGui::TextUnformatted(message.c_str());
+            ImGui::PopStyleColor();
+        }
+    }
+    
+    // Otomatik en alta kaydırma (opsiyonel)
+    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+        ImGui::SetScrollHereY(1.0f);
+
+    ImGui::EndChild();
+    ImGui::End();
+
+
+
+
+
 
 
     // VIEWPORT PANEL
@@ -788,7 +859,7 @@ void SceneManager::deserialize(const YAML::Node& node)
     for (const auto& entityNode : entitiesNode) {
         auto entity = std::make_unique<Entity>();
         entity->deserialize(entityNode);
-        LOG_TRACE("Load entity: " + entity->name);
+        LOG_TRACE("Load entity: {}", entity->name);
 
         // parent child relationship için transformun uuid sini mapliyoruz.
         uint64_t id = entity->transform->UUID;
@@ -813,7 +884,7 @@ void SceneManager::deserialize(const YAML::Node& node)
 
                 if (child && parent) {
                     child->setParent(parent);
-                    LOG_TRACE("Pass 2: Linked " + child->owner->name + " -> Parent: " + parent->owner->name);
+                    LOG_TRACE("Pass 2: Linked {} -> Parent: {}", child->owner->name, parent->owner->name);
                 }
             }
         }

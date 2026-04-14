@@ -66,7 +66,7 @@ void Texture::uploadToGPU()
     }
     else
     {
-        LOG_ERROR("Texture failed to load at path : " + _path.string());
+        LOG_ERROR("Texture failed to load at path : {}", _path.string());
         stbi_image_free(_data);
         _loadStatus = AssetLoadStatus::Error;
     }

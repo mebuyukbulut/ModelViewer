@@ -24,7 +24,7 @@ void Renderer::initMatcap() {
         matcapTexturePaths.push_back(entry.path().string());
 
     for(const auto& p : matcapTexturePaths)
-		LOG_TRACE("Found matcap texture: " + p);
+		LOG_TRACE("Found matcap texture: {}", p);
 
     //matcapTexture = TextureFactory::load(matcapTexturePaths.front(), false);
     matcapTexture = g_Assets.get<Texture>( matcapTexturePaths.front());

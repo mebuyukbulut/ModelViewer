@@ -364,7 +364,7 @@ Mesh MeshFactory::create(std::string pathStr)
     if (it != builtinLoaders.end()) 
         mesh = it->second();
     else{
-        LOG_ERROR( pathStr + " not found in MeshFactory create()!" );
+        LOG_ERROR("{} not found in MeshFactory create()!", pathStr);
         mesh = createCube();
     }
     
