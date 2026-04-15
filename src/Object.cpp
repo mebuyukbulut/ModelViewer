@@ -19,7 +19,7 @@ public:
 Object::Object() {
     UUID = UUIDGenerator::generate();
     name = "Object_" + std::to_string(UUID);
-    std::cout << "UUID: " << UUID << std::endl;
+    //std::cout << "UUID: " << UUID << std::endl;
 }
 
 void Object::serialize(YAML::Emitter& out)
