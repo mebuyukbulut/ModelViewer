@@ -140,12 +140,8 @@ float Fd_Lambert() {
     return 1.0 / PI;
 }
 
-vec3 CalcPointLight(Light light, SurfaceData s){
-    //vec4 baseColor = material.baseColor;
-    //float metallic = material.metallic;
-    //float perceptualRoughness = material.roughness;  
-    //float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    //float reflectance = material.reflectance;
+vec3 CalcPointLight(Light light, SurfaceData s)
+{
     float attRad = light.params.x; 
 
     vec3 diffuseColor = (1.0 - s.metallic) * s.baseColor.rgb;
@@ -185,14 +181,8 @@ vec3 CalcPointLight(Light light, SurfaceData s){
     return (Fd + Fr) * light.color.w * light.color.xyz * NoL * E;
 } 
 
-vec3 CalcDirectionalLight(Light light, SurfaceData s){
-    //vec4 baseColor = material.baseColor;
-    //float metallic = material.metallic;
-    //float perceptualRoughness = material.roughness;  
-    //float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    //float reflectance = material.reflectance;
-    //float attRad = light.attenuation;
-
+vec3 CalcDirectionalLight(Light light, SurfaceData s)
+{
     vec3 diffuseColor = (1.0 - s.metallic) * s.baseColor.rgb;
     vec3 f0 = 0.16 * s.reflectance * s.reflectance * (1.0 - s.metallic) + s.baseColor.rgb * s.metallic;
   
@@ -298,11 +288,6 @@ vec3 CalcSpotLight(Light light, SurfaceData s){
       return vec3(0,0,0); 
 
 
-    //vec4 baseColor = material.baseColor;
-    //float metallic = material.metallic;
-    //float perceptualRoughness = material.roughness;  
-    //float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    //float reflectance = material.reflectance;
     float attRad = light.params.x;
 
     vec3 diffuseColor = (1.0 - s.metallic) * s.baseColor.rgb;
@@ -374,9 +359,13 @@ SurfaceData buildSurfaceData(){
     vec3 armSample = texture(armMap, fTexCoords).rgb;
     vec3 emissiveSample = texture(emissiveMap, fTexCoords).rgb;
 
+
+    float perceptualRoughness = armSample.g * material.roughness;;  
+    float roughness = clamp(pow(perceptualRoughness,2), pow(0.01,2), 1) ; 
+
     s.baseColor = (baseColorSample * material.baseColor).rgb;
     s.ao = armSample.r * material.ao;
-    s.roughness = armSample.g * material.roughness;
+    s.roughness = roughness;
     s.metallic = armSample.b * material.metallic;
     s.reflectance = material.reflectance;
     s.emissive = emissiveSample * material.emissive.rgb;
