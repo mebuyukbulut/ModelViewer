@@ -55,11 +55,13 @@ public:
 // and selection 
 class ColorRenderTarget {
 	GLuint fbo;
-	GLuint colorTex;
-	GLuint depthRbo;
+	Texture* colorTex{};
+	Texture* depthTex{};
 	int width, height;
 
 public:
+	ColorRenderTarget();
+	~ColorRenderTarget();
 	void create(int width, int height);
 	void destroy();
 	bool resize(int width, int height);
@@ -68,8 +70,8 @@ public:
 
 	// Getters
 	GLuint framebuffer() const;
-    GLuint colorTexture() const;
-    GLuint depthBuffer() const;
+    Texture& colorTexture() const;
+    Texture& depthBuffer() const;
 };
 
 
@@ -81,10 +83,12 @@ public:
 // 
 class ShadowMapTarget {
 	GLuint fbo;
-	GLuint depthMap;
+	Texture* depthMap{};
 	int width, height;
 
 public:
+	ShadowMapTarget();
+	~ShadowMapTarget();
 	void create(int width, int height);
 	void destroy();
 	bool resize(int width, int height);
@@ -93,7 +97,7 @@ public:
 
 	// Getters
 	GLuint framebuffer() const;
-    GLuint depthBuffer() const;
+    Texture& depthBuffer() const;
 };
 
 
@@ -173,8 +177,8 @@ public:
 	void clearBuffer();
 
 	void resizeViewport(int width, int height);
-	GLuint getViewportImage() { return _finalTarget->colorTexture(); }
-	GLuint getDebugImage() { return _shadowMapTarget.depthBuffer(); }
+	GLuint getViewportImage();
+	GLuint getDebugImage();
 	
 
 	uint32_t getSelection(glm::vec2 mousePos);

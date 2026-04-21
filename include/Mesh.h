@@ -34,12 +34,12 @@ public:
 };
 
 class MeshFactory {
-	static OMesh createCube();
 	static OMesh createCone();
 	static OMesh createCylinder();
-	static OMesh createPlane();
 	static OMesh createTorus();
 
+	static Mesh createCube();
+	static Mesh createPlane();
 	static Mesh createBgPlane();
 	static Mesh createGridPlane();
 

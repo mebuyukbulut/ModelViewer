@@ -17,12 +17,11 @@ public:
 	float reflectance;
 	float ao;
 
+	std::shared_ptr<Texture> defaultWhiteTexture{};
 	std::shared_ptr<Texture> baseColorTexture{};
+	std::shared_ptr<Texture> armTexture{}; // AO, Roughness, Metallic
+	std::shared_ptr<Texture> normalTexture{};
 	std::shared_ptr<Texture> emissiveTexture{};
-	std::shared_ptr<Texture> metallicTexture{};
-	std::shared_ptr<Texture> roughnessTexture{};
-	std::shared_ptr<Texture> aoTexture{};
-
 
 	Material() :
 		baseColor{ 1.0f, 1.0f, 1.0f, 1.0f },

@@ -11,7 +11,9 @@
 #include <glad/gl.h>
 #include "Texture.h"
 #include "Logger.h"
+#include "Builtin.h"
 
+#include "AssetManager.h"
 // glm::vec4 baseColor;
 // glm::vec4 emissive;
 // float metallic;
@@ -20,61 +22,49 @@
 // float ao;
 
 
+// her seferinde hem değerleri, hem textureları, hem de flag ları bind edelim
+
+
 void Material::use(Shader* shader) {
-	//glActiveTexture(GL_TEXTURE0);
-	if (baseColorTexture) {
-		//LOG_TRACE("base");
-		glActiveTexture(GL_TEXTURE0);
-		shader->set("baseColorTexture", 0); // Bu eksik!
-		shader->set("material.is_BaseColorTex", glm::vec4(1, 1, 1, 1)); // rgba -> r
-		baseColorTexture->use();
+	// Set Texture location uniforms 
+	// We should do this for once. Because we always bind the same slot.  
+	shader->set(Builtin::Material::BaseColorTexture, Builtin::TextureSlot::BaseColor); 
+	shader->set(Builtin::Material::ARMTexture, 		 Builtin::TextureSlot::ARM); 
+	shader->set(Builtin::Material::NormalTexture,	 Builtin::TextureSlot::Normal); 
+	shader->set(Builtin::Material::EmissiveTexture,  Builtin::TextureSlot::Emissive); 
+
+	if(!defaultWhiteTexture){
+		defaultWhiteTexture.reset(new Texture);
+		defaultWhiteTexture->createSolidColorTextureRGBA8(255,255,255,255);
 	}
-	else {
-		shader->set("material.is_BaseColorTex", glm::vec4(0, 0, 0, 0)); // reset
-	}
-	if (emissiveTexture) {
-		glActiveTexture(GL_TEXTURE1);
-		emissiveTexture->use();
-		//shader->setInt("emissiveTexture", 0); // Bu eksik!
-		shader->set("material.is_EmissiveTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
-	}
-	else {
-		shader->set("material.is_EmissiveTex", glm::vec4(0, 0, 0, 0)); // reset
-	}
-	if (metallicTexture) {
-		glActiveTexture(GL_TEXTURE2);
-		metallicTexture->use();
-		//shader->setInt("metallicTexture", 0); // Bu eksik!
-		shader->set("material.is_MetallicTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
-	}
-	else {
-		shader->set("material.is_MetallicTex", glm::vec4(0, 0, 0, 0)); // reset
-	}
-	if (roughnessTexture) {
-		glActiveTexture(GL_TEXTURE3);
-		roughnessTexture->use();
-		//shader->setInt("roughnessTexture", 0); // Bu eksik!
-		shader->set("material.is_RoughnessTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
-	}
-	else {
-		shader->set("material.is_RoughnessTex", glm::vec4(0, 0, 0, 0)); // reset
-	}
-	if (aoTexture) {
-		glActiveTexture(GL_TEXTURE4);
-		aoTexture->use();
-		//shader->setInt("aoTexture", 0); // Bu eksik!
-		shader->set("material.is_AoTex", glm::vec4(1, 0, 0, 0)); // rgba -> r
-	}
-	else {
-		shader->set("material.is_AoTex", glm::vec4(0, 0, 0, 0)); // reset
+	if(!baseColorTexture){
+		baseColorTexture = g_Assets.get<Texture>("../assets/textures/box_crate.jpg");
+
 	}
 
-	shader->set("material.baseColor", baseColor);
-	shader->set("material.emissive", emissive);
-	shader->set("material.metallic", metallic);
-	shader->set("material.roughness", roughness);
-	shader->set("material.reflectance", reflectance);
-	shader->set("material.ao", ao);
+	// Bind Textures
+	if(baseColorTexture)	baseColorTexture->bind(Builtin::TextureSlot::BaseColor);
+	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::BaseColor);
+
+	if(armTexture)			armTexture->bind(Builtin::TextureSlot::ARM);
+	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::ARM);
+
+	if(normalTexture)		normalTexture->bind(Builtin::TextureSlot::Normal);
+	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::Normal);
+
+	if(emissiveTexture)		emissiveTexture->bind(Builtin::TextureSlot::Emissive);
+	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::Emissive);
+
+
+
+
+
+	shader->set(Builtin::Material::BaseColor, 	 	baseColor);
+	shader->set(Builtin::Material::Emissive, 	 	emissive);
+	shader->set(Builtin::Material::Metallic, 	 	metallic);
+	shader->set(Builtin::Material::Roughness, 	 	roughness);
+	shader->set(Builtin::Material::Reflectance,  	reflectance);
+	shader->set(Builtin::Material::AO, 			 	ao);
 }
 
 void Material::load(std::filesystem::path path, IAssetSettings* settings)

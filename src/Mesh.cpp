@@ -75,38 +75,63 @@ void Mesh::terminate(){
 
 
 
-OMesh MeshFactory::createCube()
+Mesh MeshFactory::createCube()
 {
-    OMesh mesh;
-    OMesh::VertexHandle vhandle[8];
-    std::vector<OMesh::VertexHandle> face_vhandles;
+    std::vector<Vertex> cubeVertices =
+    {
+        // Front (+Z)
+        {{-0.5f, -0.5f,  0.5f}, { 0,  0,  1}, {0, 0}},
+        {{ 0.5f, -0.5f,  0.5f}, { 0,  0,  1}, {1, 0}},
+        {{ 0.5f,  0.5f,  0.5f}, { 0,  0,  1}, {1, 1}},
+        {{-0.5f,  0.5f,  0.5f}, { 0,  0,  1}, {0, 1}},
 
-    vhandle[0] = mesh.add_vertex(OMesh::Point(-1, -1, 1));
-    vhandle[1] = mesh.add_vertex(OMesh::Point(1, -1, 1));
-    vhandle[2] = mesh.add_vertex(OMesh::Point(1, 1, 1));
-    vhandle[3] = mesh.add_vertex(OMesh::Point(-1, 1, 1));
-    vhandle[4] = mesh.add_vertex(OMesh::Point(-1, -1, -1));
-    vhandle[5] = mesh.add_vertex(OMesh::Point(1, -1, -1));
-    vhandle[6] = mesh.add_vertex(OMesh::Point(1, 1, -1));
-    vhandle[7] = mesh.add_vertex(OMesh::Point(-1, 1, -1));
+        // Back (-Z)
+        {{ 0.5f, -0.5f, -0.5f}, { 0,  0, -1}, {0, 0}},
+        {{-0.5f, -0.5f, -0.5f}, { 0,  0, -1}, {1, 0}},
+        {{-0.5f,  0.5f, -0.5f}, { 0,  0, -1}, {1, 1}},
+        {{ 0.5f,  0.5f, -0.5f}, { 0,  0, -1}, {0, 1}},
 
-    // Quad yüzler (6 yüz)
-    std::vector<std::array<int, 4>> quads = {
-        {0,1,2,3}, // front
-        {7,6,5,4}, // back
-        {1,0,4,5}, // bottom
-        {2,1,5,6}, // right
-        {3,2,6,7}, // top
-        {0,3,7,4}  // left
+        // Left (-X)
+        {{-0.5f, -0.5f, -0.5f}, {-1,  0,  0}, {0, 0}},
+        {{-0.5f, -0.5f,  0.5f}, {-1,  0,  0}, {1, 0}},
+        {{-0.5f,  0.5f,  0.5f}, {-1,  0,  0}, {1, 1}},
+        {{-0.5f,  0.5f, -0.5f}, {-1,  0,  0}, {0, 1}},
+
+        // Right (+X)
+        {{ 0.5f, -0.5f,  0.5f}, { 1,  0,  0}, {0, 0}},
+        {{ 0.5f, -0.5f, -0.5f}, { 1,  0,  0}, {1, 0}},
+        {{ 0.5f,  0.5f, -0.5f}, { 1,  0,  0}, {1, 1}},
+        {{ 0.5f,  0.5f,  0.5f}, { 1,  0,  0}, {0, 1}},
+
+        // Top (+Y)
+        {{-0.5f,  0.5f,  0.5f}, { 0,  1,  0}, {0, 0}},
+        {{ 0.5f,  0.5f,  0.5f}, { 0,  1,  0}, {1, 0}},
+        {{ 0.5f,  0.5f, -0.5f}, { 0,  1,  0}, {1, 1}},
+        {{-0.5f,  0.5f, -0.5f}, { 0,  1,  0}, {0, 1}},
+
+        // Bottom (-Y)
+        {{-0.5f, -0.5f, -0.5f}, { 0, -1,  0}, {0, 0}},
+        {{ 0.5f, -0.5f, -0.5f}, { 0, -1,  0}, {1, 0}},
+        {{ 0.5f, -0.5f,  0.5f}, { 0, -1,  0}, {1, 1}},
+        {{-0.5f, -0.5f,  0.5f}, { 0, -1,  0}, {0, 1}},
     };
 
-    for (auto& q : quads) {
-        face_vhandles.clear();
-        for (int i = 0; i < 4; ++i)
-            face_vhandles.push_back(vhandle[q[i]]);
-        mesh.add_face(face_vhandles);
-    }
-    return mesh;
+    std::vector<uint32_t> cubeIndices =
+    {
+        0, 1, 2,  0, 2, 3,        // Front
+        4, 5, 6,  4, 6, 7,        // Back
+        8, 9,10,  8,10,11,        // Left
+        12,13,14, 12,14,15,       // Right
+        16,17,18, 16,18,19,       // Top
+        20,21,22, 20,22,23        // Bottom
+    };
+
+    Mesh cubeMesh;
+    cubeMesh.init(cubeVertices, cubeIndices);
+    cubeMesh.upload2GPU();
+    return cubeMesh;
+
+
 }
 OMesh MeshFactory::createCone()
 {
@@ -215,49 +240,26 @@ OMesh MeshFactory::createCylinder()
     }
     return mesh;
 }
-OMesh MeshFactory::createPlane()
-{
-    OMesh mesh;
-    std::vector <OMesh::VertexHandle> vhandle;
+Mesh MeshFactory::createPlane()
+{    
+    std::vector<Vertex> planeVertices =
+    {
+        // Top (+Y)
+        {{-1,  0,  1}, { 0,  1,  0}, {0, 0}},
+        {{ 1,  0,  1}, { 0,  1,  0}, {1, 0}},
+        {{ 1,  0, -1}, { 0,  1,  0}, {1, 1}},
+        {{-1,  0, -1}, { 0,  1,  0}, {0, 1}},
+    };
 
-    // parametrelerimiz 
-    int edgeLength = 2; // 2x2 quad 
+    std::vector<uint32_t> planeIndices = 
+    {
+        0, 1, 2,  0, 2, 3,        // Top
+    };
 
-
-
-    // vertexleri oluşturuyoruz 
-    std::vector<Vertex> base_vertices;
-
-    // x
-    // |
-    // y - z
-    // 
-    // a - b
-    // |   |
-    // c - d
-
-    float halfLength = edgeLength / 2.f;
-    vhandle.push_back(mesh.add_vertex(OMesh::Point( halfLength, 0, -halfLength))); // a 0
-    vhandle.push_back(mesh.add_vertex(OMesh::Point( halfLength, 0,  halfLength))); // b 1
-    vhandle.push_back(mesh.add_vertex(OMesh::Point(-halfLength, 0, -halfLength))); // c 2
-    vhandle.push_back(mesh.add_vertex(OMesh::Point(-halfLength, 0,  halfLength))); // d 3
-
-    // Yüzeylerin vertex indexlerini belirliyoruz:
-    std::vector<std::vector<int>> faces;
-    faces.push_back({ 0, 2, 3, 1 });
-    //faces.push_back({ 0, 1, 2 });
-    //faces.push_back({ 2, 1, 3 });
-
-
-    // Belirlediğimiz indexlerdeki vertexlerden face oluşturup mesh e ekliyoruz:
-    std::vector<OMesh::VertexHandle> face_vhandles;
-    for (std::vector<int>& face : faces) {
-        face_vhandles.clear();
-        for (int& vertexIndex : face)
-            face_vhandles.push_back(vhandle[vertexIndex]);
-        mesh.add_face(face_vhandles);
-    }
-    return mesh;
+    Mesh planeMesh;
+    planeMesh.init(planeVertices, planeIndices);
+    planeMesh.upload2GPU();
+    return planeMesh;
 }
 OMesh MeshFactory::createTorus()
 {
@@ -345,15 +347,17 @@ Mesh MeshFactory::create(std::string pathStr)
         return createBgPlane();
     else if(pathStr == Builtin::Model::GridPlane)
         return createGridPlane();
+    else if(pathStr == Builtin::Model::Cube)
+        return createCube();
+    else if(pathStr == Builtin::Model::Plane)
+        return createPlane();
 
     //typedef OMesh(*BuiltinLoader)(void);
     using BuiltinLoader = OMesh(*)(void);
 
     static const std::unordered_map<std::string, BuiltinLoader> builtinLoaders = {
-        {Builtin::Model::Cube, &MeshFactory::createCube},
         {Builtin::Model::Cone, &MeshFactory::createCone},
         {Builtin::Model::Cylinder, &MeshFactory::createCylinder},
-        {Builtin::Model::Plane, &MeshFactory::createPlane},
         //{Builtin::Model::Sphere, &MeshFactory::createSphere},
         {Builtin::Model::Torus, &MeshFactory::createTorus},
     };
@@ -365,7 +369,7 @@ Mesh MeshFactory::create(std::string pathStr)
         mesh = it->second();
     else{
         LOG_ERROR("{} not found in MeshFactory create()!", pathStr);
-        mesh = createCube();
+        mesh = createCone();
     }
     
 

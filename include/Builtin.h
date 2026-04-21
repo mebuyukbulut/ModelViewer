@@ -5,7 +5,30 @@ namespace Builtin
     namespace Material{
         inline constexpr const char* DefaultMaterial = "builtin::materials::defaultMaterial";
 
+
+        inline constexpr const char* BaseColor   = "material.baseColor";
+        inline constexpr const char* Metallic    = "material.metallic";
+        inline constexpr const char* Roughness   = "material.roughness";
+        inline constexpr const char* AO          = "material.ao";
+        inline constexpr const char* Emissive    = "material.emissive";
+        inline constexpr const char* Reflectance = "material.reflectance";
+
+        inline constexpr const char* BaseColorTexture   = "baseColorMap";
+        inline constexpr const char* ARMTexture         = "armMap";
+        inline constexpr const char* NormalTexture      = "normalMap";
+        inline constexpr const char* EmissiveTexture    = "emissiveMap";
+
     }
+    namespace TextureSlot
+    {
+        inline constexpr int BaseColor = 0;
+        inline constexpr int ARM       = 1;
+        inline constexpr int Normal    = 2;
+        inline constexpr int Emissive  = 3;
+        inline constexpr int DirectionalShadowMap = 4;
+    }
+
+
     namespace Model
     {
         inline constexpr const char* Cube        = "builtin::models::cube";

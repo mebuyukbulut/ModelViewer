@@ -9,7 +9,7 @@ class Shader : public Asset
 {
 
 	unsigned int _shaderProgram;
-	std::unordered_map<std::string, unsigned int> _uniforms;
+	std::unordered_map<std::string, int> _uniforms;
 
 	unsigned int compileShader(std::string shaderCode, unsigned int shaderType);
 	unsigned int linkProgram(unsigned int vertexShader, unsigned int fragmentShader);

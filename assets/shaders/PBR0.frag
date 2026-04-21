@@ -5,7 +5,13 @@ in vec3 fNormal;
 in vec2 fTexCoords;
 out vec4 FragColor;
 
+uniform sampler2D baseColorMap;
+uniform sampler2D armMap;
+uniform sampler2D normalMap;
+uniform sampler2D emissiveMap;
+
 uniform sampler2D shadowMap;
+
 uniform mat4 lightSpaceMatrix;
 
 // PBR0.frag veya ilgili shader dosyası
@@ -31,9 +37,6 @@ layout(std140, binding = 0) uniform FrameUniforms
     vec3 viewPos;
     float _pad0;
 };
-
-
-
 
 
 //struct Light {    
@@ -63,6 +66,17 @@ struct Material{
 };
 uniform Material material;
 
+struct SurfaceData
+{
+    vec3 baseColor;
+    float ao;
+    float roughness;
+    float metallic;
+    float reflectance;
+    vec3 emissive;
+    vec3 normal;
+    vec3 viewDir;
+};
 
 
 #define PI 3.1415926535897932384626433832795
@@ -126,16 +140,16 @@ float Fd_Lambert() {
     return 1.0 / PI;
 }
 
-vec3 CalcPointLight(Light light){
-    vec4 baseColor = material.baseColor;
-    float metallic = material.metallic;
-    float perceptualRoughness = material.roughness;  
-    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    float reflectance = material.reflectance;
+vec3 CalcPointLight(Light light, SurfaceData s){
+    //vec4 baseColor = material.baseColor;
+    //float metallic = material.metallic;
+    //float perceptualRoughness = material.roughness;  
+    //float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
+    //float reflectance = material.reflectance;
     float attRad = light.params.x; 
 
-    vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
-    vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
+    vec3 diffuseColor = (1.0 - s.metallic) * s.baseColor.rgb;
+    vec3 f0 = 0.16 * s.reflectance * s.reflectance * (1.0 - s.metallic) + s.baseColor.rgb * s.metallic;
   
     vec3 n = normalize(fNormal); // Surface normal vector
     vec3 l = normalize(light.position.xyz - fPos ); // Incident light vector
@@ -149,15 +163,15 @@ vec3 CalcPointLight(Light light){
     float LoH = clamp(dot(l, h), 0.0, 1.0);
     
 
-    float D = D_GGX(NoH, roughness);
+    float D = D_GGX(NoH, s.roughness);
     vec3  F = F_Schlick(LoH, f0);
-    float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
+    float V = V_SmithGGXCorrelated(NoV, NoL, s.roughness);
 
     // specular BRDF
     vec3 Fr = (D * V) * F;
 
     // diffuse BRDF
-    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness) * (1.0 - F);
+    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, s.roughness) * (1.0 - F);
 
 
     // attenuation
@@ -171,16 +185,16 @@ vec3 CalcPointLight(Light light){
     return (Fd + Fr) * light.color.w * light.color.xyz * NoL * E;
 } 
 
-vec3 CalcDirectionalLight(Light light){
-    vec4 baseColor = material.baseColor;
-    float metallic = material.metallic;
-    float perceptualRoughness = material.roughness;  
-    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    float reflectance = material.reflectance;
+vec3 CalcDirectionalLight(Light light, SurfaceData s){
+    //vec4 baseColor = material.baseColor;
+    //float metallic = material.metallic;
+    //float perceptualRoughness = material.roughness;  
+    //float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
+    //float reflectance = material.reflectance;
     //float attRad = light.attenuation;
 
-    vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
-    vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
+    vec3 diffuseColor = (1.0 - s.metallic) * s.baseColor.rgb;
+    vec3 f0 = 0.16 * s.reflectance * s.reflectance * (1.0 - s.metallic) + s.baseColor.rgb * s.metallic;
   
     vec3 n = normalize(fNormal); // Surface normal vector
     vec3 l = normalize(light.direction.xyz); // Incident light vector
@@ -194,15 +208,15 @@ vec3 CalcDirectionalLight(Light light){
     float LoH = clamp(dot(l, h), 0.0, 1.0);
     
 
-    float D = D_GGX(NoH, roughness);
+    float D = D_GGX(NoH, s.roughness);
     vec3  F = F_Schlick(LoH, f0);
-    float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
+    float V = V_SmithGGXCorrelated(NoV, NoL, s.roughness);
 
     // specular BRDF
     vec3 Fr = (D * V) * F;
 
     // diffuse BRDF
-    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness) * (1.0 - F);
+    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, s.roughness) * (1.0 - F);
 
 
     // attenuation
@@ -275,7 +289,7 @@ vec3 CalcDirectionalLight(Light light){
 } 
 
 
-vec3 CalcSpotLight(Light light){
+vec3 CalcSpotLight(Light light, SurfaceData s){
     vec3 lightDir =  normalize(fPos - light.position.xyz);
     float theta = dot(lightDir, normalize(light.direction.xyz));
     float phi = cos(radians(light.params.z));
@@ -284,15 +298,15 @@ vec3 CalcSpotLight(Light light){
       return vec3(0,0,0); 
 
 
-    vec4 baseColor = material.baseColor;
-    float metallic = material.metallic;
-    float perceptualRoughness = material.roughness;  
-    float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
-    float reflectance = material.reflectance;
+    //vec4 baseColor = material.baseColor;
+    //float metallic = material.metallic;
+    //float perceptualRoughness = material.roughness;  
+    //float roughness = clamp(pow(material.roughness,2), pow(0.01,2), 1) ; 
+    //float reflectance = material.reflectance;
     float attRad = light.params.x;
 
-    vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
-    vec3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor.rgb * metallic;
+    vec3 diffuseColor = (1.0 - s.metallic) * s.baseColor.rgb;
+    vec3 f0 = 0.16 * s.reflectance * s.reflectance * (1.0 - s.metallic) + s.baseColor.rgb * s.metallic;
   
     vec3 n = normalize(fNormal); // Surface normal vector
     vec3 l = normalize(light.position.xyz - fPos ); // Incident light vector
@@ -306,15 +320,15 @@ vec3 CalcSpotLight(Light light){
     float LoH = clamp(dot(l, h), 0.0, 1.0);
     
 
-    float D = D_GGX(NoH, roughness);
+    float D = D_GGX(NoH, s.roughness);
     vec3  F = F_Schlick(LoH, f0);
-    float V = V_SmithGGXCorrelated(NoV, NoL, roughness);
+    float V = V_SmithGGXCorrelated(NoV, NoL, s.roughness);
 
     // specular BRDF
     vec3 Fr = (D * V) * F;
 
     // diffuse BRDF
-    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, roughness) * (1.0 - F);
+    vec3 Fd = diffuseColor * Fd_Burley(NoV, NoL, LoH, s.roughness) * (1.0 - F);
 
 
     // attenuation
@@ -353,53 +367,42 @@ vec3 ACESFilm(vec3 x)
     float e = 0.14; 
     return clamp((x*(a*x+b))/(x*(c*x+d)+e), 0.0, 1.0); 
 }
+SurfaceData buildSurfaceData(){
+    SurfaceData s;
 
+    vec4 baseColorSample = texture(baseColorMap, fTexCoords);
+    vec3 armSample = texture(armMap, fTexCoords).rgb;
+    vec3 emissiveSample = texture(emissiveMap, fTexCoords).rgb;
+
+    s.baseColor = (baseColorSample * material.baseColor).rgb;
+    s.ao = armSample.r * material.ao;
+    s.roughness = armSample.g * material.roughness;
+    s.metallic = armSample.b * material.metallic;
+    s.reflectance = material.reflectance;
+    s.emissive = emissiveSample * material.emissive.rgb;
+
+    s.normal = normalize(fNormal);
+    s.viewDir = normalize(viewPos - fPos);
+
+    return s;
+}
 
 void main(){
-	
+	SurfaceData s = buildSurfaceData();
 
     vec3 pLights = vec3(0.0);
     for(int i = 0; i < ubo_data.numLights; i++){
         int lightType = int(ubo_data.lights[i].params.y);
 
-        if(lightType == 1) pLights += CalcDirectionalLight(ubo_data.lights[i]);
-        if(lightType == 2) pLights += CalcPointLight(ubo_data.lights[i]);
-        if(lightType == 3) pLights += CalcSpotLight(ubo_data.lights[i]);
+        if(lightType == 1) pLights += CalcDirectionalLight(ubo_data.lights[i], s);
+        if(lightType == 2) pLights += CalcPointLight(ubo_data.lights[i], s);
+        if(lightType == 3) pLights += CalcSpotLight(ubo_data.lights[i], s);
     }
 
-//    // Shadow calculations
-//    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fPos, 1.0);
-//    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-//    projCoords = projCoords * 0.5 + 0.5;
-//
-//    float closestDepth = texture(shadowMap, projCoords.xy).r;
-//    float currentDepth = projCoords.z;
-//
-//   float bias = 0.01; //0.005;
-//
-//    if(ubo_data.numLights>0){
-//        vec3 n = normalize(fNormal); // Surface normal vector
-//        vec3 l = normalize(ubo_data.lights[0].position.xyz - fPos ); // Incident light vector
-//        bias = 0.005*tan(acos(dot(n,l)));
-//    }
+    vec3 result = pLights;
 
-
-//    float shadow = //currentDepth > closestDepth ? 1.0 : 0.0;
-//        currentDepth - bias > closestDepth
-//        ? 1.0
-//        : 0.0;
-
-
-    vec3 result = pLights;//* (1.0 - shadow);// * material.color;
-    //vec3 result = (pLights + ambient) * material.color;
-
-
-    //result = result / (result + vec3(1.0)); // Reinhard tone mapping
     result = ACESFilm(result);
     result = pow(result, vec3(1.0 / 2.2)); // gamma correction
 
     FragColor = vec4(result,1.0);
-    
-    //float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
-    //FragColor = vec4(vec3(depth), 1.0);
 }	

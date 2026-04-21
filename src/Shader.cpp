@@ -64,7 +64,6 @@ int Shader::getUniformLocation(const std::string& name){
         return _uniforms[name];
     
 	int location = glGetUniformLocation(_shaderProgram, name.c_str());
-    if(location < 0) return location;
     _uniforms[name] = location;
     return location;
 }
@@ -85,33 +84,39 @@ void Shader::terminate(){
 }
 
 void Shader::set(const std::string& name, const glm::mat4& mat) {
-    if(getUniformLocation(name)<0) return;
-    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
+    int location = getUniformLocation(name);
+    if(location < 0) return;
+    glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::set(const std::string &name, const glm::vec2 &vec) {
-    if(getUniformLocation(name)<0) return;
-    glUniform2fv(getUniformLocation(name), 1, &vec[0]);
+    int location = getUniformLocation(name);
+    if(location < 0) return;
+    glUniform2fv(location, 1, &vec[0]);
 }
 
 void Shader::set(const std::string& name, const glm::vec3& vec) {
-    if(getUniformLocation(name)<0) return;
-    glUniform3fv(getUniformLocation(name), 1, &vec[0]);
+    int location = getUniformLocation(name);
+    if(location < 0) return;
+    glUniform3fv(location, 1, &vec[0]);
 }
 
 void Shader::set(const std::string& name, const glm::vec4& vec) {
-    if(getUniformLocation(name)<0) return;
-    glUniform4fv(getUniformLocation(name), 1, &vec[0]);
+    int location = getUniformLocation(name);
+    if(location < 0) return;
+    glUniform4fv(location, 1, &vec[0]);
 }
 
 void Shader::set(const std::string& name, float value){
-    if(getUniformLocation(name)<0) return;
-    glUniform1f(getUniformLocation(name), value);
+    int location = getUniformLocation(name);
+    if(location < 0) return;
+    glUniform1f(location, value);
 }
 
 void Shader::set(const std::string& name, int value){
-    if(getUniformLocation(name)<0) return;
-    glUniform1i(getUniformLocation(name), value);
+    int location = getUniformLocation(name);
+    if(location < 0) return;
+    glUniform1i(location, value);
 }
 
 void Shader::load(std::filesystem::path path, IAssetSettings* settings)

@@ -19,6 +19,12 @@ void Texture::use() {
     glBindTexture(_type, _id);
 }
 
+void Texture::bind(uint32_t bindingPoint)
+{
+
+	glActiveTexture(GL_TEXTURE0+bindingPoint);
+    use();
+}
 
 void Texture::load(std::filesystem::path path, IAssetSettings* settings)
 {
@@ -73,8 +79,83 @@ void Texture::uploadToGPU()
     _data = nullptr;
 }
 
+void Texture::createColorTexture(uint32_t width, uint32_t height)
+{    
+    _type = GL_TEXTURE_2D;
 
+    glGenTextures(1, &_id);
+    glBindTexture(GL_TEXTURE_2D, _id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
 
+void Texture::createDepthTexture(uint32_t width, uint32_t height)
+{
+    _type = GL_TEXTURE_2D; 
+
+    glGenTextures(1, &_id);
+    glBindTexture(GL_TEXTURE_2D, _id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+}
+
+void Texture::createShadowDepthTexture(uint32_t width, uint32_t height)
+{
+    _type = GL_TEXTURE_2D;
+
+    glGenTextures(1, &_id);
+    glBindTexture(GL_TEXTURE_2D, _id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
+                width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); 
+
+    float ones[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ones);
+
+}
+
+void Texture::createSolidColorTextureRGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{   
+    _type = GL_TEXTURE_2D;
+    
+    glGenTextures(1, &_id);
+    glBindTexture(GL_TEXTURE_2D, _id);
+
+    uint8_t pixel[4] = { r, g, b, a };
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        1,
+        1,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        pixel
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::destroy()
+{
+    glDeleteTextures(1, &_id);
+}
 
 // texture factory sınıfını tamamiyle kaldırıp bunu IAssetSettings ile parametrik olarak yapmalıyız
 

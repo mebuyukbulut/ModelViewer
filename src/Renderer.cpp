@@ -71,10 +71,11 @@ void Renderer::materialPass(const std::vector<RenderItem> &renderItems)
 
     _materialShader->use();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _shadowMapTarget.depthBuffer());
+    _shadowMapTarget.depthBuffer().bind(Builtin::TextureSlot::DirectionalShadowMap);
+    // glActiveTexture(GL_TEXTURE0+Builtin::TextureSlot::DirectionalShadowMap);
+    // glBindTexture(GL_TEXTURE_2D, _shadowMapTarget.depthBuffer());
     _materialShader->use();
-    _materialShader->set("shadowMap", 0);
+    _materialShader->set("shadowMap", Builtin::TextureSlot::DirectionalShadowMap);
 
     for (const RenderItem& item : renderItems) 
         drawModelWithShader(item.model, item.transform, _materialShader);
@@ -96,7 +97,7 @@ void Renderer::wireframePass(const std::vector<RenderItem>& renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDisable(GL_CULL_FACE);
-    //glLineWidth(1.5f);
+    glLineWidth(1.f);
 
     _wireframeShader->use();
     for (const RenderItem& item : renderItems) 
@@ -220,8 +221,7 @@ void Renderer::postProcessPass(const ColorRenderTarget& sourceTarget, ColorRende
     clearBuffer();
     shader->use();
     shader->set("frameTex", 0); 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sourceTarget.colorTexture());
+    sourceTarget.colorTexture().bind(0); 
     drawModelWithShader(_bgModel, glm::mat4(1.0), shader); // ???
 
     destinationTarget.unbind();
@@ -412,6 +412,16 @@ void Renderer::resizeViewport(int width, int height)
         _camera->setWindowSize(width,height);
 }
 
+GLuint Renderer::getViewportImage()
+{
+    return _finalTarget->colorTexture().getId(); 
+}
+
+GLuint Renderer::getDebugImage()
+{ 
+    return _shadowMapTarget.depthBuffer().getId(); 
+}
+
 void Renderer::drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID){
 
     shader->use();
@@ -439,34 +449,32 @@ ViewMode Renderer::getViewMode()          {return _viewMode; }
 
 void Renderer::setCamera(std::shared_ptr<Camera> camera) { _camera = camera; }
 
+ColorRenderTarget::ColorRenderTarget()
+{
+    colorTex = new Texture();
+    depthTex = new Texture();
+}
 
-
-
-
+ColorRenderTarget::~ColorRenderTarget()
+{
+    delete colorTex;
+    delete depthTex;
+}
 
 void ColorRenderTarget::create(int width, int height)
 {
     this->width = width; this->height = height; 
 
-    glGenTextures(1, &colorTex);
-    glBindTexture(GL_TEXTURE_2D, colorTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
-        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glGenRenderbuffers(1, &depthRbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, depthRbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    colorTex->createColorTexture(width, height);
+    depthTex->createDepthTexture(width, height);
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex->getId(), 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex->getId(), 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         LOG_ERROR("ColorRenderTarget incomplete!");
-
 
     unbind(); // bu burada gereksiz gibi ama bakalım
 }
@@ -474,9 +482,8 @@ void ColorRenderTarget::create(int width, int height)
 void ColorRenderTarget::destroy()
 {    
     glDeleteFramebuffers(1, &fbo);
-    glDeleteTextures(1, &colorTex);
-    glDeleteRenderbuffers(1, &depthRbo);
-
+    colorTex->destroy();
+    depthTex->destroy();
 }
 
 bool ColorRenderTarget::resize(int width, int height)
@@ -503,35 +510,29 @@ void ColorRenderTarget::unbind(){
 }
 
 GLuint ColorRenderTarget::framebuffer()  const { return fbo; }
-GLuint ColorRenderTarget::colorTexture() const { return colorTex; }
-GLuint ColorRenderTarget::depthBuffer()  const { return depthRbo; }
+Texture& ColorRenderTarget::colorTexture() const { return *colorTex; }
+Texture& ColorRenderTarget::depthBuffer()  const { return *depthTex; }
 
+ShadowMapTarget::ShadowMapTarget()
+{
+    depthMap = new Texture();
+}
 
+ShadowMapTarget::~ShadowMapTarget()
+{
+    delete depthMap; 
+}
 
-
-
-
-
-// 
+//
 void ShadowMapTarget::create(int width, int height)
 {
     this->width = width; this->height = height;
 
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
-                width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); 
-
-    float ones[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ones);
+    depthMap->createShadowDepthTexture(width, height);
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap->getId(), 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     
@@ -541,7 +542,7 @@ void ShadowMapTarget::create(int width, int height)
 void ShadowMapTarget::destroy()
 {
     glDeleteFramebuffers(1, &fbo);
-    glDeleteTextures(1, &depthMap);
+    depthMap->destroy();
 }
 
 // width height !width !height !h&&!w expected !h||!w
@@ -576,4 +577,4 @@ void ShadowMapTarget::unbind()
 }
 
 GLuint ShadowMapTarget::framebuffer() const { return fbo; }
-GLuint ShadowMapTarget::depthBuffer() const { return depthMap; }
+Texture& ShadowMapTarget::depthBuffer() const { return *depthMap; }

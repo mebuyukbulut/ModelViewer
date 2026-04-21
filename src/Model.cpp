@@ -127,12 +127,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
     if (auto tex = loadMaterialTextures(material, aiTextureType_DIFFUSE))
         mat->baseColorTexture = tex;
-    if (auto tex = loadMaterialTextures(material, aiTextureType_GLTF_METALLIC_ROUGHNESS))
-        mat->roughnessTexture = tex;
-    //if (auto tex = loadMaterialTextures(material, aiTextureType_HEIGHT))
-    //    mat-> = tex;
-    if (auto tex = loadMaterialTextures(material, aiTextureType_AMBIENT))
-        mat->aoTexture = tex;
+    // if (auto tex = loadMaterialTextures(material, aiTextureType_GLTF_METALLIC_ROUGHNESS))
+    //     mat->roughnessTexture = tex;
+    // //if (auto tex = loadMaterialTextures(material, aiTextureType_HEIGHT))
+    // //    mat-> = tex;
+    // if (auto tex = loadMaterialTextures(material, aiTextureType_AMBIENT))
+    //     mat->aoTexture = tex;
 
     _materials.push_back(mat);
 
