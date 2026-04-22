@@ -1,10 +1,14 @@
 ﻿#pragma once
 #include "Object.h"
 #include <unordered_map>
+#include <map>
 #include <filesystem>
 #include <future>
 #include <vector>
+#include <typeindex>
+#include <algorithm>
 #include "Asset.h"
+
 
 class AssetManager : public Object
 {
@@ -30,6 +34,9 @@ class AssetManager : public Object
 	std::vector<std::future<void>> _activeLoads; // Async ile CPU da işlem görenler 
 	std::vector<std::shared_ptr<Asset>> _pendingUploads; // Async işlemi sonrası GPU ya yüklenmeyi bekleyenler 
 
+	std::map<std::type_index, std::vector<std::shared_ptr<Asset>>> _typeLists ; 
+
+
 	//void load(std::filesystem::path path, const IAssetSettings* settings = nullptr);
 	//void loadAsync(std::filesystem::path path, const IAssetSettings* settings = nullptr);
 public:
@@ -39,6 +46,10 @@ public:
 
 	template <class T>
 	std::shared_ptr<T> get(std::filesystem::path path, IAssetSettings* settings = nullptr, bool async = false);
+
+	template <class T>
+	std::vector<std::shared_ptr<T>> getAll();
+
 
 	void update();
 
@@ -72,6 +83,7 @@ inline std::shared_ptr<T> AssetManager::get(std::filesystem::path path, IAssetSe
 
 	std::shared_ptr<Asset> asset = std::make_shared<T>();
 	_assets[asset->UUID] = asset; 
+	_typeLists[std::type_index(typeid(T))].push_back(asset);
 
 	AR.addRecord(asset->UUID, path);
 
@@ -82,14 +94,38 @@ inline std::shared_ptr<T> AssetManager::get(std::filesystem::path path, IAssetSe
 	else {
 		asset->load(path, settings);
 		if (asset->getLoadStatus() == AssetLoadStatus::ReadyToUpload)
-			asset->uploadToGPU();		
-		// if(asset->getLoadStatus() != AssetLoadStatus::Complete)
-		// 	asset->uploadToGPU();
+			asset->uploadToGPU();
 	}
 
 	return get<T>(asset->UUID); // yeni assetin id sini sorgula
 
 }
 
+template <class T>
+inline std::vector<std::shared_ptr<T>> AssetManager::getAll()
+{
+	auto typeindex = std::type_index(typeid(T));
+	// if there is no index return empty vector
+	if(! _typeLists.contains(typeindex)) return {};
+
+	const std::vector<std::shared_ptr<Asset>>& src = _typeLists.at(typeindex);
+
+	std::vector<std::shared_ptr<T>> result; 
+	result.reserve(src.size());
+
+    std::transform(src.begin(), src.end(), std::back_inserter(result),
+        [](const std::shared_ptr<Asset>& asset)
+        {
+            return std::static_pointer_cast<T>(asset);
+        });
+
+    std::erase_if(result,
+        [](const std::shared_ptr<T>& asset)
+        { // !asset could be verbose! 
+            return !asset || asset->getLoadStatus() != AssetLoadStatus::Complete;
+        });
+
+    return result;
+}
 
 inline AssetManager g_Assets{};
