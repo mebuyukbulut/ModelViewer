@@ -27,6 +27,18 @@ namespace Builtin
         inline constexpr int Emissive  = 3;
         inline constexpr int DirectionalShadowMap = 4;
     }
+    namespace Texture
+    {
+        inline constexpr const char* SolidWhite = "builtin::texture::solidWhite";
+        inline constexpr const char* SolidBlack = "builtin::texture::solidBlack";
+        inline constexpr const char* FlatNormal = "builtin::texture::flatNormal";
+
+        inline constexpr const char* All[] = {
+            SolidWhite,       
+            SolidBlack,       
+            FlatNormal,   
+        };
+    }
 
 
     namespace Model

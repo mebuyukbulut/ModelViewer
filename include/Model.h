@@ -44,9 +44,6 @@ public:
     void unload() override;
     void uploadToGPU() override;
 
-    virtual void onInspect() {
-        if (_materials.size())
-            _materials.front().get()->onInspect();
-    }
+    virtual void onInspect() override ;
 
 };

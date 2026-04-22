@@ -9,6 +9,12 @@ class Shader;
 
 class Material : public Asset
 {
+	struct DefaultTextures{
+		std::shared_ptr<Texture> white;
+		std::shared_ptr<Texture> black;
+		std::shared_ptr<Texture> normal;
+		DefaultTextures();
+	} defTex;
 public:
 	glm::vec4 baseColor;
 	glm::vec4 emissive;

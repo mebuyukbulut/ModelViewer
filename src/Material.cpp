@@ -33,29 +33,15 @@ void Material::use(Shader* shader) {
 	shader->set(Builtin::Material::NormalTexture,	 Builtin::TextureSlot::Normal); 
 	shader->set(Builtin::Material::EmissiveTexture,  Builtin::TextureSlot::Emissive); 
 
-	if(!defaultWhiteTexture){
-		defaultWhiteTexture.reset(new Texture);
-		defaultWhiteTexture->createSolidColorTextureRGBA8(255,255,255,255);
-	}
 	if(!baseColorTexture){
 		baseColorTexture = g_Assets.get<Texture>("../assets/textures/box_crate.jpg");
-
 	}
 
 	// Bind Textures
-	if(baseColorTexture)	baseColorTexture->bind(Builtin::TextureSlot::BaseColor);
-	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::BaseColor);
-
-	if(armTexture)			armTexture->bind(Builtin::TextureSlot::ARM);
-	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::ARM);
-
-	if(normalTexture)		normalTexture->bind(Builtin::TextureSlot::Normal);
-	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::Normal);
-
-	if(emissiveTexture)		emissiveTexture->bind(Builtin::TextureSlot::Emissive);
-	else 					defaultWhiteTexture->bind(Builtin::TextureSlot::Emissive);
-
-
+	(baseColorTexture ? baseColorTexture : defTex.white )->bind(Builtin::TextureSlot::BaseColor);
+	(armTexture 	  ? armTexture : 	   defTex.white )->bind(Builtin::TextureSlot::ARM);
+	(normalTexture	  ? normalTexture :    defTex.normal)->bind(Builtin::TextureSlot::Normal);
+	(emissiveTexture  ? emissiveTexture :  defTex.white )->bind(Builtin::TextureSlot::Emissive);
 
 
 
@@ -124,3 +110,11 @@ void Material::onInspect()
 //        glBindTexture(GL_TEXTURE_2D, _textures[i].id);
 //    }
 //}
+
+
+Material::DefaultTextures::DefaultTextures()
+{
+	white  = g_Assets.get<Texture>(Builtin::Texture::SolidWhite);
+	black  = g_Assets.get<Texture>(Builtin::Texture::SolidBlack);
+	normal = g_Assets.get<Texture>(Builtin::Texture::FlatNormal);
+}

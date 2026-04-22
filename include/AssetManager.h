@@ -81,7 +81,10 @@ inline std::shared_ptr<T> AssetManager::get(std::filesystem::path path, IAssetSe
 	}
 	else {
 		asset->load(path, settings);
-		asset->uploadToGPU();
+		if (asset->getLoadStatus() == AssetLoadStatus::ReadyToUpload)
+			asset->uploadToGPU();		
+		// if(asset->getLoadStatus() != AssetLoadStatus::Complete)
+		// 	asset->uploadToGPU();
 	}
 
 	return get<T>(asset->UUID); // yeni assetin id sini sorgula

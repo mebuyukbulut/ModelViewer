@@ -7,6 +7,8 @@
 #include "AssetManager.h"
 #include "Builtin.h"
 
+#include <imgui.h>
+
 
 
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -228,4 +230,13 @@ void Model::uploadToGPU()
     for (auto& m : meshes)
         m.upload2GPU();
     _loadStatus = AssetLoadStatus::Complete;
+}
+
+void Model::onInspect(){
+    if (!_materials.size()) return;
+    
+    Material* mat = _materials.front().get();
+
+    ImGui::Text(mat->name.c_str());
+    mat->onInspect();
 }

@@ -12,6 +12,8 @@ class Texture : public Asset {
 	unsigned int _id; 
 	unsigned int _type; // OpenGL Enum
 
+	void loadInternal(std::string path);
+
 public:
 
 	void use();

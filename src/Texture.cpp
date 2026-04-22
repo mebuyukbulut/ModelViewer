@@ -11,8 +11,17 @@
 
 #include "Logger.h"
 #include "Shader.h"
+#include "Builtin.h"
 
-void Texture::use() {
+void Texture::loadInternal(std::string path)
+{
+    if(path == Builtin::Texture::SolidBlack)        createSolidColorTextureRGBA8(  0,   0,   0, 255);
+    else if(path == Builtin::Texture::SolidWhite)   createSolidColorTextureRGBA8(255, 255, 255, 255);
+    else if(path == Builtin::Texture::FlatNormal)   createSolidColorTextureRGBA8(128, 128, 255, 255);
+}
+
+void Texture::use()
+{
     if (!_type) 
         LOG_ERROR("Texture not initialized!");
     //glActiveTexture(_type);
@@ -30,6 +39,18 @@ void Texture::load(std::filesystem::path path, IAssetSettings* settings)
 {
     _path = path.string();
     _type = GL_TEXTURE_2D;
+
+    std::string pathStr = path.string();
+
+    // Sanal yolla model yükleme
+    for(std::string key : Builtin::Texture::All){
+        if(key == pathStr){
+            loadInternal(pathStr);
+            _loadStatus = AssetLoadStatus::Complete;
+            return;
+        }
+    }
+
     //_type = GL_TEXTURE_CUBE_MAP;
 
     _loadStatus = AssetLoadStatus::LoadingToCPU;
@@ -126,7 +147,7 @@ void Texture::createShadowDepthTexture(uint32_t width, uint32_t height)
 void Texture::createSolidColorTextureRGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {   
     _type = GL_TEXTURE_2D;
-    
+
     glGenTextures(1, &_id);
     glBindTexture(GL_TEXTURE_2D, _id);
 
