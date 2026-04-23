@@ -40,10 +40,26 @@ public:
 
 	void use(Shader* shader);
 
+	void loadDefault(std::string path);
+
 	// Inherited via Asset
 	void load(std::filesystem::path path, IAssetSettings* settings) override;
 	void unload() override;
 	void uploadToGPU() override;
 
 	virtual void onInspect();
+
+	void setBaseColorTexture(std::shared_ptr<Texture> texture);
+	void setArmTexture(std::shared_ptr<Texture> texture);
+	void setNormalTexture(std::shared_ptr<Texture> texture);
+	void setEmissiveTexture(std::shared_ptr<Texture> texture);
+
 };
+
+
+
+namespace EditorUI{
+	// void MaterialEditor(std::shared_ptr<Material> mat);
+	std::string materialSelector();
+	//std::vector<std::string> getMaterialList()
+}

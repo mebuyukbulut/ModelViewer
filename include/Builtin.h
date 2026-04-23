@@ -4,6 +4,18 @@ namespace Builtin
 {
     namespace Material{
         inline constexpr const char* DefaultMaterial = "builtin::materials::defaultMaterial";
+        inline constexpr const char* DefaultMetal = "builtin::materials::defaultMetal";
+        inline constexpr const char* PlasticRed = "builtin::materials::plasticRed";
+        inline constexpr const char* PlasticBlue = "builtin::materials::plasticBlue";
+        inline constexpr const char* BoxCrate = "builtin::materials::boxCrate";
+
+        inline constexpr const char* All[] = {
+            DefaultMaterial,       
+            DefaultMetal,       
+            PlasticRed,   
+            PlasticBlue,   
+            BoxCrate,   
+        };
 
 
         inline constexpr const char* BaseColor   = "material.baseColor";

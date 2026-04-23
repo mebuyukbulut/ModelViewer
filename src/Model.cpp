@@ -232,9 +232,17 @@ void Model::uploadToGPU()
     _loadStatus = AssetLoadStatus::Complete;
 }
 
+#include <iostream>
 void Model::onInspect(){
     if (!_materials.size()) return;
     
+    // auto mats = g_Assets.getAll<Material>();
+    // std::cout << mats.size() << std::endl;
+    if(std::string path = EditorUI::materialSelector(); path != ""){
+        _materials.clear();
+        _materials.push_back(g_Assets.get<Material>(path));
+    }
+
     Material* mat = _materials.front().get();
 
     ImGui::Text(mat->name.c_str());

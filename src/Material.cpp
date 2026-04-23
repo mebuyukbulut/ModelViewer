@@ -14,15 +14,7 @@
 #include "Builtin.h"
 
 #include "AssetManager.h"
-// glm::vec4 baseColor;
-// glm::vec4 emissive;
-// float metallic;
-// float roughness;
-// float reflectance;
-// float ao;
 
-
-// her seferinde hem değerleri, hem textureları, hem de flag ları bind edelim
 
 
 void Material::use(Shader* shader) {
@@ -32,10 +24,6 @@ void Material::use(Shader* shader) {
 	shader->set(Builtin::Material::ARMTexture, 		 Builtin::TextureSlot::ARM); 
 	shader->set(Builtin::Material::NormalTexture,	 Builtin::TextureSlot::Normal); 
 	shader->set(Builtin::Material::EmissiveTexture,  Builtin::TextureSlot::Emissive); 
-
-	if(!baseColorTexture){
-		baseColorTexture = g_Assets.get<Texture>("../assets/textures/box_crate.jpg");
-	}
 
 	// Bind Textures
 	(baseColorTexture ? baseColorTexture : defTex.white )->bind(Builtin::TextureSlot::BaseColor);
@@ -53,8 +41,47 @@ void Material::use(Shader* shader) {
 	shader->set(Builtin::Material::AO, 			 	ao);
 }
 
+void Material::loadDefault(std::string path)
+{
+	if(path == Builtin::Material::DefaultMaterial){
+
+	}
+	else if(path == Builtin::Material::DefaultMetal){
+		metallic = 1.0f; 
+		roughness = 0.3;
+	}
+	else if(path == Builtin::Material::PlasticRed){
+		baseColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
+		roughness = 0.25;
+	}
+	else if(path == Builtin::Material::PlasticBlue){
+		baseColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); 
+		roughness = 0.25;
+	}
+	else if(path == Builtin::Material::BoxCrate){
+		baseColorTexture = g_Assets.get<Texture>("../assets/textures/box_crate.jpg");
+		roughness = 0.75;
+	}
+	else{
+		LOG_ERROR("The internal material path is wrong or unimplemented", path);
+	}
+	_loadStatus = AssetLoadStatus::Complete;
+}
+
 void Material::load(std::filesystem::path path, IAssetSettings* settings)
 {
+
+    _path = path; // bunu Model::Load da yapabiliriz belki. 
+    std::string pathStr = path.string(); 
+
+    // Sanal yolla model yükleme
+    for(const char* key : Builtin::Material::All){
+        if(key == pathStr){
+            loadDefault(pathStr);
+            return;
+        }
+    }
+
 	// dosyadan okuyup material oluştur. 
 }
 
@@ -78,6 +105,18 @@ void Material::onInspect()
 	ImGui::ColorEdit4("emissive", glm::value_ptr(emissive), ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel);
 }
 
+void Material::setBaseColorTexture(std::shared_ptr<Texture> texture){
+	baseColorTexture = texture;
+}
+void Material::setArmTexture(std::shared_ptr<Texture> texture){
+	armTexture = texture;
+}
+void Material::setNormalTexture(std::shared_ptr<Texture> texture){
+	normalTexture = texture;
+}
+void Material::setEmissiveTexture(std::shared_ptr<Texture> texture){
+	emissiveTexture = texture;
+}
 
 //
 //// bu bindingler material sınıfında olmalı. 
@@ -117,4 +156,52 @@ Material::DefaultTextures::DefaultTextures()
 	white  = g_Assets.get<Texture>(Builtin::Texture::SolidWhite);
 	black  = g_Assets.get<Texture>(Builtin::Texture::SolidBlack);
 	normal = g_Assets.get<Texture>(Builtin::Texture::FlatNormal);
+}
+
+std::string EditorUI::materialSelector()
+{
+    static int selectedMat = -1;
+	auto mats = g_Assets.getAll<Material>();
+
+
+    std::vector<std::string> matNames;
+	matNames.reserve(mats.size()); 
+
+	std::transform(mats.begin(), mats.end(), std::back_inserter(matNames),
+		[](const std::shared_ptr<Material>& mat){
+			return mat->getPath(); // name
+		});
+
+
+    // combo
+    ImGui::SetNextItemWidth(200);
+
+    if (ImGui::BeginCombo("##fxcombo", selectedMat == -1 ? "Select an Effect" : matNames[selectedMat].c_str()))
+    {
+        for (int i = 0; i < matNames.size(); i++)
+        {
+            bool isSelected = (selectedMat == i);
+
+            if (ImGui::Selectable(matNames[i].c_str(), isSelected))
+                selectedMat = i;
+
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+
+        ImGui::EndCombo();
+    }
+
+    // ImGui::SameLine();
+
+    // add button
+    if (ImGui::Button("+ Add Effect"))
+    {
+        if(selectedMat >= 0)
+			return mats.at(selectedMat)->getPath();
+    }
+
+
+    // ImGui::Separator();
+    return std::string();
 }

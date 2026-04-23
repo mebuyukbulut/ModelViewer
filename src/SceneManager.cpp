@@ -133,7 +133,8 @@ void SceneManager::initCommands()
 void SceneManager::initDefaults()
 {
     // Load default Material
-    g_Assets.get<Material>(Builtin::Material::DefaultMaterial); 
+    for(const char* path : Builtin::Material::All)
+        g_Assets.get<Material>(path); 
 
     // Load default Models
     for(const char* key : Builtin::Model::All)
