@@ -5,7 +5,7 @@ in vec3 fNormal;
 in vec2 fTexCoords;
 out vec4 FragColor;
 
-layout(binding = 2) uniform sampler2D matcapTexture;
+uniform sampler2D matcapTexture;
 
 void main()
 {

@@ -8,7 +8,7 @@
 #include <typeindex>
 #include <algorithm>
 #include "Asset.h"
-
+#include "Logger.h"
 
 class AssetManager : public Object
 {
@@ -93,8 +93,14 @@ inline std::shared_ptr<T> AssetManager::get(std::filesystem::path path, IAssetSe
 	}
 	else {
 		asset->load(path, settings);
-		if (asset->getLoadStatus() == AssetLoadStatus::ReadyToUpload)
+		if (asset->getLoadStatus() == AssetLoadStatus::ReadyToUpload){
+
 			asset->uploadToGPU();
+			//LOG_SUCCESS("[OK]\nAsset path: {}", asset->getPath().c_str());
+		}
+		else{
+			//LOG_CRITICAL("SOMETHING GOES WRONG\nAsset path: {}", asset->getPath().c_str());
+		}
 	}
 
 	return get<T>(asset->UUID); // yeni assetin id sini sorgula

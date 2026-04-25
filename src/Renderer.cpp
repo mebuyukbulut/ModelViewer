@@ -84,13 +84,14 @@ void Renderer::materialPass(const std::vector<RenderItem> &renderItems)
 void Renderer::matcapPass(const std::vector<RenderItem>& renderItems)
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glActiveTexture(GL_TEXTURE2);
-    matcapTexture->use();
 
+    
+    matcapTexture->bind(0);
+    _matcapShader->set("matcapTexture", 0);
     _matcapShader->use();
 
     for (const RenderItem& item : renderItems) 
-        drawModelWithShader(item.model, item.transform, _matcapShader);
+        drawModelWithShader(item.model, item.transform, _matcapShader, false);
 }
 
 void Renderer::wireframePass(const std::vector<RenderItem>& renderItems)
@@ -167,7 +168,7 @@ void Renderer::selectionPass(const SceneRenderData &renderData)
 
     // Selection pass for Models
 	for (const RenderItem& item : renderData.renderItems) 
-        drawModelWithShader(item.model, item.transform, _selectionShader, item.entityIndex + 1);
+        drawModelWithShader(item.model, item.transform, _selectionShader, false, item.entityIndex + 1);
 
     // Selection pass for Lights
 	for (const LightItem& item : renderData.lightItems){
@@ -179,11 +180,11 @@ void Renderer::selectionPass(const SceneRenderData &renderData)
         newTransform[3] = item.transform[3];
 
         if(item.light->type == ComponentType::DirectionalLight)
-            drawModelWithShader(_directionLightGizmo, newTransform, _selectionShader, item.entityIndex + 1);
+            drawModelWithShader(_directionLightGizmo, newTransform, _selectionShader, false, item.entityIndex + 1);
         else if(item.light->type == ComponentType::PointLight)
-            drawModelWithShader(_pointLightGizmo, newTransform, _selectionShader, item.entityIndex + 1);
+            drawModelWithShader(_pointLightGizmo, newTransform, _selectionShader, false, item.entityIndex + 1);
         else if(item.light->type == ComponentType::SpotLight)
-            drawModelWithShader(_spotLightGizmo, newTransform, _selectionShader, item.entityIndex + 1);
+            drawModelWithShader(_spotLightGizmo, newTransform, _selectionShader, false, item.entityIndex + 1);
         else
             LOG_ERROR("Renderer::lightPass() -> UNKNOW LIGHT TYPE");
     }
@@ -209,7 +210,7 @@ void Renderer::outlinePass(const SceneRenderData &renderData)
     _materialShader->use();
     for (const RenderItem& item : renderData.renderItems) 
         if(item.isSelected)
-            drawModelWithShader(item.model, item.transform, _materialShader); // ???
+            drawModelWithShader(item.model, item.transform, _materialShader, false); // ???
 
 
 
@@ -222,7 +223,7 @@ void Renderer::postProcessPass(const ColorRenderTarget& sourceTarget, ColorRende
     shader->use();
     shader->set("frameTex", 0); 
     sourceTarget.colorTexture().bind(0); 
-    drawModelWithShader(_bgModel, glm::mat4(1.0), shader); // ???
+    drawModelWithShader(_bgModel, glm::mat4(1.0), shader, false); 
 
     destinationTarget.unbind();
 }
@@ -358,7 +359,7 @@ void Renderer::renderScene(const SceneRenderData &renderData, bool isViewportSel
     lightPass(renderData.lightItems);
     gridPass();
 
-    outlinePass(renderData); 
+    //outlinePass(renderData); 
 
     _rt.unbind();
 
@@ -422,14 +423,14 @@ GLuint Renderer::getDebugImage()
     return _shadowMapTarget.depthBuffer().getId(); 
 }
 
-void Renderer::drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID){
+void Renderer::drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, bool bindMaterial, uint32_t ID){
 
     shader->use();
     shader->set("model", transform);
     if(ID)
         shader->set("objectID", (int)ID);
 
-    model->draw(shader);
+    model->draw(shader, bindMaterial);
 }
 
 

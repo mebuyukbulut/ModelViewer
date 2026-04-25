@@ -165,7 +165,7 @@ private:
 	void outlinePass(const SceneRenderData &renderData);
 	void postProcessPass(const ColorRenderTarget& sourceTarget, ColorRenderTarget& destinationTarget, Shader* shader);
 
-	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, uint32_t ID = 0);
+	void drawModelWithShader(Model* model, const glm::mat4& transform, Shader* shader, bool bindMaterial = true, uint32_t ID = 0);
 
 public:
 	class FXRegistry* fxReg{};

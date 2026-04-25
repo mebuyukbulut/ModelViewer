@@ -55,6 +55,7 @@ void Texture::load(std::filesystem::path path, IAssetSettings* settings)
 
     _loadStatus = AssetLoadStatus::LoadingToCPU;
     _data = stbi_load(path.string().c_str(), &_width, &_height, &_nrChannels, 0);
+    LOG_INFO("{} is ready to upload.", _path.c_str());
     _loadStatus = AssetLoadStatus::ReadyToUpload;
 }
 

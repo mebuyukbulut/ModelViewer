@@ -37,7 +37,7 @@ class Model : public Asset{
 public:
     Model() { _type = AssetType::Model; }
 
-    void draw(Shader* shader);
+    void draw(Shader* shader, bool bindMaterial = true);
 
     // Inherited via Asset
     void load(std::filesystem::path path, IAssetSettings* settings) override;
