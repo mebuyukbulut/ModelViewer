@@ -44,21 +44,25 @@ void Material::use(Shader* shader) {
 void Material::loadDefault(std::string path)
 {
 	if(path == Builtin::Material::DefaultMaterial){
-
+		name = "Default Material";
 	}
 	else if(path == Builtin::Material::DefaultMetal){
+		name = "Default Metal"; 
 		metallic = 1.0f; 
 		roughness = 0.3;
 	}
 	else if(path == Builtin::Material::PlasticRed){
+		name = "Plastic Red";
 		baseColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
 		roughness = 0.25;
 	}
 	else if(path == Builtin::Material::PlasticBlue){
+		name = "Plastic Blue";
 		baseColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); 
 		roughness = 0.25;
 	}
 	else if(path == Builtin::Material::BoxCrate){
+		name = "Wood Crate";
 		baseColorTexture = g_Assets.get<Texture>("../assets/textures/box_crate.jpg");
 		roughness = 0.75;
 	}
@@ -169,14 +173,17 @@ std::string EditorUI::materialSelector()
 
 	std::transform(mats.begin(), mats.end(), std::back_inserter(matNames),
 		[](const std::shared_ptr<Material>& mat){
-			return mat->getPath(); // name
+			return mat->name; // name
 		});
 
 
+
+
+	ImGui::SeparatorText("MATERIAL SELECTOR");
     // combo
     ImGui::SetNextItemWidth(200);
 
-    if (ImGui::BeginCombo("##fxcombo", selectedMat == -1 ? "Select an Effect" : matNames[selectedMat].c_str()))
+    if (ImGui::BeginCombo("##fxcombo", selectedMat == -1 ? "Select a Material" : matNames[selectedMat].c_str()))
     {
         for (int i = 0; i < matNames.size(); i++)
         {
@@ -195,7 +202,7 @@ std::string EditorUI::materialSelector()
     // ImGui::SameLine();
 
     // add button
-    if (ImGui::Button("+ Add Effect"))
+    if (ImGui::Button("Apply"))
     {
         if(selectedMat >= 0)
 			return mats.at(selectedMat)->getPath();
